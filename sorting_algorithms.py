@@ -726,7 +726,7 @@ class TrueSkill (SortingAlgorithm):
         self.data = list(data)
 
         self.ratings = {k:Rating() for k in data}
-        self.overlap_matrix = np.full((self.n, self.n), self.intervals_overlap(0, 1))
+        self.overlap_matrix = np.full((self.n, self.n), self.intervals_overlap(self.data[0], self.data[1]))
         np.fill_diagonal(self.overlap_matrix, 0)
 
         self.comparison_size = comparison_size
