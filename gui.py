@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from PIL import ImageTk, Image
 import time
+from pathlib import Path
 
 
 class TestGui():
@@ -9,6 +10,8 @@ class TestGui():
 
         ctk.set_appearance_mode('dark')
         ctk.set_default_color_theme("dark-blue")
+
+        img_paths = [str(path) for path in list(Path("Images").glob('*/*.jpg'))]
 
         image_ids = [90138, 159701, 161513, 164511]
 
@@ -22,7 +25,10 @@ class TestGui():
         self.root.grid_columnconfigure(0, weight=1)
 
         self.images = [ctk.CTkImage(Image.open(
-            "Images/" + str(idx) + ".jpg"), size=(250, 250)) for idx in image_ids]
+            img), size=(250, 250)) for img in img_paths[:4]]
+
+        #self.images = [ctk.CTkImage(Image.open(
+        #    "Images/" + str(idx) + ".jpg"), size=(250, 250)) for idx in image_ids]
 
         self.images_frame = ctk.CTkFrame(master=self.root)
         self.images_frame.grid(row=1, column=0, padx=0, pady=0)
