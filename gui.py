@@ -3,7 +3,7 @@ from helper_functions import DiffLevel
 from PIL import ImageTk, Image
 import time
 import numpy as np
-
+import pickle
 
 class TestGui():
 
@@ -116,5 +116,11 @@ class TestGui():
         diff_lvls = np.full(len(keys)-1, DiffLevel.normal)
 
         self.sort_alg.inference("1", keys, diff_lvls)
-        #pickul
+
+        f = open("state.pickle", "wb")
+        
+        pickle.dump(self.sort_alg, f)
+
+        f.close()
+
         self.display_comparison(self.sort_alg.get_comparison("1"))
