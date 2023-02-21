@@ -5,9 +5,10 @@ import time
 import numpy as np
 import pickle
 
+
 class TestGui():
 
-    def __init__(self, sort_alg, comparison_size = 2):
+    def __init__(self, sort_alg, comparison_size=2):
 
         self.sort_alg = sort_alg
         self.comparison_size = comparison_size
@@ -40,7 +41,7 @@ class TestGui():
     def run(self):
         self.session_start_time = time.time()
         self.root.after(1000, self.update_time)
-    
+
         self.display_comparison(self.sort_alg.get_comparison("1"))
         self.root.mainloop()
 
@@ -75,15 +76,13 @@ class TestGui():
 
     def display_comparison(self, keys):
         print(keys)
-        self.images = [(img, ctk.CTkImage(Image.open(img), size=(250, 250))) for img in keys]
-        
-        print(self.images)
+        self.images = [(img, ctk.CTkImage(Image.open(img), size=(250, 250)))
+                       for img in keys]
         self.update_images()
 
     def update_images(self):
 
         for i, img_tuple in enumerate(self.images):
-            print(img_tuple[1])
             self.displayed_images[i].configure(image=img_tuple[1])
 
     def move_left(self, index):
@@ -118,7 +117,7 @@ class TestGui():
         self.sort_alg.inference("1", keys, diff_lvls)
 
         f = open("state.pickle", "wb")
-        
+
         pickle.dump(self.sort_alg, f)
 
         f.close()

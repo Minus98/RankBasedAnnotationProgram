@@ -14,7 +14,7 @@ if saved_state_path.is_file():
     file = open(saved_state_path, 'rb')
     sort_alg = pickle.load(file)
 else:
-    sort_alg = MergeSort(img_paths)
+    sort_alg = TrueSkill(img_paths)
 
-gui = TestGui(sort_alg = sort_alg, comparison_size = c_sz)
+gui = TestGui(sort_alg=sort_alg, comparison_size=c_sz)
 gui.run()
