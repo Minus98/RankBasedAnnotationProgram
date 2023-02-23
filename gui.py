@@ -74,6 +74,36 @@ class TestGui():
                 master=image_frame, text=">", width=120, height=36, font=('Helvetica bold', 20), command=lambda i=i: self.move_right(i), state=right_button_state)
             move_right_button.grid(row=1, column=1, padx=(0, 5), pady=(0, 10))
 
+            image_frame.bind("<Button-1>", command=lambda event, image_frame=image_frame, i=i: self.on_drag_start(event, image_frame, i))
+            #image_frame.bind("<B1-Motion>", command=lambda event, image_frame=image_frame, i=i: self.on_drag_motion(event, image_frame, i))
+
+            displayed_image.bind("<Button-1>", command=lambda event, image_frame=image_frame, i=i: self.on_drag_start(event, image_frame, i))
+            #displayed_image.bind("<B1-Motion>", command=lambda event, image_frame=image_frame, i=i: self.on_drag_motion(event, image_frame, i))
+
+    def create_image_widget(self, image_idx):
+        image_frame = ctk.CTkFrame(master=self.root)
+
+        img = self.displayed_images[image_idx].cget("image")
+
+        displayed_image = ctk.CTkLabel(
+            master=image_frame, text="", image=img)
+
+        displayed_image.grid(row=0, column=0, columnspan=2,
+                                sticky="ew", padx=10, pady=10)
+
+        move_left_button = ctk.CTkButton(
+            master=image_frame, text="<", width=120, height=36, font=('Helvetica bold', 20), state=ctk.DISABLED)
+        move_left_button.grid(row=1, column=0, padx=(5, 0), pady=(0, 10))
+
+        move_right_button = ctk.CTkButton(
+            master=image_frame, text=">", width=120, height=36, font=('Helvetica bold', 20), state=ctk.DISABLED)
+        move_right_button.grid(row=1, column=1, padx=(0, 5), pady=(0, 10))
+
+        image_frame.bind("<B1-Motion>", command=lambda event, image_frame=image_frame, i=image_idx: self.on_drag_motion(event, image_frame, i))
+        displayed_image.bind("<B1-Motion>", command=lambda event, image_frame=image_frame, i=image_idx: self.on_drag_motion(event, image_frame, i))
+
+        return image_frame
+
     def display_comparison(self, keys):
         print(keys)
         self.images = [(img, ctk.CTkImage(Image.open(img), size=(250, 250)))
@@ -110,6 +140,30 @@ class TestGui():
         self.session_duration_label.configure(text=elapsed)
         self.root.after(1000, self.update_time)
 
+    def on_drag_start(self, event, frame, idx):
+        pos_x = self.images_frame.winfo_x() + frame.winfo_x() + event.x
+        pos_y = self.images_frame.winfo_y() + frame.winfo_y() + event.y
+
+        dx = frame.winfo_width()//2
+        dy = frame.winfo_height()//2
+
+        frame_clone = self.create_image_widget(idx)
+        frame_clone.place(x=pos_x-dx, y = pos_y-dy)
+        frame_clone.focus_set()
+        
+
+        print("hej")
+
+
+    def on_drag_motion(self, event, frame, idx):
+        print("I am moviiiing!")
+
+        x = frame.winfo_x() + event.x - frame.winfo_width()//2
+        y = frame.winfo_y() + event.y - frame.winfo_height()//2
+
+        frame.place(x=x, y=y)
+
+    
     def submit_comparison(self):
         keys = [key for key, _ in self.images]
         diff_lvls = np.full(len(keys)-1, DiffLevel.normal)
