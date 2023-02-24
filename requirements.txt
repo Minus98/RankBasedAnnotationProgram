@@ -2,3 +2,4 @@ trueskill
 customtkinter
 pillow
 numpy
+pandas
