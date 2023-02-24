@@ -6,7 +6,7 @@ import pickle
 
 img_paths = [str(path) for path in list(Path("Images").glob('*/*.jpg'))]
 random.shuffle(img_paths)
-c_sz = 2
+c_sz = 4
 
 saved_state_path = Path('state.pickle')
 
@@ -14,7 +14,7 @@ if saved_state_path.is_file():
     file = open(saved_state_path, 'rb')
     sort_alg = pickle.load(file)
 else:
-    sort_alg = TrueSkill(img_paths)
+    sort_alg = TrueSkill(img_paths, c_sz)
 
 gui = TestGui(sort_alg=sort_alg, comparison_size=c_sz)
 gui.run()
