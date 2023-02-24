@@ -20,7 +20,7 @@ class TestGui():
 
         self.root = ctk.CTk()
         self.root.geometry("1640x720")
-        self.root.title("Rank Based Annotation")
+        self.root.title("Rank-Based Annotation")
 
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_rowconfigure(1, weight=1)
@@ -35,7 +35,7 @@ class TestGui():
         self.init_image_frames()
 
         header = ctk.CTkLabel(
-            master=self.root, text="Rank Based Annotation", font=('Helvetica bold', 40))
+            master=self.root, text="Rank-Based Annotation", font=('Helvetica bold', 40))
 
         header.grid(row=0, column=0, columnspan=2, sticky="S")
 
