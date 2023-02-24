@@ -35,7 +35,7 @@ class TestGui():
         self.submit_button.grid(row=2, column=0, sticky="N")
 
         self.session_duration_label = ctk.CTkLabel(
-            master=self.root, text="0", font=('Helvetica bold', 30))
+            master=self.root, text="0:00", font=('Helvetica bold', 30))
         self.session_duration_label.grid(row=0, column=0)
 
     def run(self):
@@ -146,8 +146,18 @@ class TestGui():
         current_time = time.time()
 
         elapsed = int(current_time - self.session_start_time)
+        (min, sec) = divmod(elapsed, 60)
+        (hours, min) = divmod(min, 60)
 
-        self.session_duration_label.configure(text=elapsed)
+        if hours:
+            text_input = '{:02}:{:02}:{:02}'.format(int(hours), int(min), int(sec))
+        elif min < 10: 
+            text_input = '{:01}:{:02}'.format(int(min), int(sec))
+        else:
+            text_input = '{:02}:{:02}'.format(int(min), int(sec))
+
+        self.session_duration_label.configure(text=text_input)
+
         self.root.after(1000, self.update_time)
 
     def on_drag_start(self, event, frame, idx):
