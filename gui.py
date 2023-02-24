@@ -2,7 +2,9 @@ import customtkinter as ctk
 from helper_functions import DiffLevel
 from PIL import ImageTk, Image
 import time
+import pandas as pd
 import numpy as np
+import os
 import pickle
 
 
@@ -24,22 +26,29 @@ class TestGui():
         self.root.grid_rowconfigure(1, weight=2)
         self.root.grid_rowconfigure(2, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_columnconfigure(1, weight=1)
 
         self.images_frame = ctk.CTkFrame(master=self.root)
-        self.images_frame.grid(row=1, column=0, padx=0, pady=0)
+        self.images_frame.grid(row=1, column=0, columnspan=2, padx=0, pady=0)
 
         self.init_image_frames()
 
         self.submit_button = ctk.CTkButton(
             master=self.root, text="Submit Ordering", width=280, height=60, command=self.submit_comparison, font=('Helvetica bold', 20))
-        self.submit_button.grid(row=2, column=0, sticky="N")
+        self.submit_button.grid(row=2, column=0, columnspan=2, sticky="N")
 
         self.session_duration_label = ctk.CTkLabel(
             master=self.root, text="0:00", font=('Helvetica bold', 30))
-        self.session_duration_label.grid(row=0, column=0)
+        self.session_duration_label.grid(row=0, column=1, sticky='SE', padx=100)
+
+        self.comp_count = 0
+        self.comp_count_label = ctk.CTkLabel(
+            master=self.root, text=f"Comparison count: {self.comp_count}", font=('Helvetica bold', 30))
+        self.comp_count_label.grid(row=0, column=0, sticky='SW', padx=100)
 
     def run(self):
         self.session_start_time = time.time()
+
         self.root.after(1000, self.update_time)
 
         self.display_comparison(self.sort_alg.get_comparison("1"))
@@ -232,11 +241,23 @@ class TestGui():
         diff_lvls = np.full(len(keys)-1, DiffLevel.normal)
 
         self.sort_alg.inference("1", keys, diff_lvls)
-
+        
         f = open("state.pickle", "wb")
-
         pickle.dump(self.sort_alg, f)
-
         f.close()
+        
+        self.save_to_csv_file(keys, diff_lvls)
 
+        self.comp_count += 1
+        self.comp_count_label.configure(text=f"Comparison count: {self.comp_count}")
         self.display_comparison(self.sort_alg.get_comparison("1"))
+
+    def save_to_csv_file(self, keys, diff_lvls):
+        df = pd.DataFrame({'result': [keys],	
+                     'diff_levels': [diff_lvls],
+                     'time': [time.time()-self.session_start_time],
+                     'session': [1], 	
+                     'user': ["1"]})
+
+        output_path='data.csv'
+        df.to_csv(output_path, mode='a', header=not os.path.exists(output_path))
