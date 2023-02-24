@@ -48,10 +48,14 @@ class TestGui():
     def init_image_frames(self):
 
         self.displayed_images = []
+        self.image_frames = []
 
         for i in range(self.comparison_size):
 
             image_frame = ctk.CTkFrame(master=self.images_frame)
+
+            self.image_frames.append(image_frame)
+
             image_frame.grid(row=0, column=i, padx=20, pady=20)
 
             displayed_image = ctk.CTkLabel(
@@ -177,11 +181,41 @@ class TestGui():
 
     def on_drag_stop(self, event, frame, idx):
 
-        # Check if inside images_frame
-        # If not, we do not try to move
-
         self.drag_frame.place_forget()
         self.black_frame.place_forget()
+
+        index, row = self.images_frame.grid_location(
+            frame.winfo_x() + event.x, event.y)
+
+        if row != 0 or index < 0 or index >= len(self.images) or index == idx:
+            return
+
+        widget = self.image_frames[index]
+
+        width = widget.winfo_width()
+
+        # Change 20 to get padx of images_frame
+        relative_x = frame.winfo_x() + event.x - widget.winfo_x() + 20
+
+        from_right_bonus = 0
+
+        if (idx > index):
+            from_right_bonus = 1
+
+        image_to_move = self.images.pop(idx)
+        if relative_x < width // 3:
+            self.images.insert(index - 1 + from_right_bonus, image_to_move)
+        elif relative_x < 2*width // 3:
+            # If you are coming from above, same as lower third
+            # If you are coming from below, same as upper third
+            if from_right_bonus:
+                self.images.insert(index - 1 + from_right_bonus, image_to_move)
+            else:
+                self.images.insert(index + from_right_bonus, image_to_move)
+        else:
+            self.images.insert(index + from_right_bonus, image_to_move)
+
+        self.update_images()
 
     def submit_comparison(self):
         keys = [key for key, _ in self.images]
