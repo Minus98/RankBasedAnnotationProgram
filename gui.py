@@ -19,7 +19,12 @@ class TestGui():
         ctk.set_default_color_theme("dark-blue")
 
         self.root = ctk.CTk()
-        self.root.geometry("1640x720")
+
+        w = 1640
+        h = 720
+        x, y = self.center(w, h)
+
+        self.root.geometry('%dx%d+%d+%d' % (w, h, x, y))
         self.root.title("Rank-Based Annotation")
 
         self.root.grid_rowconfigure(0, weight=1)
@@ -66,6 +71,17 @@ class TestGui():
         self.init_diff_level_buttons()
 
         self.root.mainloop()
+
+    def center(self, w, h):
+        # get screen width and height
+        ws = self.root.winfo_screenwidth()  # width of the screen
+        hs = self.root.winfo_screenheight()  # height of the screen
+
+        # calculate x and y coordinates for the Tk root window
+        x = (ws/2) - (w/2)
+        y = (hs/2) - (h/2) - 40
+
+        return x, y
 
     def init_image_frames(self):
 
@@ -138,28 +154,28 @@ class TestGui():
                 master=diff_level_frame, variable=int_diff_level, value=1, width=22, text="")
             r2 = ctk.CTkRadioButton(
                 master=diff_level_frame, variable=int_diff_level, value=2, width=22, text="")
-            
+
             r0.grid(row=1, column=0, padx=(12, 5), pady=2,
                     sticky="ew")
             r1.grid(row=1, column=1, padx=(12, 5), pady=2,
                     sticky="ew")
             r2.grid(row=1, column=2, padx=(12, 5), pady=2,
                     sticky="ew")
-            
-            diff_level_label = ctk.CTkLabel(text="", master=diff_level_frame, font=('Helvetica bold', 18))
+
+            diff_level_label = ctk.CTkLabel(
+                text="", master=diff_level_frame, font=('Helvetica bold', 18))
             diff_level_label.grid(row=0, column=0, columnspan=3)
 
-            int_diff_level.trace('w', lambda var, index, mode, int_diff_level=int_diff_level,  label=diff_level_label: self.update_diff_labels(int_diff_level, label))
+            int_diff_level.trace('w', lambda var, index, mode, int_diff_level=int_diff_level,
+                                 label=diff_level_label: self.update_diff_labels(int_diff_level, label))
 
         diff_levels_frame.configure(
             fg_color=self.images_frame.cget("fg_color"))
-        
 
     def reset_diff_levels(self):
         for int_diff_lvl in self.int_diff_levels:
             int_diff_lvl.set(1)
 
-        
     def update_diff_labels(self, int_diff_level, label):
         if int_diff_level.get() == 0:
             label.configure(text="no difference")
@@ -252,7 +268,6 @@ class TestGui():
 
         frame_clone = self.create_image_widget(idx)
         frame_clone.place(x=pos_x-dx, y=pos_y-dy)
-        frame_clone.focus_set()
 
         self.drag_frame = frame_clone
 
@@ -308,7 +323,8 @@ class TestGui():
     def submit_comparison(self):
         keys = [key for key, _ in self.images]
 
-        diff_lvls = [DiffLevel(int_diff_lvl.get()) for int_diff_lvl in self.int_diff_levels]
+        diff_lvls = [DiffLevel(int_diff_lvl.get())
+                     for int_diff_lvl in self.int_diff_levels]
 
         self.sort_alg.inference("1", keys, diff_lvls)
 
@@ -321,9 +337,39 @@ class TestGui():
         self.comp_count += 1
         self.comp_count_label.configure(
             text=f"Comparison count: {self.comp_count}")
+
+        self.is_finished_check()
         self.display_comparison(self.sort_alg.get_comparison("1"))
         self.reset_diff_levels()
 
+    def is_finished_check(self):
+        if self.sort_alg.is_finished():
+            pop_out = ctk.CTkToplevel()
+
+            w = 700
+            h = 300
+            x, y = self.center(w, h)
+
+            pop_out.geometry('%dx%d+%d+%d' % (w, h, x, y))
+            pop_out.columnconfigure(index=0, weight=1)
+            pop_out.columnconfigure(index=1, weight=1)
+            pop_out.rowconfigure(index=0, weight=1)
+            pop_out.rowconfigure(index=1, weight=1)
+
+            label = ctk.CTkLabel(text="Hello! \n You are now done annotating thank you very much. \n What do you want to do next?",
+                                 master=pop_out, font=('Helvetica bold', 30))
+            label.grid(row=0, column=0, sticky='nsew', columnspan=2)
+
+            menu_button = ctk.CTkButton(
+                text="Return to menu", width=w//2-20, height=h//5, master=pop_out, font=('Helvetica bold', 30))
+            menu_button.grid(row=1, column=0, sticky='sew',
+                             pady=(0, 10), padx=(10, 5))
+            quit_button = ctk.CTkButton(text="Quit", command=self.root.destroy,
+                                        width=w//2-20, height=h//5, master=pop_out, font=('Helvetica bold', 30))
+            quit_button.grid(row=1, column=1, sticky='sew',
+                             pady=(0, 10), padx=(5, 10))
+
+            pop_out.grab_set()
 
     def save_to_csv_file(self, keys, diff_lvls):
         df = pd.DataFrame({'result': [keys],
