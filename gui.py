@@ -34,6 +34,10 @@ class TestGui():
 
         self.init_image_frames()
 
+        self.int_diff_levels = [ctk.IntVar()] * (comparison_size - 1)
+
+        self.init_diff_level_buttons()
+
         header = ctk.CTkLabel(
             master=self.root, text="Rank-Based Annotation", font=('Helvetica bold', 40))
 
@@ -72,7 +76,7 @@ class TestGui():
 
             self.image_frames.append(image_frame)
 
-            image_frame.grid(row=0, column=i, padx=20, pady=20)
+            image_frame.grid(row=1, column=i, padx=20, pady=20)
 
             displayed_image = ctk.CTkLabel(
                 master=image_frame, text="")
@@ -107,6 +111,29 @@ class TestGui():
                                  i=i: self.on_drag_motion(event, image_frame, i))
             displayed_image.bind("<ButtonRelease-1>", command=lambda event, image_frame=image_frame,
                                  i=i: self.on_drag_stop(event, image_frame, i))
+
+    def init_diff_level_buttons(self):
+
+        diff_levels_frame = ctk.CTkFrame(master=self.images_frame)
+
+        for i, int_diff_level in enumerate(self.int_diff_levels):
+
+            diff_level_frame = ctk.CTkFrame(master=diff_levels_frame)
+
+            r0 = ctk.CTkRadioButton(
+                master=diff_level_frame, variable=self.int_diff_levels[i], value=0, text="")
+            r1 = ctk.CTkRadioButton(
+                master=diff_level_frame, variable=self.int_diff_levels[i], value=1, text="")
+            r2 = ctk.CTkRadioButton(
+                master=diff_level_frame, variable=self.int_diff_levels[i], value=2, text="")
+
+            r0.grid(row=0, column=0)
+            r1.grid(row=0, column=1)
+            r2.grid(row=0, column=2)
+
+            diff_level_frame.grid(row=0, column=i)
+        diff_levels_frame.grid(
+            row=0, column=0, columnspan=self.comparison_size)
 
     def create_image_widget(self, image_idx):
         image_frame = ctk.CTkFrame(
