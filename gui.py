@@ -34,7 +34,7 @@ class TestGui():
 
         self.init_image_frames()
 
-        self.int_diff_levels = [ctk.IntVar()
+        self.int_diff_levels = [ctk.IntVar(None, 1)
                                 for _ in range(comparison_size - 1)]
 
         header = ctk.CTkLabel(
@@ -124,8 +124,6 @@ class TestGui():
 
         for i in range(len(self.int_diff_levels)):
             diff_levels_frame.columnconfigure(i, weight=1)
-        # diff_levels_frame.columnconfigure(1, weight=1)
-        # diff_levels_frame.columnconfigure(2, weight=1)
 
         for i, int_diff_level in enumerate(self.int_diff_levels):
 
@@ -140,16 +138,35 @@ class TestGui():
                 master=diff_level_frame, variable=int_diff_level, value=1, width=22, text="")
             r2 = ctk.CTkRadioButton(
                 master=diff_level_frame, variable=int_diff_level, value=2, width=22, text="")
+            
+            r0.grid(row=1, column=0, padx=(12, 5), pady=2,
+                    sticky="ew")
+            r1.grid(row=1, column=1, padx=(12, 5), pady=2,
+                    sticky="ew")
+            r2.grid(row=1, column=2, padx=(12, 5), pady=2,
+                    sticky="ew")
+            
+            diff_level_label = ctk.CTkLabel(text="", master=diff_level_frame, font=('Helvetica bold', 18))
+            diff_level_label.grid(row=0, column=0, columnspan=3)
 
-            r0.grid(row=0, column=0, padx=(7, 0), pady=2,
-                    sticky="ew")
-            r1.grid(row=0, column=1, padx=(7, 0), pady=2,
-                    sticky="ew")
-            r2.grid(row=0, column=2, padx=(7, 0), pady=2,
-                    sticky="ew")
+            int_diff_level.trace('w', lambda var, index, mode, int_diff_level=int_diff_level,  label=diff_level_label: self.update_diff_labels(int_diff_level, label))
 
         diff_levels_frame.configure(
             fg_color=self.images_frame.cget("fg_color"))
+        
+
+    def reset_diff_levels(self):
+        for int_diff_lvl in self.int_diff_levels:
+            int_diff_lvl.set(1)
+
+        
+    def update_diff_labels(self, int_diff_level, label):
+        if int_diff_level.get() == 0:
+            label.configure(text="no difference")
+        elif int_diff_level.get() == 2:
+            label.configure(text="large difference")
+        else:
+            label.configure(text="")
 
     def create_image_widget(self, image_idx):
         image_frame = ctk.CTkFrame(
@@ -257,7 +274,7 @@ class TestGui():
         index, row = self.images_frame.grid_location(
             frame.winfo_x() + event.x, event.y)
 
-        if row != 0 or index < 0 or index >= len(self.images) or index == idx:
+        if row != 1 or index < 0 or index >= len(self.images) or index == idx:
             return
 
         widget = self.image_frames[index]
@@ -286,10 +303,12 @@ class TestGui():
             self.images.insert(index + from_right_bonus, image_to_move)
 
         self.update_images()
+        self.reset_diff_levels()
 
     def submit_comparison(self):
         keys = [key for key, _ in self.images]
-        diff_lvls = np.full(len(keys)-1, DiffLevel.normal)
+
+        diff_lvls = [DiffLevel(int_diff_lvl.get()) for int_diff_lvl in self.int_diff_levels]
 
         self.sort_alg.inference("1", keys, diff_lvls)
 
@@ -303,6 +322,8 @@ class TestGui():
         self.comp_count_label.configure(
             text=f"Comparison count: {self.comp_count}")
         self.display_comparison(self.sort_alg.get_comparison("1"))
+        self.reset_diff_levels()
+
 
     def save_to_csv_file(self, keys, diff_lvls):
         df = pd.DataFrame({'result': [keys],
