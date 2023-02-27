@@ -124,8 +124,6 @@ class TestGui():
 
         for i in range(len(self.int_diff_levels)):
             diff_levels_frame.columnconfigure(i, weight=1)
-        # diff_levels_frame.columnconfigure(1, weight=1)
-        # diff_levels_frame.columnconfigure(2, weight=1)
 
         for i, int_diff_level in enumerate(self.int_diff_levels):
 
