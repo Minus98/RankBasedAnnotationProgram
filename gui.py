@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import os
 import pickle
+from pathlib import Path
 
 
 class TestGui():
@@ -20,12 +21,85 @@ class TestGui():
 
         self.root = ctk.CTk()
 
-        w = 1640
+        w = 1300
         h = 720
         x, y = self.center(w, h)
 
         self.root.geometry('%dx%d+%d+%d' % (w, h, x, y))
         self.root.title("Rank-Based Annotation")
+
+    def run(self):
+
+        # self.populate_ordering_screen()
+
+        self.populate_menu_screen()
+
+        self.root.mainloop()
+
+    def populate_menu_screen(self):
+
+        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_columnconfigure(1, weight=1)
+
+        self.menu_frame = ctk.CTkFrame(master=self.root)
+        self.menu_frame.grid(row=0, column=0)
+
+        self.instructions_frame = ctk.CTkFrame(master=self.root)
+        self.instructions_frame.grid(row=0, column=1)
+
+        new_button = ctk.CTkButton(
+            master=self.menu_frame, text="New Annotation", width=200, height=40, font=('Helvetica bold', 20))
+        delete_button = ctk.CTkButton(
+            master=self.menu_frame, text="Delete Annotation", width=200, height=40, font=('Helvetica bold', 20))
+
+        new_button.grid(row=0, column=0, padx=(10, 5), pady=10)
+        delete_button.grid(row=0, column=1, padx=(5, 10), pady=10)
+
+        saved_annotations_frame = ctk.CTkScrollableFrame(
+            master=self.menu_frame)
+
+        saved_annotations_frame.grid(
+            row=1, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
+
+        saved_annotations_frame.columnconfigure(0, weight=1)
+
+        self.display_saves(saved_annotations_frame)
+
+        b = "•"
+
+        text = ctk.CTkLabel(master=self.instructions_frame, text="Welcome to the Rank-Based Annotation program \n   " +
+                            b + " Order the images youngest to oldest, left to right \n     " +
+                            b + " Specify the difference between two images using the radio buttons", font=('Helvetica bold', 20))
+
+        text.grid(row=0, column=0, padx=10, pady=10)
+
+    def display_saves(self, saved_annotations_frame):
+        paths = list(Path("Saves").glob('*.pickle'))
+        print(paths)
+
+        self.append_row(saved_annotations_frame, 0)
+        self.append_row(saved_annotations_frame, 1)
+        self.append_row(saved_annotations_frame, 2)
+        self.append_row(saved_annotations_frame, 3)
+        self.append_row(saved_annotations_frame, 4)
+        self.append_row(saved_annotations_frame, 5)
+        self.append_row(saved_annotations_frame, 6)
+
+    def append_row(self, saved_annotations_frame, index):
+
+        saved_annotations_row = ctk.CTkFrame(master=saved_annotations_frame)
+        saved_annotations_row.grid(row=index, column=0, sticky="ew", pady=3)
+
+        save_name_label = ctk.CTkLabel(
+            master=saved_annotations_row, text="Save 1", font=('Helvetica bold', 20))
+        save_name_label.grid(row=0, column=0, padx=5, pady=2)
+
+    def populate_ordering_screen(self):
+
+        self.session_start_time = time.time()
+
+        self.root.after(1000, self.update_time)
 
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_rowconfigure(1, weight=1)
@@ -40,7 +114,7 @@ class TestGui():
         self.init_image_frames()
 
         self.int_diff_levels = [ctk.IntVar(None, 1)
-                                for _ in range(comparison_size - 1)]
+                                for _ in range(self.comparison_size - 1)]
 
         header = ctk.CTkLabel(
             master=self.root, text="Rank-Based Annotation", font=('Helvetica bold', 40))
@@ -63,16 +137,9 @@ class TestGui():
 
         self.motion_allowed = True
 
-    def run(self):
-        self.session_start_time = time.time()
-
-        self.root.after(1000, self.update_time)
-
         self.display_comparison(self.sort_alg.get_comparison("1"))
 
         self.init_diff_level_buttons()
-
-        self.root.mainloop()
 
     def center(self, w, h):
         # get screen width and height
@@ -282,7 +349,7 @@ class TestGui():
             return
         else:
             self.motion_allowed = False
-            self.root.after(5, self.allow_motion)
+            self.root.after(10, self.allow_motion)
 
         x = self.images_frame.winfo_x() + frame.winfo_x() + event.x - \
             self.drag_frame.winfo_width()//2
@@ -341,7 +408,7 @@ class TestGui():
 
         self.sort_alg.inference("1", keys, diff_lvls)
 
-        f = open("state.pickle", "wb")
+        f = open("Saves/state.pickle", "wb")
         pickle.dump(self.sort_alg, f)
         f.close()
 
