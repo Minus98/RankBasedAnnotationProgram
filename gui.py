@@ -61,6 +61,8 @@ class TestGui():
             master=self.root, text=f"Comparison count: {self.comp_count}", font=('Helvetica bold', 30))
         self.comp_count_label.grid(row=1, column=0, sticky='SW', padx=100)
 
+        self.motion_allowed = True
+
     def run(self):
         self.session_start_time = time.time()
 
@@ -271,7 +273,16 @@ class TestGui():
 
         self.drag_frame = frame_clone
 
+    def allow_motion(self):
+        self.motion_allowed = True
+
     def on_drag_motion(self, event, frame, idx):
+
+        if not self.motion_allowed:
+            return
+        else:
+            self.motion_allowed = False
+            self.root.after(5, self.allow_motion)
 
         x = self.images_frame.winfo_x() + frame.winfo_x() + event.x - \
             self.drag_frame.winfo_width()//2
@@ -280,6 +291,8 @@ class TestGui():
             self.drag_frame.winfo_height()//2
 
         self.drag_frame.place(x=x, y=y)
+
+        self.root.update_idletasks()
 
     def on_drag_stop(self, event, frame, idx):
 
