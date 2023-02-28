@@ -33,6 +33,7 @@ class MergeSort(SortingAlgorithm):
 
     def __init__(self, data):
         self.data = data
+        self.comparison_size = 2
         self.current_layer = [[value] for value in data]
         self.next_sorted = [[]]
 
