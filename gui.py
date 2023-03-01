@@ -44,14 +44,14 @@ class TestGui():
 
         self.clear_screen()
         menu_screen = MenuScreen(
-            self.root, self.display_menu, self.display_ordering_screen)
+            self.root, self.display_menu, self.display_ordering_screen, self.center)
         menu_screen.display()
 
     def display_ordering_screen(self, save_obj):
 
         self.clear_screen()
         ordering_screen = OrderingScreen(
-            self.root, save_obj, self.display_menu)
+            self.root, save_obj, self.display_menu, self.center)
         ordering_screen.display()
 
     def center(self, w, h):

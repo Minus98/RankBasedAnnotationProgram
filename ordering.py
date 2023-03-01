@@ -5,14 +5,16 @@ import pickle
 import os
 from PIL import Image
 import pandas as pd
+from is_finished_pop_out import IsFinishedPopOut
 
 
 class OrderingScreen():
 
-    def __init__(self, root, save_obj, menu_callback):
+    def __init__(self, root, save_obj, menu_callback, center):
 
         self.root = root
         self.menu_callback = menu_callback
+        self.center = center
 
         self.save_obj = save_obj
         self.sort_alg = save_obj["sort_alg"]
@@ -337,32 +339,7 @@ class OrderingScreen():
 
     def is_finished_check(self):
         if self.sort_alg.is_finished():
-            pop_out = ctk.CTkToplevel()
-
-            w = 700
-            h = 300
-            x, y = self.center(w, h)
-
-            pop_out.geometry('%dx%d+%d+%d' % (w, h, x, y))
-            pop_out.columnconfigure(index=0, weight=1)
-            pop_out.columnconfigure(index=1, weight=1)
-            pop_out.rowconfigure(index=0, weight=1)
-            pop_out.rowconfigure(index=1, weight=1)
-
-            label = ctk.CTkLabel(text="Hello! \n You are now done annotating thank you very much. \n What do you want to do next?",
-                                 master=pop_out, font=('Helvetica bold', 30))
-            label.grid(row=0, column=0, sticky='nsew', columnspan=2)
-
-            menu_button = ctk.CTkButton(
-                text="Return to menu", command=self.back_to_menu, width=w//2-20, height=h//5, master=pop_out, font=('Helvetica bold', 30))
-            menu_button.grid(row=1, column=0, sticky='sew',
-                             pady=(0, 10), padx=(10, 5))
-            quit_button = ctk.CTkButton(text="Quit", command=self.root.destroy,
-                                        width=w//2-20, height=h//5, master=pop_out, font=('Helvetica bold', 30))
-            quit_button.grid(row=1, column=1, sticky='sew',
-                             pady=(0, 10), padx=(5, 10))
-
-            pop_out.grab_set()
+            IsFinishedPopOut(self.root, self.center, self.back_to_menu)
 
     def back_to_menu(self):
         self.root.after_cancel(self.timer_after)
@@ -378,14 +355,3 @@ class OrderingScreen():
         output_path = "Saves/" + self.save_obj["path_to_save"] + ".csv"
         df.to_csv(output_path, mode='a',
                   header=not os.path.exists(output_path))
-
-    def center(self, w, h):
-        # get screen width and height
-        ws = self.root.winfo_screenwidth()  # width of the screen
-        hs = self.root.winfo_screenheight()  # height of the screen
-
-        # calculate x and y coordinates for the Tk root window
-        x = (ws/2) - (w/2)
-        y = (hs/2) - (h/2) - 40
-
-        return x, y
