@@ -28,7 +28,7 @@ class MenuScreen():
             master=self.menu_frame, text="Delete Annotation", width=200, height=40, font=('Helvetica bold', 20))
 
         self.saved_annotations_frame = ctk.CTkScrollableFrame(
-            master=self.menu_frame)
+            master=self.menu_frame, height=400)
 
         self.saved_annotations_frame.columnconfigure(0, weight=1)
 
@@ -36,22 +36,31 @@ class MenuScreen():
 
         self.text = ctk.CTkLabel(master=self.instructions_frame, text="Welcome to the Rank-Based Annotation program \n   " +
                                  b + " Order the images youngest to oldest, left to right \n     " +
-                                 b + " Specify the difference between two images using the radio buttons", font=('Helvetica bold', 20))
+                                 b + " Specify the difference between two images using the radio buttons", font=('Helvetica bold', 20), wraplength=400)
 
     def display(self):
 
         self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_columnconfigure(0, weight=2)
         self.root.grid_columnconfigure(1, weight=1)
 
-        self.menu_frame.grid(row=0, column=0)
-        self.instructions_frame.grid(row=0, column=1)
+        self.menu_frame.grid(row=0, column=0, sticky="nsew",
+                             padx=(20, 10), pady=20)
+        self.instructions_frame.grid(
+            row=0, column=1, sticky="nsew", padx=(20, 10), pady=20)
 
-        self.new_button.grid(row=0, column=0, padx=(10, 5), pady=10)
-        self.delete_button.grid(row=0, column=1, padx=(5, 10), pady=10)
+        self.menu_frame.grid_columnconfigure(0, weight=1)
+        self.menu_frame.grid_columnconfigure(1, weight=1)
+        self.menu_frame.grid_rowconfigure(0, weight=1)
+        self.menu_frame.grid_rowconfigure(1, weight=2)
+
+        self.new_button.grid(row=0, column=0, padx=(
+            20, 10), pady=10, sticky="sew")
+        self.delete_button.grid(row=0, column=1, padx=(
+            10, 20), pady=10, sticky="sew")
 
         self.saved_annotations_frame.grid(
-            row=1, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
+            row=1, column=0, columnspan=2, sticky="new", padx=10, pady=10)
 
         self.display_saves()
 
@@ -77,6 +86,8 @@ class MenuScreen():
             master=saved_annotations_row, text=name, font=('Helvetica bold', 20))
         save_name_label.grid(row=0, column=0, padx=5, pady=2)
 
+        self.add_hover(saved_annotations_row)
+
     def new_annotation(self):
         CreationPopOut(self.creation_callback, self.center)
 
@@ -87,3 +98,30 @@ class MenuScreen():
         save_obj = pickle.load(file)
 
         self.ordering_callback(save_obj)
+
+    def add_hover(self, widget):
+
+        self.add_hover_to_children(widget, widget)
+
+    def add_hover_to_children(self, widget, child_widget):
+
+        child_widget.bind("<Enter>", lambda event,
+                          widget=widget, color=widget.cget("fg_color"): self.highlight(widget, color))
+        child_widget.bind("<Leave>", lambda event,
+                          widget=widget, color=widget.cget("fg_color"): self.remove_highlight(widget, color))
+
+        for child in child_widget.winfo_children():
+            self.add_hover_to_children(widget, child)
+
+    def highlight(self, widget, color):
+
+        gray_color = int(color[1][-2:]) + 10
+
+        if gray_color > 100:
+            gray_color = 100
+
+        widget.configure(fg_color='gray' + str((gray_color)))
+
+    def remove_highlight(self, widget, color):
+        # might have to change so that it is recursive like highlight...
+        widget.configure(fg_color=color)

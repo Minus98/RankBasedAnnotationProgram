@@ -40,6 +40,9 @@ class OrderingScreen():
         self.comp_count_label = ctk.CTkLabel(
             master=self.root, text=f"Comparison count: {self.comp_count}", font=('Helvetica bold', 30))
 
+        self.back_button = ctk.CTkButton(
+            master=self.root, text="Back To Menu", width=200, height=40, command=self.back_to_menu, font=('Helvetica bold', 18))
+
         self.motion_allowed = True
 
         self.display_comparison(self.sort_alg.get_comparison("1"))
@@ -64,6 +67,8 @@ class OrderingScreen():
         self.session_duration_label.grid(
             row=1, column=1, sticky='SE', padx=100)
         self.comp_count_label.grid(row=1, column=0, sticky='SW', padx=100)
+
+        self.back_button.place(x=20, y=20)
 
         self.timer_after = self.root.after(1000, self.update_time)
 
