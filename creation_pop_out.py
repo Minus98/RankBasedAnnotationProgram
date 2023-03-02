@@ -120,7 +120,7 @@ class CreationPopOut():
             sort_alg = TrueSkill(
                 data=img_paths, comparison_size=int(comparison_size.get()))
 
-        file_name = name.get() + "_" + str(int(time.time()))
+        file_name = str(int(time.time()))
         save_obj = {"sort_alg": sort_alg, "name": final_name,
                     "image_directory": directory, "path_to_save": file_name}
 

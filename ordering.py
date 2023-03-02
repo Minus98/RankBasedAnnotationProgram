@@ -6,6 +6,7 @@ import os
 from PIL import Image
 import pandas as pd
 from is_finished_pop_out import IsFinishedPopOut
+from uuid import uuid4
 
 
 class OrderingScreen():
@@ -45,18 +46,18 @@ class OrderingScreen():
 
         self.motion_allowed = True
 
-        self.display_comparison(self.sort_alg.get_comparison("1"))
-
         self.init_diff_level_buttons()
+
+        self.session_id = uuid4()
 
     def display(self):
 
         self.session_start_time = time.time()
 
-        self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_rowconfigure(1, weight=1)
-        self.root.grid_rowconfigure(2, weight=2)
-        self.root.grid_rowconfigure(3, weight=1)
+        self.root.grid_rowconfigure(0, weight=1, uniform="ordering")
+        self.root.grid_rowconfigure(1, weight=1, uniform="ordering")
+        self.root.grid_rowconfigure(2, weight=6, uniform="ordering")
+        self.root.grid_rowconfigure(3, weight=1, uniform="ordering")
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
 
@@ -71,6 +72,9 @@ class OrderingScreen():
         self.back_button.place(x=20, y=20)
 
         self.timer_after = self.root.after(1000, self.update_time)
+
+        if not self.is_finished_check():
+            self.display_comparison(self.sort_alg.get_comparison("1"))
 
     def init_image_frames(self):
 
@@ -338,13 +342,16 @@ class OrderingScreen():
         self.comp_count_label.configure(
             text=f"Comparison count: {self.comp_count}")
 
-        self.is_finished_check()
-        self.display_comparison(self.sort_alg.get_comparison("1"))
+        if not self.is_finished_check():
+            self.display_comparison(self.sort_alg.get_comparison("1"))
+
         self.reset_diff_levels()
 
     def is_finished_check(self):
         if self.sort_alg.is_finished():
             IsFinishedPopOut(self.root, self.center, self.back_to_menu)
+            return True
+        return False
 
     def back_to_menu(self):
         self.root.after_cancel(self.timer_after)
@@ -354,7 +361,7 @@ class OrderingScreen():
         df = pd.DataFrame({'result': [keys],
                            'diff_levels': [diff_lvls],
                            'time': [time.time()-self.session_start_time],
-                           'session': [1],
+                           'session': [self.session_id],
                            'user': ["1"]})
 
         output_path = "Saves/" + self.save_obj["path_to_save"] + ".csv"
