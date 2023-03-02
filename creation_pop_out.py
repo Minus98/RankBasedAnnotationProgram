@@ -4,6 +4,8 @@ import time
 from pathlib import Path
 import random
 from sorting_algorithms import *
+import os
+import sys
 
 
 class CreationPopOut():
@@ -121,10 +123,21 @@ class CreationPopOut():
                 data=img_paths, comparison_size=int(comparison_size.get()))
 
         file_name = str(int(time.time()))
-        save_obj = {"sort_alg": sort_alg, "name": final_name,
-                    "image_directory": directory, "path_to_save": file_name}
 
-        f = open("Saves/" + file_name + ".pickle", "wb")
+
+        if getattr(sys, 'frozen', False):
+            application_path = os.path.dirname(sys.executable)
+        elif __file__:
+            application_path = os.path.dirname(__file__)
+
+        path = application_path + "/Saves"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        save_obj = {"sort_alg": sort_alg, "name": final_name,
+                    "image_directory": directory, "path_to_save": path + "/" + file_name}
+
+        f = open(path + "/" + file_name + ".pickle", "wb")
         pickle.dump(save_obj, f)
         f.close()
 

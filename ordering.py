@@ -332,7 +332,7 @@ class OrderingScreen():
 
         self.sort_alg.inference("1", keys, diff_lvls)
 
-        f = open("Saves/" + self.save_obj["path_to_save"] + ".pickle", "wb")
+        f = open(self.save_obj["path_to_save"] + ".pickle", "wb")
         pickle.dump(self.save_obj, f)
         f.close()
 
@@ -364,6 +364,6 @@ class OrderingScreen():
                            'session': [self.session_id],
                            'user': ["1"]})
 
-        output_path = "Saves/" + self.save_obj["path_to_save"] + ".csv"
+        output_path = self.save_obj["path_to_save"] + ".csv"
         df.to_csv(output_path, mode='a',
                   header=not os.path.exists(output_path))

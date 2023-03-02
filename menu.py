@@ -4,7 +4,7 @@ from sorting_algorithms import *
 import os
 import pickle
 from creation_pop_out import CreationPopOut
-
+import sys
 
 class MenuScreen():
 
@@ -16,7 +16,14 @@ class MenuScreen():
         self.ordering_callback = ordering_callback
         self.center = center
 
-        self.paths = list(Path("Saves").glob('*.pickle'))
+        if getattr(sys, 'frozen', False):
+            application_path = os.path.dirname(sys.executable)
+        elif __file__:
+            application_path = os.path.dirname(__file__)
+
+        path = application_path + "/Saves"
+
+        self.paths = list(Path(path).glob('*.pickle'))
 
         self.saves = [pickle.load(open(path, 'rb')) for path in self.paths]
 
