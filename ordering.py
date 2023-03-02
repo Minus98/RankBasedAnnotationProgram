@@ -218,6 +218,8 @@ class OrderingScreen():
 
         self.update_images()
 
+        self.reset_diff_levels()
+
     def move_right(self, index):
 
         if index < len(self.images) - 1:
@@ -225,6 +227,8 @@ class OrderingScreen():
                                             1] = self.images[index + 1], self.images[index]
 
         self.update_images()
+
+        self.reset_diff_levels()
 
     def update_time(self):
 

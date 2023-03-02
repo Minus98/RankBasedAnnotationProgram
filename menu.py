@@ -6,6 +6,7 @@ import pickle
 from creation_pop_out import CreationPopOut
 import sys
 
+
 class MenuScreen():
 
     def __init__(self, root, creation_callback, ordering_callback, center):
@@ -153,6 +154,10 @@ class MenuScreen():
             master=saved_annotations_row, text=total_images, font=('Helvetica bold', 20))
 
         total_images_label.grid(row=0, column=2, padx=10, pady=4, sticky="w")
+
+        for child in saved_annotations_row.winfo_children():
+            child.bind("<Button-1>", command=lambda event,
+                       i=index: self.load_save(i))
 
         self.add_hover(saved_annotations_row)
 
