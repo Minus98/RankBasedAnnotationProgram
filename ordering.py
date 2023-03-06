@@ -52,8 +52,6 @@ class OrderingScreen():
 
         self.motion_allowed = True
 
-        self.init_diff_level_buttons()
-
         self.session_id = uuid4()
 
     def display(self):
@@ -81,6 +79,7 @@ class OrderingScreen():
 
         if not self.is_finished_check():
             self.display_comparison(self.sort_alg.get_comparison("1"))
+            self.init_diff_level_buttons()
 
     def init_image_frames(self):
 
@@ -138,8 +137,10 @@ class OrderingScreen():
         diff_levels_frame = ctk.CTkFrame(
             master=self.images_frame)
 
+        image_width = self.images[0][1][0]._size[0]
+
         diff_levels_frame.grid(
-            row=0, column=0, columnspan=self.comparison_size, padx=(20 + 135), pady=(10, 0), sticky="ew")
+            row=0, column=0, columnspan=self.comparison_size, padx=(30 + image_width // 2), pady=(10, 0), sticky="ew")
 
         for i in range(len(self.int_diff_levels)):
             diff_levels_frame.columnconfigure(i, weight=1)
