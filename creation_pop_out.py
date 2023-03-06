@@ -110,8 +110,9 @@ class CreationPopOut():
         directory = image_directory.get()
         final_name = name.get()
 
-        img_paths = [str(path)
-                     for path in list(Path(directory).glob('*.jpg'))]
+        img_paths = [os.path.join(Path(directory), f) for f in os.listdir(
+            directory) if os.path.isfile(os.path.join(directory, f))]
+
         random.shuffle(img_paths)
 
         alg = algorithm.get()
@@ -123,7 +124,6 @@ class CreationPopOut():
                 data=img_paths, comparison_size=int(comparison_size.get()))
 
         file_name = str(int(time.time()))
-
 
         if getattr(sys, 'frozen', False):
             application_path = os.path.dirname(sys.executable)

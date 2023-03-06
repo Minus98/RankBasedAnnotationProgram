@@ -5,10 +5,13 @@ import time
 import pickle
 import os
 from PIL import Image
+from tkinter import PhotoImage
 import pandas as pd
 from is_finished_pop_out import IsFinishedPopOut
 from uuid import uuid4
 import shutil
+import nibabel as nib
+import SimpleITK as sitk
 
 
 class OrderingScreen():
@@ -203,9 +206,19 @@ class OrderingScreen():
 
     def display_comparison(self, keys):
         print(keys)
-        self.images = [(img, ctk.CTkImage(Image.open(img), size=(250, 250)))
+        self.images = [(img, self.file_2_CTkImage(img))
                        for img in keys]
         self.update_images()
+
+    def file_2_CTkImage(self, img_src):
+        _, extension = os.path.splitext(img_src)
+
+        if extension == '.nii':
+            img = nib.load(img_src).get_fdata()
+            PhotoImage(data=img)
+            ctk.CTkImage(Image.fromarray(img_arr), size=(512, 512))
+        else:
+            ctk.CTkImage(Image.open(img_src), size=(250, 250))
 
     def update_images(self):
 
