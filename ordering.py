@@ -121,6 +121,8 @@ class OrderingScreen():
                              i=i: self.on_drag_motion(event, image_frame, i))
             image_frame.bind("<ButtonRelease-1>", command=lambda event, image_frame=image_frame,
                              i=i: self.on_drag_stop(event, image_frame, i))
+            image_frame.bind("<MouseWheel>", command=lambda event, image_frame=image_frame,
+                             i=i: self.on_image_scroll(event, image_frame, i))
 
             displayed_image.bind("<Button-1>", command=lambda event,
                                  image_frame=image_frame, i=i: self.on_drag_start(event, image_frame, i))
@@ -128,6 +130,8 @@ class OrderingScreen():
                                  i=i: self.on_drag_motion(event, image_frame, i))
             displayed_image.bind("<ButtonRelease-1>", command=lambda event, image_frame=image_frame,
                                  i=i: self.on_drag_stop(event, image_frame, i))
+            displayed_image.bind("<MouseWheel>", command=lambda event,
+                                 image_frame=image_frame, i=i: self.on_image_scroll(event, image_frame, i))
 
     def init_diff_level_buttons(self):
 
@@ -207,7 +211,7 @@ class OrderingScreen():
 
     def display_comparison(self, keys):
         print(keys)
-        self.images = [(img, self.file_2_CTkImage(img))
+        self.images = [[img, self.file_2_CTkImage(img), 0]
                        for img in keys]
         self.update_images()
 
@@ -215,15 +219,23 @@ class OrderingScreen():
         _, extension = os.path.splitext(img_src)
 
         if extension == '.nii':
-            img = nib.load(img_src).get_fdata()[:, :, 50] + 1024
-            return ctk.CTkImage(Image.fromarray(img), size=(512, 512))
+            ctk_imgs = []
+            nib_imgs = nib.load(img_src).get_fdata() + 1024
+
+            for i in range(0, nib_imgs.shape[2], 10):
+                img = nib_imgs[:, :, i]
+                sz = img.shape
+                ctk_imgs.append(ctk.CTkImage(Image.fromarray(img), size=sz))
+
+            return ctk_imgs
         else:
-            return ctk.CTkImage(Image.open(img_src), size=(250, 250))
+            return [ctk.CTkImage(Image.open(img_src), size=(250, 250))]
 
     def update_images(self):
 
-        for i, img_tuple in enumerate(self.images):
-            self.displayed_images[i].configure(image=img_tuple[1])
+        for i, img_info in enumerate(self.images):
+            self.displayed_images[i].configure(
+                image=img_info[1][img_info[2]])
 
     def move_left(self, index):
 
@@ -342,6 +354,19 @@ class OrderingScreen():
 
         self.update_images()
         self.reset_diff_levels()
+
+    # perhaps use "<Button-4> defines the scroll up event on mice with wheel support and and <Button-5> the scroll down." for linux
+    def on_image_scroll(self, event, frame, idx):
+        print(event.delta < 0)
+
+        if event.delta < 0:
+            self.images[idx][2] = max(self.images[idx][2]-1, 0)
+
+        elif event.delta > 0:
+            self.images[idx][2] = min(
+                self.images[idx][2]+1, len(self.images[idx][1])-1)
+
+        self.update_images()
 
     def submit_comparison(self):
         keys = [key for key, _ in self.images]
