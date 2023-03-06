@@ -121,8 +121,8 @@ class OrderingScreen():
                              i=i: self.on_drag_motion(event, image_frame, i))
             image_frame.bind("<ButtonRelease-1>", command=lambda event, image_frame=image_frame,
                              i=i: self.on_drag_stop(event, image_frame, i))
-            image_frame.bind("<MouseWheel>", command=lambda event, image_frame=image_frame,
-                             i=i: self.on_image_scroll(event, image_frame, i))
+            image_frame.bind("<MouseWheel>", command=lambda event,
+                             i=i: self.on_image_scroll(event, i))
 
             displayed_image.bind("<Button-1>", command=lambda event,
                                  image_frame=image_frame, i=i: self.on_drag_start(event, image_frame, i))
@@ -130,8 +130,8 @@ class OrderingScreen():
                                  i=i: self.on_drag_motion(event, image_frame, i))
             displayed_image.bind("<ButtonRelease-1>", command=lambda event, image_frame=image_frame,
                                  i=i: self.on_drag_stop(event, image_frame, i))
-            displayed_image.bind("<MouseWheel>", command=lambda event,
-                                 image_frame=image_frame, i=i: self.on_image_scroll(event, image_frame, i))
+            displayed_image.bind(
+                "<MouseWheel>", command=lambda event, i=i: self.on_image_scroll(event, i))
 
     def init_diff_level_buttons(self):
 
@@ -356,7 +356,7 @@ class OrderingScreen():
         self.reset_diff_levels()
 
     # perhaps use "<Button-4> defines the scroll up event on mice with wheel support and and <Button-5> the scroll down." for linux
-    def on_image_scroll(self, event, frame, idx):
+    def on_image_scroll(self, event, idx):
         print(event.delta < 0)
 
         if event.delta < 0:
