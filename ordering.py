@@ -133,6 +133,9 @@ class OrderingScreen():
             displayed_image.bind(
                 "<MouseWheel>", command=lambda event, i=i: self.on_image_scroll(event, i))
 
+            self.root.bind(
+                "<Return>", lambda event: self.submit_comparison())
+
     def init_diff_level_buttons(self):
 
         diff_levels_frame = ctk.CTkFrame(
@@ -357,7 +360,6 @@ class OrderingScreen():
 
     # perhaps use "<Button-4> defines the scroll up event on mice with wheel support and and <Button-5> the scroll down." for linux
     def on_image_scroll(self, event, idx):
-        print(event.delta < 0)
 
         if event.delta < 0:
             self.images[idx][2] = max(self.images[idx][2]-1, 0)
@@ -369,7 +371,7 @@ class OrderingScreen():
         self.update_images()
 
     def submit_comparison(self):
-        keys = [key for key, _ in self.images]
+        keys = [key for key, _, _ in self.images]
 
         diff_lvls = [DiffLevel(int_diff_lvl.get())
                      for int_diff_lvl in self.int_diff_levels]
@@ -410,6 +412,7 @@ class OrderingScreen():
 
     def back_to_menu(self):
         self.root.after_cancel(self.timer_after)
+        self.root.unbind("<Return>")
         self.menu_callback()
 
     def save_to_csv_file(self, keys, diff_lvls):
