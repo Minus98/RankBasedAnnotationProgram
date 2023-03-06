@@ -1,3 +1,4 @@
+from pathlib import Path
 import customtkinter as ctk
 from helper_functions import DiffLevel
 import time
@@ -7,6 +8,7 @@ from PIL import Image
 import pandas as pd
 from is_finished_pop_out import IsFinishedPopOut
 from uuid import uuid4
+import shutil
 
 
 class OrderingScreen():
@@ -353,9 +355,20 @@ class OrderingScreen():
 
     def is_finished_check(self):
         if self.sort_alg.is_finished():
+            self.save_sorted_images()
             IsFinishedPopOut(self.root, self.center, self.back_to_menu)
             return True
         return False
+
+    def save_sorted_images(self):
+        res = self.sort_alg.get_result()
+        for i, src in enumerate(res):
+            path = str(Path(src).parent)
+            _, extension = os.path.splitext(src)
+            new_name = str(i) + extension
+            dst = path + '/sorted/' + new_name
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.copy(src, dst)
 
     def back_to_menu(self):
         self.root.after_cancel(self.timer_after)
