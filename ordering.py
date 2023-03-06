@@ -225,6 +225,7 @@ class OrderingScreen():
         if extension == '.nii':
             ctk_imgs = []
             nib_imgs = nib.load(img_src).get_fdata() + 1024
+            nib_imgs = (nib_imgs / np.max(nib_imgs)) * 255
 
             for i in range(0, nib_imgs.shape[2], 10):
                 img = nib_imgs[:, :, i]
