@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from pairwiseordering import PairwiseOrderingScreen
 from sorting_algorithms import *
 from menu import MenuScreen
 from ordering import OrderingScreen
@@ -50,8 +51,14 @@ class TestGui():
     def display_ordering_screen(self, save_obj):
 
         self.clear_screen()
-        ordering_screen = OrderingScreen(
-            self.root, save_obj, self.display_menu, self.center)
+
+        if save_obj["sort_alg"].comparison_size == 2:
+            ordering_screen = PairwiseOrderingScreen(
+                self.root, save_obj, self.display_menu, self.center)
+        else:
+            ordering_screen = OrderingScreen(
+                self.root, save_obj, self.display_menu, self.center)
+
         ordering_screen.display()
 
     def center(self, w, h):
