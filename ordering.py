@@ -1,5 +1,6 @@
 from pathlib import Path
 import customtkinter as ctk
+import numpy as np
 from helper_functions import DiffLevel
 import time
 import pickle
@@ -214,11 +215,10 @@ class OrderingScreen():
         _, extension = os.path.splitext(img_src)
 
         if extension == '.nii':
-            img = nib.load(img_src).get_fdata()
-            PhotoImage(data=img)
-            ctk.CTkImage(Image.fromarray(img_arr), size=(512, 512))
+            img = nib.load(img_src).get_fdata()[:, :, 50] + 1024
+            return ctk.CTkImage(Image.fromarray(img), size=(512, 512))
         else:
-            ctk.CTkImage(Image.open(img_src), size=(250, 250))
+            return ctk.CTkImage(Image.open(img_src), size=(250, 250))
 
     def update_images(self):
 
