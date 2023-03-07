@@ -1,7 +1,9 @@
-from trueskill import Rating, quality_1vs1, rate_1vs1
+
+from trueskill import Rating, rate_1vs1
 import numpy as np
-import copy
 import random
+import copy
+
 
 from abc import ABC, abstractmethod
 
@@ -731,7 +733,7 @@ class MedianMergeSort(SortingAlgorithm):
         return len(self.task_layers) == 1 and len(self.task_layers[0]) == 1 and self.task_layers[0][0].is_incomplete()
 
 
-class TrueSkill (SortingAlgorithm):
+class TrueSkill (sa.SortingAlgorithm):
 
     def __init__(self, data, comparison_size=2, comparison_max=1000):
 
@@ -739,8 +741,11 @@ class TrueSkill (SortingAlgorithm):
         self.data = list(data)
 
         self.ratings = {k: Rating() for k in data}
+        self.start_mu = self.ratings[0].mu
+        self.start_sigma = self.ratings[0].sigma
+
         self.overlap_matrix = np.full(
-            (self.n, self.n), self.intervals_overlap(self.data[0], self.data[1]))
+            (self.n, self.n), self.intervals_overlap(0, 1))
         np.fill_diagonal(self.overlap_matrix, 0)
 
         self.comparison_size = comparison_size
@@ -779,9 +784,7 @@ class TrueSkill (SortingAlgorithm):
             if max_sum < sum_i:
                 max_sum = sum_i
                 comparisons = [i] + list(indices)
-
-        keys_list = list(self.ratings.keys())
-        return [keys_list[c] for c in comparisons]
+        return comparisons
 
     def inference(self, user_id, keys, diff_lvls):
 
@@ -820,7 +823,17 @@ class TrueSkill (SortingAlgorithm):
         return [k for k, v in sorted(self.ratings.items(), key=lambda x:x[1])]
 
     def is_finished(self):
-        return self.comparison_counter == self.comparison_max or self.overlap_matrix.max() <= 0
+        k = int(len(self.data) * 0.3)
+
+        if self.comparison_counter == self.comparison_max or self.overlap_matrix.max() <= 0:
+            return True
+
+        for row in self.overlap_matrix:
+            min_overlaps = sorted(row, reverse=True)[:k]
+            if min(min_overlaps) > self.start_sigma:
+                return False
+
+        return True
 
     def comparison_is_available(self, user_id):
         return not self.is_finished()
