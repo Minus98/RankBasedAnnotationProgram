@@ -77,7 +77,8 @@ class CreationPopOut():
             row=3, column=0, padx=10, pady=(2, 10), sticky="e")
 
         image_directory = ctk.StringVar()
-        image_directory.set("/Images")
+        image_directory.set(str(Path("Images").resolve()))
+
         directory_entry = ctk.CTkEntry(
             master=pop_out, textvariable=image_directory, placeholder_text="select the directory which contains the files", width=400, height=40, font=('Helvetica bold', 16), state=ctk.DISABLED)
 
