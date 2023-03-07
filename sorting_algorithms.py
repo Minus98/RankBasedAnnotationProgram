@@ -733,7 +733,7 @@ class MedianMergeSort(SortingAlgorithm):
         return len(self.task_layers) == 1 and len(self.task_layers[0]) == 1 and self.task_layers[0][0].is_incomplete()
 
 
-class TrueSkill (sa.SortingAlgorithm):
+class TrueSkill (SortingAlgorithm):
 
     def __init__(self, data, comparison_size=2, comparison_max=1000):
 
@@ -741,11 +741,11 @@ class TrueSkill (sa.SortingAlgorithm):
         self.data = list(data)
 
         self.ratings = {k: Rating() for k in data}
-        self.start_mu = self.ratings[0].mu
-        self.start_sigma = self.ratings[0].sigma
+        self.start_mu = self.ratings[self.data[0]].mu
+        self.start_sigma = self.ratings[self.data[0]].sigma
 
         self.overlap_matrix = np.full(
-            (self.n, self.n), self.intervals_overlap(0, 1))
+            (self.n, self.n), self.intervals_overlap(self.data[0], self.data[1]))
         np.fill_diagonal(self.overlap_matrix, 0)
 
         self.comparison_size = comparison_size
@@ -784,7 +784,9 @@ class TrueSkill (sa.SortingAlgorithm):
             if max_sum < sum_i:
                 max_sum = sum_i
                 comparisons = [i] + list(indices)
-        return comparisons
+
+        keys_list = list(self.ratings.keys())
+        return [keys_list[c] for c in comparisons]
 
     def inference(self, user_id, keys, diff_lvls):
 
