@@ -13,6 +13,7 @@ from uuid import uuid4
 import shutil
 import nibabel as nib
 import SimpleITK as sitk
+import sorting_algorithms as sa
 
 
 class PairwiseOrderingScreen():
@@ -49,8 +50,12 @@ class PairwiseOrderingScreen():
                                               height=40, command=lambda: self.submit_comparison(2), font=('Helvetica bold', 20))
 
         self.tab_index = -1
-        self.tab_items = [self.alot_less_button, self.less_button,
-                          self.same_button, self.more_button, self.alot_more_button]
+
+        if not type(self.sort_alg) == sa.MergeSort:
+            self.tab_items = [self.alot_less_button, self.less_button,
+                              self.same_button, self.more_button, self.alot_more_button]
+        else:
+            self.tab_items = [self.less_button, self.more_button]
 
         self.root.bind(
             "1", lambda event: self.on_shortcmd(0))
@@ -103,11 +108,15 @@ class PairwiseOrderingScreen():
 
         self.buttons_frame.grid(row=4, column=0, columnspan=2, sticky="N")
 
-        self.alot_less_button.grid(row=0, column=0, padx=(10, 5), pady=10)
-        self.less_button.grid(row=0, column=1, padx=5, pady=10)
-        self.same_button.grid(row=0, column=2, padx=5, pady=10)
-        self.more_button.grid(row=0, column=3, padx=5, pady=10)
-        self.alot_more_button.grid(row=0, column=4, padx=(5, 10), pady=10)
+        if not type(self.sort_alg) == sa.MergeSort:
+            self.alot_less_button.grid(row=0, column=0, padx=(10, 5), pady=10)
+            self.less_button.grid(row=0, column=1, padx=5, pady=10)
+            self.same_button.grid(row=0, column=2, padx=5, pady=10)
+            self.more_button.grid(row=0, column=3, padx=5, pady=10)
+            self.alot_more_button.grid(row=0, column=4, padx=(5, 10), pady=10)
+        else:
+            self.less_button.grid(row=0, column=0, padx=(10, 5), pady=10)
+            self.more_button.grid(row=0, column=1, padx=(5, 10), pady=10)
 
         self.session_duration_label.grid(
             row=1, column=1, sticky='SE', padx=100)
@@ -214,7 +223,7 @@ class PairwiseOrderingScreen():
             self.remove_highlight(self.tab_items[self.tab_index])
 
         self.tab_index += 1
-        if self.tab_index > 4:
+        if self.tab_index >= len(self.tab_items):
             self.tab_index = 0
 
         print(self.tab_index)
