@@ -12,7 +12,6 @@ from is_finished_pop_out import IsFinishedPopOut
 from uuid import uuid4
 import shutil
 import nibabel as nib
-import SimpleITK as sitk
 import sorting_algorithms as sa
 
 
