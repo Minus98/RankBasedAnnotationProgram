@@ -108,10 +108,10 @@ class CreationPopOut():
 
     def create_save(self, name, algorithm, comparison_size, image_directory, pop_out):
 
-        directory = image_directory.get()
+        directory = os.path.relpath(image_directory.get())
         final_name = name.get()
 
-        img_paths = [os.path.join(Path(directory), f) for f in os.listdir(
+        img_paths = [os.path.join(directory, f) for f in os.listdir(
             directory) if os.path.isfile(os.path.join(directory, f))]
 
         random.shuffle(img_paths)
