@@ -3,7 +3,7 @@ from pairwiseordering import PairwiseOrderingScreen
 from sorting_algorithms import *
 from menu import MenuScreen
 from ordering import OrderingScreen
-
+from user_selection_popout import UserSelectionPopOut
 
 class TestGui():
 
@@ -25,6 +25,8 @@ class TestGui():
 
         self.display_menu()
 
+        UserSelectionPopOut(self.root, self.center, self.select_user)
+        
         self.root.mainloop()
 
     def clear_screen(self):
@@ -50,16 +52,19 @@ class TestGui():
 
     def display_ordering_screen(self, save_obj):
 
-        self.clear_screen()
+        if hasattr(self, 'selected_user'):
+            self.clear_screen()
 
-        if save_obj["sort_alg"].comparison_size == 2:
-            ordering_screen = PairwiseOrderingScreen(
-                self.root, save_obj, self.display_menu, self.center)
+            if save_obj["sort_alg"].comparison_size == 2:
+                ordering_screen = PairwiseOrderingScreen(
+                    self.root, save_obj, self.display_menu, self.center, self.selected_user)
+            else:
+                ordering_screen = OrderingScreen(
+                    self.root, save_obj, self.display_menu, self.center, self.selected_user)
+
+            ordering_screen.display()
         else:
-            ordering_screen = OrderingScreen(
-                self.root, save_obj, self.display_menu, self.center)
-
-        ordering_screen.display()
+            UserSelectionPopOut(self.root, self.center, self.select_user)
 
     def center(self, w, h):
         # get screen width and height
@@ -71,3 +76,6 @@ class TestGui():
         y = (hs/2) - (h/2) - 40
 
         return x, y
+
+    def select_user(self, user):
+        self.selected_user = user

@@ -17,11 +17,12 @@ import sorting_algorithms as sa
 
 class PairwiseOrderingScreen():
 
-    def __init__(self, root, save_obj, menu_callback, center):
+    def __init__(self, root, save_obj, menu_callback, center, user):
 
         self.root = root
         self.menu_callback = menu_callback
         self.center = center
+        self.user = user
 
         self.save_obj = save_obj
         self.sort_alg = save_obj["sort_alg"]
@@ -306,7 +307,7 @@ class PairwiseOrderingScreen():
                            'diff_levels': [diff_lvls],
                            'time': [time.time()-self.session_start_time],
                            'session': [self.session_id],
-                           'user': ["1"]})
+                           'user': [self.user]})
 
         output_path = self.save_obj["path_to_save"] + ".csv"
         df.to_csv(output_path, mode='a',

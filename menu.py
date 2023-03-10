@@ -5,6 +5,7 @@ import os
 import pickle
 from creation_pop_out import CreationPopOut
 import sys
+from utils import *
 
 
 class MenuScreen():
@@ -159,7 +160,7 @@ class MenuScreen():
             child.bind("<Button-1>", command=lambda event,
                        i=index: self.load_save(i))
 
-        self.add_hover(saved_annotations_row)
+        add_hover(saved_annotations_row)
 
     def new_annotation(self):
         CreationPopOut(self.creation_callback, self.center)
@@ -171,30 +172,3 @@ class MenuScreen():
         save_obj = pickle.load(file)
 
         self.ordering_callback(save_obj)
-
-    def add_hover(self, widget):
-
-        self.add_hover_to_children(widget, widget)
-
-    def add_hover_to_children(self, widget, child_widget):
-
-        child_widget.bind("<Enter>", lambda event,
-                          widget=widget, color=widget.cget("fg_color"): self.highlight(widget, color))
-        child_widget.bind("<Leave>", lambda event,
-                          widget=widget, color=widget.cget("fg_color"): self.remove_highlight(widget, color))
-
-        for child in child_widget.winfo_children():
-            self.add_hover_to_children(widget, child)
-
-    def highlight(self, widget, color):
-
-        gray_color = int(color[1][-2:]) + 10
-
-        if gray_color > 100:
-            gray_color = 100
-
-        widget.configure(fg_color='gray' + str((gray_color)))
-
-    def remove_highlight(self, widget, color):
-        # might have to change so that it is recursive like highlight...
-        widget.configure(fg_color=color)
