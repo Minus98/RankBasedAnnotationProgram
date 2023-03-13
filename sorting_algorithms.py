@@ -38,6 +38,7 @@ class MergeSort(SortingAlgorithm):
         self.comparison_size = 2
         self.current_layer = [[value] for value in data]
         self.next_sorted = [[]]
+        self.comp_count = 0
 
     def get_comparison(self, user_id):
         return [self.current_layer[0][0], self.current_layer[1][0]]
@@ -78,6 +79,8 @@ class MergeSort(SortingAlgorithm):
             if diff_lvls[0].value == 0:
                 self.next_sorted[-1].append(equally_smallest)
 
+        self.comp_count += 1
+
     def get_result(self):
         if self.is_finished():
             # return the first and only sublist of the current layer if the sorting is finished
@@ -109,6 +112,8 @@ class TimSort(SortingAlgorithm):
         self.high = -1
         self.low = -1
 
+        self.comp_count = 0
+
     def get_comparison(self, user_id):
         if self.creating_runs:
 
@@ -125,6 +130,8 @@ class TimSort(SortingAlgorithm):
             self.bin_insertion_inference(user_id, keys, diff_lvls)
         else:
             self.merge_inference(user_id, keys, diff_lvls)
+
+        self.comp_count += 1
 
     def merge_inference(self, user_id, keys, diff_lvls):
         if self.current_layer[0][0] == keys[0]:
@@ -253,6 +260,8 @@ class HammingLUCB(SortingAlgorithm):
         self.comparisons = self.get_lists_to_compare()
         self.overlaps = [True] * (self.L-1)
 
+        self.comp_count = 0
+
     def get_lists_to_compare(self):
         data_shuff = random.sample(self.data, self.n)
         (q, r) = divmod(self.n, self.comparison_size)
@@ -287,6 +296,8 @@ class HammingLUCB(SortingAlgorithm):
 
         if not len(self.comparisons):
             self.comparisons = self.get_new_comparisons()
+
+        self.comp_count += 1
 
     def update_estimates(self, keys, diff_lvls):
 
@@ -419,6 +430,7 @@ class Borda(SortingAlgorithm):
         self.borda_count = np.zeros(self.n)
         self.counter_iterations = 0
         self.comparison_size = comparison_size
+        self.comp_count = 0
 
         if exhaustive:
             self.counter_max = 1
@@ -463,6 +475,8 @@ class Borda(SortingAlgorithm):
         if not self.comparisons and self.counter_iterations+1 < self.counter_max:
             self.counter_iterations += 1
             self.comparisons = self.get_lists_to_compare()
+
+        self.comp_count += 1
 
     def get_update_score(self, index, diff_lvls):
 
@@ -612,6 +626,8 @@ class MedianMergeSort(SortingAlgorithm):
         self.get_lists_to_compare()
         #print([[t for t in l] for l in self.task_layers])
 
+        self.comp_count = 0
+
     def get_lists_to_compare(self):
         n = len(self.items)
         (q, r) = divmod(n, self.comparison_size)
@@ -701,6 +717,8 @@ class MedianMergeSort(SortingAlgorithm):
         if not any(self.task_layers[0:layer_idx + 1]):
             self.task_layers = self.task_layers[layer_idx + 1:]
 
+        self.comp_count += 1
+
     def get_mean_list(self, task):
 
         means = []
@@ -751,7 +769,7 @@ class TrueSkill (SortingAlgorithm):
 
         self.comparison_size = comparison_size
         self.comparison_max = comparison_max
-        self.comparison_counter = 0
+        self.comp_count = 0
 
     def intervals_overlap(self, key1, key2):
         r1_low = self.ratings[key1].mu - 2 * self.ratings[key1].sigma
@@ -820,7 +838,7 @@ class TrueSkill (SortingAlgorithm):
         for k in keys:
             self.update_overlap_matrix(k)
 
-        self.comparison_counter += 1
+        self.comp_count += 1
 
     def get_result(self):
         return [k for k, v in sorted(self.ratings.items(), key=lambda x:x[1])]
@@ -828,7 +846,7 @@ class TrueSkill (SortingAlgorithm):
     def is_finished(self):
         k = max(int(len(self.data) * 0.3), 1)
 
-        if self.comparison_counter == self.comparison_max or self.overlap_matrix.max() <= 0:
+        if self.comp_count == self.comparison_max or self.overlap_matrix.max() <= 0:
             return True
 
         for row in self.overlap_matrix:

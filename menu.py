@@ -50,6 +50,8 @@ class MenuScreen():
             1, weight=1, uniform="header")
         self.saved_annotations_header.grid_columnconfigure(
             2, weight=1, uniform="header")
+        self.saved_annotations_header.grid_columnconfigure(
+            3, weight=1, uniform="header")
         self.saved_annotations_header.grid_rowconfigure(
             0, weight=1, uniform="header")
 
@@ -61,6 +63,9 @@ class MenuScreen():
 
         self.header_images_label = ctk.CTkLabel(
             master=self.saved_annotations_header, text="Images:", font=('Helvetica bold', 20))
+
+        self.header_count_label = ctk.CTkLabel(
+            master=self.saved_annotations_header, text="Comparisons made:", font=('Helvetica bold', 20))
 
         self.saved_annotations_frame = ctk.CTkScrollableFrame(
             master=self.menu_frame, height=400)
@@ -110,6 +115,8 @@ class MenuScreen():
             row=0, column=1, sticky="w", padx=10, pady=4)
         self.header_images_label.grid(
             row=0, column=2, sticky="w", padx=10, pady=4)
+        self.header_count_label.grid(
+            row=0, column=3, sticky="w", padx=10, pady=4)
 
         self.saved_annotations_frame.grid(
             row=1, column=0, columnspan=2, sticky="nsew", padx=10, pady=(0, 0))
@@ -136,6 +143,7 @@ class MenuScreen():
         saved_annotations_row.grid_columnconfigure(0, weight=1, uniform="row")
         saved_annotations_row.grid_columnconfigure(1, weight=1, uniform="row")
         saved_annotations_row.grid_columnconfigure(2, weight=1, uniform="row")
+        saved_annotations_row.grid_columnconfigure(3, weight=1, uniform="row")
         saved_annotations_row.grid_rowconfigure(0, weight=1, uniform="row")
 
         save_name_label = ctk.CTkLabel(
@@ -155,6 +163,11 @@ class MenuScreen():
             master=saved_annotations_row, text=total_images, font=('Helvetica bold', 20))
 
         total_images_label.grid(row=0, column=2, padx=10, pady=4, sticky="w")
+
+        count_label = ctk.CTkLabel(
+            master=saved_annotations_row, text=sort_alg.comp_count, font=('Helvetica bold', 20))
+
+        count_label.grid(row=0, column=3, padx=10, pady=4, sticky="w")
 
         for child in saved_annotations_row.winfo_children():
             child.bind("<Button-1>", command=lambda event,
