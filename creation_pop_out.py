@@ -3,6 +3,8 @@ import pickle
 import time
 from pathlib import Path
 import random
+
+import pandas as pd
 from sorting_algorithms import *
 import os
 import sys
@@ -135,8 +137,17 @@ class CreationPopOut():
         if not os.path.exists(path):
             os.makedirs(path)
 
+        path_to_save = path + "/" + file_name
+
+        df = pd.DataFrame(
+            columns=['result', 'diff_levels', 'time', 'session', 'user'])
+
+        output_path = path_to_save + ".csv"
+        df.to_csv(output_path, mode='a',
+                  header=not os.path.exists(output_path))
+
         save_obj = {"sort_alg": sort_alg, "name": final_name,
-                    "image_directory": directory, "path_to_save": path + "/" + file_name}
+                    "image_directory": directory, "path_to_save": path_to_save}
 
         f = open(path + "/" + file_name + ".pickle", "wb")
         pickle.dump(save_obj, f)
