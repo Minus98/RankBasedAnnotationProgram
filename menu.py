@@ -112,10 +112,10 @@ class MenuScreen():
         self.instructions_frame.grid_rowconfigure(0, weight=1)
         self.instructions_frame.grid_rowconfigure(1, weight=5)
 
-        self.new_button.grid(row=2, column=0, padx=(
+        self.new_button.grid(row=2, column=0, columnspan=2, padx=(
             20, 10), pady=10)
-        self.delete_button.grid(row=2, column=1, padx=(
-            10, 20), pady=10)
+        # self.delete_button.grid(row=2, column=1, padx=(
+        #    10, 20), pady=10)
 
         self.saved_annotations_header.grid(
             row=0, column=0, columnspan=2, sticky="sew", padx=(10, 20), pady=(20, 0))
