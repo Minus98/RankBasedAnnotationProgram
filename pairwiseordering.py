@@ -1,3 +1,4 @@
+import copy
 from pathlib import Path
 import customtkinter as ctk
 import numpy as np
@@ -26,6 +27,7 @@ class PairwiseOrderingScreen():
 
         self.save_obj = save_obj
         self.sort_alg = save_obj["sort_alg"]
+        self.prev_sort_alg = None
         self.df = pd.read_csv(self.save_obj["path_to_save"] + '.csv')
 
         self.images_frame = ctk.CTkFrame(master=self.root)
@@ -76,6 +78,8 @@ class PairwiseOrderingScreen():
 
         self.root.bind(
             "<Tab>", lambda event: self.on_tab())
+
+        self.root.bind("<Control-z>", lambda event: self.undo_annotation())
 
         self.session_duration_label = ctk.CTkLabel(
             master=self.root, text="0:00", font=('Helvetica bold', 30))
@@ -240,14 +244,12 @@ class PairwiseOrderingScreen():
     def on_tab(self):
 
         if self.tab_index >= 0:
-            print(self.tab_index)
             self.remove_highlight(self.tab_items[self.tab_index])
 
         self.tab_index += 1
         if self.tab_index >= len(self.tab_items):
             self.tab_index = 0
 
-        print(self.tab_index)
         self.highlight(self.tab_items[self.tab_index])
 
     def reset_tab(self):
@@ -258,14 +260,12 @@ class PairwiseOrderingScreen():
     def highlight(self, widget):
 
         hex = widget.cget("fg_color")[1]
-        print(hex)
-        print(widget.cget("fg_color"))
+
         rgb = [int(hex[i:i+2], 16) for i in (1, 3, 5)]
         for i in range(len(rgb)):
             rgb[i] = min(rgb[i]+50, 255)
 
         new_hex = '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
-        print("add", new_hex)
         widget.configure(fg_color=new_hex)
 
     def remove_highlight(self, widget):
@@ -273,13 +273,30 @@ class PairwiseOrderingScreen():
 
     def on_enter(self):
         self.tab_items[self.tab_index].invoke()
-        self.reset_tab()
 
     def on_shortcmd(self, index):
         self.tab_items[index].invoke()
-        self.reset_tab()
+
+    def undo_annotation(self):
+        if self.prev_sort_alg is not None:
+            self.reset_tab()
+
+            self.sort_alg = self.prev_sort_alg
+            self.save_obj['sort_alg'] = self.prev_sort_alg
+            self.prev_sort_alg = None
+
+            self.undo_csv_file()
+            self.save_algorithm()
+            self.display_new_comparison()
+
+            self.comp_count -= 1
+            self.comp_count_label.configure(
+                text=f"Comparison count: {self.comp_count}")
 
     def submit_comparison(self, difflevel, df_annotatation=False):
+        self.reset_tab()
+        self.prev_sort_alg = copy.deepcopy(self.sort_alg)
+
         keys = [key for key, _, _ in self.images]
 
         if difflevel < 0:
@@ -289,18 +306,20 @@ class PairwiseOrderingScreen():
 
         self.sort_alg.inference("1", keys, diff_lvls)
 
-        f = open(self.save_obj["path_to_save"] + ".pickle", "wb")
-        pickle.dump(self.save_obj, f)
-        f.close()
-
         self.save_to_csv_file(keys, diff_lvls, df_annotatation)
-
         self.comp_count += 1
         self.comp_count_label.configure(
             text=f"Comparison count: {self.comp_count}")
 
+        self.save_algorithm()
+
         if not self.is_finished_check():
             self.display_new_comparison()
+
+    def save_algorithm(self):
+        f = open(self.save_obj["path_to_save"] + ".pickle", "wb")
+        pickle.dump(self.save_obj, f)
+        f.close()
 
     def is_finished_check(self):
         if self.sort_alg.is_finished():
@@ -323,6 +342,12 @@ class PairwiseOrderingScreen():
         self.root.after_cancel(self.timer_after)
         self.menu_callback()
 
+    def undo_csv_file(self):
+        copy_df = pd.read_csv(self.save_obj["path_to_save"] + '.csv')
+        copy_df.iloc[-1, copy_df.columns.get_loc('undone')] = True
+        output_path = self.save_obj["path_to_save"] + ".csv"
+        copy_df.to_csv(output_path, index=False)
+
     def save_to_csv_file(self, keys, diff_lvls, df_annotatation=False):
 
         user = 'DF' if df_annotatation else self.user
@@ -330,7 +355,8 @@ class PairwiseOrderingScreen():
                            'diff_levels': [diff_lvls],
                            'time': [time.time()-self.session_start_time],
                            'session': [self.session_id],
-                           'user': [user]})
+                           'user': [user],
+                           'undone': [False]})
 
         self.df = pd.concat([self.df, df], ignore_index=True)
 

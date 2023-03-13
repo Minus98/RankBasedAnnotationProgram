@@ -1,3 +1,4 @@
+import copy
 from pathlib import Path
 import customtkinter as ctk
 import numpy as np
@@ -25,6 +26,7 @@ class OrderingScreen():
 
         self.save_obj = save_obj
         self.sort_alg = save_obj["sort_alg"]
+        self.prev_sort_alg = None
         self.comparison_size = self.sort_alg.comparison_size
 
         self.images_frame = ctk.CTkFrame(master=self.root)
@@ -49,6 +51,8 @@ class OrderingScreen():
 
         self.back_button = ctk.CTkButton(
             master=self.root, text="Back To Menu", width=200, height=40, command=self.back_to_menu, font=('Helvetica bold', 18))
+
+        self.root.bind("<Control-z>", lambda event: self.undo_annotation())
 
         self.motion_allowed = True
 
@@ -78,7 +82,7 @@ class OrderingScreen():
         self.timer_after = self.root.after(1000, self.update_time)
 
         if not self.is_finished_check():
-            self.display_comparison(self.sort_alg.get_comparison("1"))
+            self.display_new_comparison()
             self.init_diff_level_buttons()
 
     def init_image_frames(self):
@@ -213,8 +217,8 @@ class OrderingScreen():
 
         return image_frame
 
-    def display_comparison(self, keys):
-        print(keys)
+    def display_new_comparison(self):
+        keys = self.sort_alg.get_comparison("1")
         self.images = [[img, self.file_2_CTkImage(img), 0]
                        for img in keys]
         self.update_images()
@@ -372,7 +376,25 @@ class OrderingScreen():
 
         self.update_images()
 
+    def undo_annotation(self):
+        if self.prev_sort_alg is not None:
+
+            self.sort_alg = self.prev_sort_alg
+            self.save_obj['sort_alg'] = self.prev_sort_alg
+            self.prev_sort_alg = None
+
+            self.undo_csv_file()
+            self.save_algorithm()
+            self.display_new_comparison()
+
+            self.comp_count -= 1
+            self.comp_count_label.configure(
+                text=f"Comparison count: {self.comp_count}")
+
     def submit_comparison(self):
+
+        self.prev_sort_alg = copy.deepcopy(self.sort_alg)
+
         keys = [key for key, _, _ in self.images]
 
         diff_lvls = [DiffLevel(int_diff_lvl.get())
@@ -380,9 +402,7 @@ class OrderingScreen():
 
         self.sort_alg.inference("1", keys, diff_lvls)
 
-        f = open(self.save_obj["path_to_save"] + ".pickle", "wb")
-        pickle.dump(self.save_obj, f)
-        f.close()
+        self.save_algorithm()
 
         self.save_to_csv_file(keys, diff_lvls)
 
@@ -391,9 +411,14 @@ class OrderingScreen():
             text=f"Comparison count: {self.comp_count}")
 
         if not self.is_finished_check():
-            self.display_comparison(self.sort_alg.get_comparison("1"))
+            self.display_new_comparison()
 
         self.reset_diff_levels()
+
+    def save_algorithm(self):
+        f = open(self.save_obj["path_to_save"] + ".pickle", "wb")
+        pickle.dump(self.save_obj, f)
+        f.close()
 
     def is_finished_check(self):
         if self.sort_alg.is_finished():
@@ -417,12 +442,19 @@ class OrderingScreen():
         self.root.unbind("<Return>")
         self.menu_callback()
 
+    def undo_csv_file(self):
+        copy_df = pd.read_csv(self.save_obj["path_to_save"] + '.csv')
+        copy_df.iloc[-1, copy_df.columns.get_loc('undone')] = True
+        output_path = self.save_obj["path_to_save"] + ".csv"
+        copy_df.to_csv(output_path, index=False)
+
     def save_to_csv_file(self, keys, diff_lvls):
         df = pd.DataFrame({'result': [keys],
                            'diff_levels': [diff_lvls],
                            'time': [time.time()-self.session_start_time],
                            'session': [self.session_id],
-                           'user': [self.user]})
+                           'user': [self.user],
+                           'undone': [False]})
 
         output_path = self.save_obj["path_to_save"] + ".csv"
         df.to_csv(output_path, mode='a',

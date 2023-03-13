@@ -140,7 +140,7 @@ class CreationPopOut():
         path_to_save = path + "/" + file_name
 
         df = pd.DataFrame(
-            columns=['result', 'diff_levels', 'time', 'session', 'user'])
+            columns=['result', 'diff_levels', 'time', 'session', 'user', 'undone'])
 
         output_path = path_to_save + ".csv"
         df.to_csv(output_path, mode='a',
