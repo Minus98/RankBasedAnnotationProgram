@@ -72,8 +72,6 @@ class MenuScreen():
 
         self.saved_annotations_frame.columnconfigure(0, weight=1)
 
-        b = "•"
-
         self.text_header = ctk.CTkLabel(
             master=self.instructions_frame, text="Welcome to the Rank-Based Annotation program", font=('Helvetica bold', 24), wraplength=400)
 
@@ -85,6 +83,10 @@ class MenuScreen():
                                  "Order the images youngest to oldest, left to right. \n \n" +
                                  "You can use the arrow buttons, or drag and drop the images. \n \n" +
                                  "Specify the difference between two images using the radio buttons.", font=('Helvetica bold', 18), wraplength=400, anchor="w", justify=ctk.LEFT)
+
+        self.text.bind(
+            '<Configure>', lambda event: self.update_wraplength(self.text))
+        self.old_size = self.text.winfo_width()
 
     def display(self):
 
@@ -195,3 +197,9 @@ class MenuScreen():
         save_obj = pickle.load(file)
 
         self.ordering_callback(save_obj)
+
+    def update_wraplength(self, label):
+
+        if abs(label.winfo_width() - self.old_size) > 20:
+            self.old_size = label.winfo_width()
+            label.configure(wraplength=label.winfo_width() - 10)
