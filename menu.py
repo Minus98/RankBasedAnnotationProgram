@@ -5,6 +5,7 @@ import os
 import pickle
 from creation_pop_out import CreationPopOut
 import sys
+from utils import *
 
 
 class MenuScreen():
@@ -49,6 +50,8 @@ class MenuScreen():
             1, weight=1, uniform="header")
         self.saved_annotations_header.grid_columnconfigure(
             2, weight=1, uniform="header")
+        self.saved_annotations_header.grid_columnconfigure(
+            3, weight=1, uniform="header")
         self.saved_annotations_header.grid_rowconfigure(
             0, weight=1, uniform="header")
 
@@ -61,6 +64,9 @@ class MenuScreen():
         self.header_images_label = ctk.CTkLabel(
             master=self.saved_annotations_header, text="Images:", font=('Helvetica bold', 20))
 
+        self.header_count_label = ctk.CTkLabel(
+            master=self.saved_annotations_header, text="Comparisons made:", font=('Helvetica bold', 20))
+
         self.saved_annotations_frame = ctk.CTkScrollableFrame(
             master=self.menu_frame, height=400)
 
@@ -68,9 +74,17 @@ class MenuScreen():
 
         b = "•"
 
-        self.text = ctk.CTkLabel(master=self.instructions_frame, text="Welcome to the Rank-Based Annotation program \n   " +
-                                 b + " Order the images youngest to oldest, left to right \n     " +
-                                 b + " Specify the difference between two images using the radio buttons", font=('Helvetica bold', 20), wraplength=400)
+        self.text_header = ctk.CTkLabel(
+            master=self.instructions_frame, text="Welcome to the Rank-Based Annotation program", font=('Helvetica bold', 24), wraplength=400)
+
+        self.text = ctk.CTkLabel(master=self.instructions_frame, text="Every annotation is saved immediately, and you can quit the program at any time and pick up where you left off. \n \n" +
+                                 "2 images per comparison: \n \n" +
+                                 "2 or more buttons available, pick the option that best describes the relation of the image on the right to the image on the left. \n \n" +
+                                 "You can also use keys 1-5 on your keyboard. \n \n" +
+                                 "3 or more per comparison: \n \n" +
+                                 "Order the images youngest to oldest, left to right. \n \n" +
+                                 "You can use the arrow buttons, or drag and drop the images. \n \n" +
+                                 "Specify the difference between two images using the radio buttons.", font=('Helvetica bold', 18), wraplength=400, anchor="w", justify=ctk.LEFT)
 
     def display(self):
 
@@ -94,6 +108,7 @@ class MenuScreen():
 
         self.instructions_frame.grid_columnconfigure(0, weight=1)
         self.instructions_frame.grid_rowconfigure(0, weight=1)
+        self.instructions_frame.grid_rowconfigure(1, weight=5)
 
         self.new_button.grid(row=2, column=0, padx=(
             20, 10), pady=10)
@@ -109,13 +124,16 @@ class MenuScreen():
             row=0, column=1, sticky="w", padx=10, pady=4)
         self.header_images_label.grid(
             row=0, column=2, sticky="w", padx=10, pady=4)
+        self.header_count_label.grid(
+            row=0, column=3, sticky="w", padx=10, pady=4)
 
         self.saved_annotations_frame.grid(
             row=1, column=0, columnspan=2, sticky="nsew", padx=10, pady=(0, 0))
 
         self.display_saves()
 
-        self.text.grid(row=0, column=0, padx=10, pady=10, sticky="new")
+        self.text_header.grid(row=0, column=0, padx=10, pady=10, sticky="new")
+        self.text.grid(row=1, column=0, padx=20, pady=10, sticky="new")
 
     def display_saves(self):
 
@@ -135,6 +153,7 @@ class MenuScreen():
         saved_annotations_row.grid_columnconfigure(0, weight=1, uniform="row")
         saved_annotations_row.grid_columnconfigure(1, weight=1, uniform="row")
         saved_annotations_row.grid_columnconfigure(2, weight=1, uniform="row")
+        saved_annotations_row.grid_columnconfigure(3, weight=1, uniform="row")
         saved_annotations_row.grid_rowconfigure(0, weight=1, uniform="row")
 
         save_name_label = ctk.CTkLabel(
@@ -155,11 +174,16 @@ class MenuScreen():
 
         total_images_label.grid(row=0, column=2, padx=10, pady=4, sticky="w")
 
+        count_label = ctk.CTkLabel(
+            master=saved_annotations_row, text=sort_alg.comp_count, font=('Helvetica bold', 20))
+
+        count_label.grid(row=0, column=3, padx=10, pady=4, sticky="w")
+
         for child in saved_annotations_row.winfo_children():
             child.bind("<Button-1>", command=lambda event,
                        i=index: self.load_save(i))
 
-        self.add_hover(saved_annotations_row)
+        add_hover(saved_annotations_row)
 
     def new_annotation(self):
         CreationPopOut(self.creation_callback, self.center)
@@ -171,30 +195,3 @@ class MenuScreen():
         save_obj = pickle.load(file)
 
         self.ordering_callback(save_obj)
-
-    def add_hover(self, widget):
-
-        self.add_hover_to_children(widget, widget)
-
-    def add_hover_to_children(self, widget, child_widget):
-
-        child_widget.bind("<Enter>", lambda event,
-                          widget=widget, color=widget.cget("fg_color"): self.highlight(widget, color))
-        child_widget.bind("<Leave>", lambda event,
-                          widget=widget, color=widget.cget("fg_color"): self.remove_highlight(widget, color))
-
-        for child in child_widget.winfo_children():
-            self.add_hover_to_children(widget, child)
-
-    def highlight(self, widget, color):
-
-        gray_color = int(color[1][-2:]) + 10
-
-        if gray_color > 100:
-            gray_color = 100
-
-        widget.configure(fg_color='gray' + str((gray_color)))
-
-    def remove_highlight(self, widget, color):
-        # might have to change so that it is recursive like highlight...
-        widget.configure(fg_color=color)
