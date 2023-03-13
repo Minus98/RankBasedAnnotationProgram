@@ -79,7 +79,7 @@ class MenuScreen():
 
         self.text = ctk.CTkLabel(master=self.instructions_frame, text="Every annotation is saved immediately, and you can quit the program at any time and pick up where you left off. \n \n" +
                                  "2 images per comparison: \n \n" +
-                                 "5 buttons available, pick the option that best describes the relation of the image on the right to the image on the left, ranging from ''A lot younger'' to ''A lot older''. \n \n" +
+                                 "2 or more buttons available, pick the option that best describes the relation of the image on the right to the image on the left. \n \n" +
                                  "You can also use keys 1-5 on your keyboard. \n \n" +
                                  "3 or more per comparison: \n \n" +
                                  "Order the images youngest to oldest, left to right. \n \n" +
