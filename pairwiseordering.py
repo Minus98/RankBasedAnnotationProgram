@@ -26,6 +26,7 @@ class PairwiseOrderingScreen():
 
         self.save_obj = save_obj
         self.sort_alg = save_obj["sort_alg"]
+        self.df = pd.read_csv(self.save_obj["path_to_save"] + '.csv')
 
         self.images_frame = ctk.CTkFrame(master=self.root)
         self.buttons_frame = ctk.CTkFrame(master=self.root)
@@ -129,7 +130,7 @@ class PairwiseOrderingScreen():
         self.timer_after = self.root.after(1000, self.update_time)
 
         if not self.is_finished_check():
-            self.display_comparison(self.sort_alg.get_comparison("1"))
+            self.display_new_comparison()
 
     def init_image_frames(self):
 
@@ -157,11 +158,29 @@ class PairwiseOrderingScreen():
             displayed_image.bind(
                 "<MouseWheel>", command=lambda event, i=i: self.on_image_scroll(event, i))
 
-    def display_comparison(self, keys):
-        print(keys)
+    def display_new_comparison(self):
+        keys = self.sort_alg.get_comparison("1")
         self.images = [[img, self.file_2_CTkImage(img), 0]
                        for img in keys]
-        self.update_images()
+
+        df_res = self.check_df_for_comp(keys)
+        if df_res != 0:
+            self.submit_comparison(df_res, df_annotatation=True)
+        else:
+            self.update_images()
+
+    def check_df_for_comp(self, keys):
+
+        a_v_b = self.df.loc[self.df['result'] == str(keys)]
+        b_v_a = self.df.loc[self.df['result'] == str(keys[::-1])]
+
+        n = len(a_v_b) + len(b_v_a)
+        if n > 2:
+            if len(a_v_b) / n > .7:
+                return 1
+            elif len(b_v_a) / n > .7:
+                return -1
+        return 0
 
     def file_2_CTkImage(self, img_src):
         _, extension = os.path.splitext(img_src)
@@ -260,7 +279,7 @@ class PairwiseOrderingScreen():
         self.tab_items[index].invoke()
         self.reset_tab()
 
-    def submit_comparison(self, difflevel):
+    def submit_comparison(self, difflevel, df_annotatation=False):
         keys = [key for key, _, _ in self.images]
 
         if difflevel < 0:
@@ -274,14 +293,14 @@ class PairwiseOrderingScreen():
         pickle.dump(self.save_obj, f)
         f.close()
 
-        self.save_to_csv_file(keys, diff_lvls)
+        self.save_to_csv_file(keys, diff_lvls, df_annotatation)
 
         self.comp_count += 1
         self.comp_count_label.configure(
             text=f"Comparison count: {self.comp_count}")
 
         if not self.is_finished_check():
-            self.display_comparison(self.sort_alg.get_comparison("1"))
+            self.display_new_comparison()
 
     def is_finished_check(self):
         if self.sort_alg.is_finished():
@@ -304,12 +323,16 @@ class PairwiseOrderingScreen():
         self.root.after_cancel(self.timer_after)
         self.menu_callback()
 
-    def save_to_csv_file(self, keys, diff_lvls):
+    def save_to_csv_file(self, keys, diff_lvls, df_annotatation=False):
+
+        user = 'DF' if df_annotatation else self.user
         df = pd.DataFrame({'result': [keys],
                            'diff_levels': [diff_lvls],
                            'time': [time.time()-self.session_start_time],
                            'session': [self.session_id],
-                           'user': [self.user]})
+                           'user': [user]})
+
+        self.df = pd.concat([self.df, df], ignore_index=True)
 
         output_path = self.save_obj["path_to_save"] + ".csv"
         df.to_csv(output_path, mode='a',
