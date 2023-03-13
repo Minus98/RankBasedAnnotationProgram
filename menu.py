@@ -74,9 +74,17 @@ class MenuScreen():
 
         b = "•"
 
-        self.text = ctk.CTkLabel(master=self.instructions_frame, text="Welcome to the Rank-Based Annotation program \n   " +
-                                 b + " Order the images youngest to oldest, left to right \n     " +
-                                 b + " Specify the difference between two images using the radio buttons", font=('Helvetica bold', 20), wraplength=400)
+        self.text_header = ctk.CTkLabel(
+            master=self.instructions_frame, text="Welcome to the Rank-Based Annotation program", font=('Helvetica bold', 24), wraplength=400)
+
+        self.text = ctk.CTkLabel(master=self.instructions_frame, text="Every annotation is saved immediately, and you can quit the program at any time and pick up where you left off. \n \n" +
+                                 "2 images per comparison: \n \n" +
+                                 "5 buttons available, pick the option that best describes the relation of the image on the right to the image on the left, ranging from ''A lot younger'' to ''A lot older''. \n \n" +
+                                 "You can also use keys 1-5 on your keyboard. \n \n" +
+                                 "3 or more per comparison: \n \n" +
+                                 "Order the images youngest to oldest, left to right. \n \n" +
+                                 "You can use the arrow buttons, or drag and drop the images. \n \n" +
+                                 "Specify the difference between two images using the radio buttons.", font=('Helvetica bold', 18), wraplength=400, anchor="w", justify=ctk.LEFT)
 
     def display(self):
 
@@ -100,6 +108,7 @@ class MenuScreen():
 
         self.instructions_frame.grid_columnconfigure(0, weight=1)
         self.instructions_frame.grid_rowconfigure(0, weight=1)
+        self.instructions_frame.grid_rowconfigure(1, weight=5)
 
         self.new_button.grid(row=2, column=0, padx=(
             20, 10), pady=10)
@@ -123,7 +132,8 @@ class MenuScreen():
 
         self.display_saves()
 
-        self.text.grid(row=0, column=0, padx=10, pady=10, sticky="new")
+        self.text_header.grid(row=0, column=0, padx=10, pady=10, sticky="new")
+        self.text.grid(row=1, column=0, padx=20, pady=10, sticky="new")
 
     def display_saves(self):
 

@@ -38,15 +38,15 @@ class PairwiseOrderingScreen():
         self.question = ctk.CTkLabel(
             master=self.root, text="The person on the right is ...", font=('Helvetica bold', 20))
 
-        self.alot_less_button = ctk.CTkButton(master=self.buttons_frame, text="A lot younger", width=120,
+        self.alot_less_button = ctk.CTkButton(master=self.buttons_frame, text="A lot younger (1)", width=160,
                                               height=40, command=lambda: self.submit_comparison(-2), font=('Helvetica bold', 20))
-        self.less_button = ctk.CTkButton(master=self.buttons_frame, text="Younger", width=120,
+        self.less_button = ctk.CTkButton(master=self.buttons_frame, text="Younger (2)", width=160,
                                          height=40, command=lambda: self.submit_comparison(-1), font=('Helvetica bold', 20))
-        self.same_button = ctk.CTkButton(master=self.buttons_frame, text="Of similar age", width=120,
+        self.same_button = ctk.CTkButton(master=self.buttons_frame, text="Of similar age (3)", width=160,
                                          height=40, command=lambda: self.submit_comparison(0), font=('Helvetica bold', 20))
-        self.more_button = ctk.CTkButton(master=self.buttons_frame, text="Older", width=120,
+        self.more_button = ctk.CTkButton(master=self.buttons_frame, text="Older (4)", width=160,
                                          height=40, command=lambda: self.submit_comparison(1), font=('Helvetica bold', 20))
-        self.alot_more_button = ctk.CTkButton(master=self.buttons_frame, text="A lot older", width=120,
+        self.alot_more_button = ctk.CTkButton(master=self.buttons_frame, text="A lot older (5)", width=160,
                                               height=40, command=lambda: self.submit_comparison(2), font=('Helvetica bold', 20))
 
         self.tab_index = -1
@@ -56,6 +56,8 @@ class PairwiseOrderingScreen():
                               self.same_button, self.more_button, self.alot_more_button]
         else:
             self.tab_items = [self.less_button, self.more_button]
+            self.less_button.configure(text="Younger (1)")
+            self.more_button.configure(text="Older (2)")
 
         self.root.bind(
             "1", lambda event: self.on_shortcmd(0))
