@@ -53,6 +53,9 @@ class OrderingScreen():
             master=self.root, text="Back To Menu", width=200, height=40, command=self.back_to_menu, font=('Helvetica bold', 18))
 
         self.root.bind("<Control-z>", lambda event: self.undo_annotation())
+        self.root.bind("<Control-Z>", lambda event: self.undo_annotation())
+        self.root.bind("<Command-z>", lambda event: self.undo_annotation())
+        self.root.bind("<Command-Z>", lambda event: self.undo_annotation())
 
         self.motion_allowed = True
 

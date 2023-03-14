@@ -80,6 +80,9 @@ class PairwiseOrderingScreen():
             "<Tab>", lambda event: self.on_tab())
 
         self.root.bind("<Control-z>", lambda event: self.undo_annotation())
+        self.root.bind("<Control-Z>", lambda event: self.undo_annotation())
+        self.root.bind("<Command-z>", lambda event: self.undo_annotation())
+        self.root.bind("<Command-Z>", lambda event: self.undo_annotation())
 
         self.session_duration_label = ctk.CTkLabel(
             master=self.root, text="0:00", font=('Helvetica bold', 30))
