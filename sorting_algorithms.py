@@ -825,7 +825,7 @@ class TrueSkill (SortingAlgorithm):
                         to_update.append(([i, j], False))
                 j += 1
 
-        random.shuffle(to_update)
+        random.Random(6).shuffle(to_update)
 
         for ([i, j], is_draw) in to_update:
             if is_draw:
