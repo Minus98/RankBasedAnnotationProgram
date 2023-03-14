@@ -98,6 +98,7 @@ class PairwiseOrderingScreen():
     def display(self):
 
         self.session_start_time = time.time()
+        self.session_elapsed_time_prev = 0
 
         self.root.grid_rowconfigure(0, weight=1, uniform="ordering")
         self.root.grid_rowconfigure(1, weight=1, uniform="ordering")
@@ -313,6 +314,8 @@ class PairwiseOrderingScreen():
 
         self.save_algorithm()
 
+        self.session_elapsed_time_prev = time.time() - self.session_start_time
+
         if not self.is_finished_check():
             self.display_new_comparison()
 
@@ -353,7 +356,7 @@ class PairwiseOrderingScreen():
         user = 'DF' if df_annotatation else self.user
         df = pd.DataFrame({'result': [keys],
                            'diff_levels': [diff_lvls],
-                           'time': [time.time()-self.session_start_time],
+                           'time': [time.time()-self.session_start_time - self.session_elapsed_time_prev],
                            'session': [self.session_id],
                            'user': [user],
                            'undone': [False]})

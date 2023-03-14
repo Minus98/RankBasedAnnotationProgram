@@ -61,6 +61,7 @@ class OrderingScreen():
     def display(self):
 
         self.session_start_time = time.time()
+        self.session_elapsed_time_prev = 0
 
         self.root.grid_rowconfigure(0, weight=1, uniform="ordering")
         self.root.grid_rowconfigure(1, weight=1, uniform="ordering")
@@ -410,6 +411,8 @@ class OrderingScreen():
         self.comp_count_label.configure(
             text=f"Comparison count: {self.comp_count}")
 
+        self.session_elapsed_time_prev = time.time() - self.session_start_time
+
         if not self.is_finished_check():
             self.display_new_comparison()
 
@@ -451,7 +454,7 @@ class OrderingScreen():
     def save_to_csv_file(self, keys, diff_lvls):
         df = pd.DataFrame({'result': [keys],
                            'diff_levels': [diff_lvls],
-                           'time': [time.time()-self.session_start_time],
+                           'time': [time.time() - self.session_start_time - self.session_elapsed_time_prev],
                            'session': [self.session_id],
                            'user': [self.user],
                            'undone': [False]})
