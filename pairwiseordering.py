@@ -28,7 +28,6 @@ class PairwiseOrderingScreen():
         self.save_obj = save_obj
         self.sort_alg = save_obj["sort_alg"]
         self.prev_sort_alg = None
-        self.df = pd.read_csv(self.save_obj["path_to_save"] + '.csv')
 
         self.images_frame = ctk.CTkFrame(master=self.root)
         self.buttons_frame = ctk.CTkFrame(master=self.root)
@@ -172,23 +171,32 @@ class PairwiseOrderingScreen():
                        for img in keys]
 
         df_res = self.check_df_for_comp(keys)
-        if df_res != 0:
+        if df_res is not None:
             self.submit_comparison(df_res, df_annotatation=True)
         else:
             self.update_images()
 
     def check_df_for_comp(self, keys):
 
-        a_v_b = self.df.loc[self.df['result'] == str(keys)]
-        b_v_a = self.df.loc[self.df['result'] == str(keys[::-1])]
+        df_check = pd.read_csv(self.save_obj["path_to_save"] + '.csv')
+
+        a_v_b = df_check.loc[(df_check['result'] == str(keys))
+                             & (df_check['undone'] == False)]
+        b_v_a = df_check.loc[(df_check['result'] == str(keys[::-1]))
+                             & (df_check['undone'] == False)]
+
+        a_v_b_draw = a_v_b.loc[df_check['diff_levels'] == str([DiffLevel(0)])]
+        b_v_a_draw = b_v_a.loc[df_check['diff_levels'] == str([DiffLevel(0)])]
 
         n = len(a_v_b) + len(b_v_a)
         if n > 2:
-            if len(a_v_b) / n > .7:
+            if len(a_v_b_draw) + len(b_v_a_draw) / n > .7:
+                return 0
+            elif len(a_v_b) / n > .7:
                 return 1
             elif len(b_v_a) / n > .7:
                 return -1
-        return 0
+        return None
 
     def file_2_CTkImage(self, img_src):
         _, extension = os.path.splitext(img_src)
@@ -363,8 +371,6 @@ class PairwiseOrderingScreen():
                            'session': [self.session_id],
                            'user': [user],
                            'undone': [False]})
-
-        self.df = pd.concat([self.df, df], ignore_index=True)
 
         output_path = self.save_obj["path_to_save"] + ".csv"
         df.to_csv(output_path, mode='a',
