@@ -753,10 +753,15 @@ class MedianMergeSort(SortingAlgorithm):
 
 class TrueSkill (SortingAlgorithm):
 
-    def __init__(self, data, comparison_size=2, comparison_max=1000, sigma_fraction=0.8):
+    def __init__(self, data, comparison_size=2, comparison_max=None, sigma_fraction=0.5):
 
         self.n = len(data)
         self.data = list(data)
+
+        if comparison_max is None:
+            self.comparison_max = self.n * 6 + 50
+        else:
+            self.comparison_max = comparison_max
 
         self.ratings = {k: Rating() for k in data}
         self.start_mu = self.ratings[self.data[0]].mu
@@ -768,7 +773,6 @@ class TrueSkill (SortingAlgorithm):
         np.fill_diagonal(self.overlap_matrix, 0)
 
         self.comparison_size = comparison_size
-        self.comparison_max = comparison_max
         self.comp_count = 0
 
     def intervals_overlap(self, key1, key2):
@@ -841,7 +845,7 @@ class TrueSkill (SortingAlgorithm):
         self.comp_count += 1
 
     def get_result(self):
-        return [k for k, v in sorted(self.ratings.items(), key=lambda x:x[1])]
+        return [k for k, _ in sorted(self.ratings.items(), key=lambda x:x[1])]
 
     def is_finished(self):
         k = max(int(len(self.data) * 0.3), 1)
