@@ -362,7 +362,7 @@ class PairwiseOrderingScreen():
     def save_sorted_images(self):
         res = self.sort_alg.get_result()
         for i, src in enumerate(res):
-            path = str(Path(src).parent)
+            path = get_full_path(str(Path(src).parent))
             _, extension = os.path.splitext(src)
             new_name = str(i) + extension
             dst = path + '/sorted/' + new_name
