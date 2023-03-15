@@ -1,5 +1,6 @@
 import copy
 from pathlib import Path
+import random
 import customtkinter as ctk
 import numpy as np
 from helper_functions import DiffLevel
@@ -167,15 +168,20 @@ class PairwiseOrderingScreen():
                 "<MouseWheel>", command=lambda event, i=i: self.on_image_scroll(event, i))
 
     def display_new_comparison(self):
-        keys = self.sort_alg.get_comparison("1")
-        self.images = [[img, self.file_2_CTkImage(img), 0]
-                       for img in keys]
+        keys = self.sort_alg.get_comparison(self.user)
 
         df_res = self.check_df_for_comp(keys)
         if df_res is not None:
             self.submit_comparison(df_res, df_annotatation=True)
-        else:
+        elif keys:
+            self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]
             self.update_images()
+        else:
+            keys = random.sample(self.sort_alg.data, 2)
+            self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]
+            self.update_images()
+            IsFinishedPopOut(self.root, self.center,
+                             self.back_to_menu, 'no annotations')
 
     def check_df_for_comp(self, keys):
 
@@ -325,7 +331,8 @@ class PairwiseOrderingScreen():
 
         diff_lvls = [DiffLevel(abs(difflevel))]
 
-        self.sort_alg.inference("1", keys, diff_lvls)
+        user = 'DF' if df_annotatation else self.user
+        self.sort_alg.inference(user, keys, diff_lvls)
 
         self.save_to_csv_file(keys, diff_lvls, df_annotatation)
         self.comp_count += 1

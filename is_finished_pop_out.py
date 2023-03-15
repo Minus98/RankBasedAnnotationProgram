@@ -3,7 +3,7 @@ import customtkinter as ctk
 
 class IsFinishedPopOut():
 
-    def __init__(self, root, center, back_to_menu):
+    def __init__(self, root, center, back_to_menu, state='finished'):
 
         self.root = root
         self.center = center
@@ -21,8 +21,13 @@ class IsFinishedPopOut():
         pop_out.rowconfigure(index=0, weight=1)
         pop_out.rowconfigure(index=1, weight=1)
 
-        label = ctk.CTkLabel(text="Hello! \n You are now done annotating thank you very much. \n What do you want to do next?",
-                             master=pop_out, font=('Helvetica bold', 30))
+        if state == 'finished':
+            label = ctk.CTkLabel(text="Hello! \n You are now done annotating thank you very much. \n What do you want to do next?",
+                                 master=pop_out, font=('Helvetica bold', 30))
+        else:
+            label = ctk.CTkLabel(text="Hello! \n You have now done all your possible annotations! \n What do you want to do next?",
+                                 master=pop_out, font=('Helvetica bold', 30))
+
         label.grid(row=0, column=0, sticky='nsew', columnspan=2)
 
         menu_button = ctk.CTkButton(
