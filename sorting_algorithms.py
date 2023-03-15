@@ -1,4 +1,5 @@
 
+import math
 from trueskill import Rating, rate_1vs1
 import numpy as np
 import random
@@ -753,7 +754,7 @@ class MedianMergeSort(SortingAlgorithm):
 
 class TrueSkill (SortingAlgorithm):
 
-    def __init__(self, data, comparison_size=2, comparison_max=None, sigma_fraction=0.5):
+    def __init__(self, data, comparison_size=2, comparison_max=None, threshold=0.1, mod=10):
 
         self.n = len(data)
         self.data = list(data)
@@ -766,7 +767,11 @@ class TrueSkill (SortingAlgorithm):
         self.ratings = {k: Rating() for k in data}
         self.start_mu = self.ratings[self.data[0]].mu
         self.start_sigma = self.ratings[self.data[0]].sigma
-        self.sigma_fraction = sigma_fraction
+
+        self.prev_ratings = copy.deepcopy(self.ratings)
+
+        self.threshold = threshold
+        self.mod = mod
 
         self.overlap_matrix = np.full(
             (self.n, self.n), self.intervals_overlap(self.data[0], self.data[1]))
@@ -845,6 +850,9 @@ class TrueSkill (SortingAlgorithm):
 
     def inference(self, user_id, keys, diff_lvls):
 
+        if self.comp_count % self.mod == 0:
+            self.prev_ratings = copy.deepcopy(self.ratings)
+
         to_update = []
 
         for i in range(len(keys)):
@@ -886,14 +894,16 @@ class TrueSkill (SortingAlgorithm):
 
     def is_finished(self):
 
+        if self.comp_count % self.mod == 0 and self.comp_count >= self.mod:
+            rmse = math.sqrt(sum(
+                (self.prev_ratings[key].mu - self.ratings[key].mu) ** 2 for key in self.data) / self.n)
+            if rmse < self.threshold:
+                return True
+
         if self.comp_count == self.comparison_max or self.overlap_matrix.max() <= 0:
             return True
 
-        for row in self.overlap_matrix:
-            if max(row) > self.start_sigma * self.sigma_fraction:
-                return False
-
-        return True
+        return False
 
     def comparison_is_available(self, user_id):
-        return not self.is_finished()
+        return not self.is_finished() or not self.get_comparison(user_id)
