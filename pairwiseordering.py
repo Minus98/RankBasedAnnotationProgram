@@ -40,9 +40,9 @@ class PairwiseOrderingScreen():
             master=self.root, text="Rank-Based Annotation", font=('Helvetica bold', 40))
 
         self.question = ctk.CTkLabel(
-            master=self.root, text="The person on the right is ...", font=('Helvetica bold', 20))
+            master=self.root, text="The person on the right looks to be ...", font=('Helvetica bold', 20))
 
-        self.alot_less_button = ctk.CTkButton(master=self.buttons_frame, text="A lot younger (1)", width=160,
+        self.alot_less_button = ctk.CTkButton(master=self.buttons_frame, text="Much younger (1)", width=160,
                                               height=40, command=lambda: self.submit_comparison(-2), font=('Helvetica bold', 20))
         self.less_button = ctk.CTkButton(master=self.buttons_frame, text="Younger (2)", width=160,
                                          height=40, command=lambda: self.submit_comparison(-1), font=('Helvetica bold', 20))
@@ -50,7 +50,7 @@ class PairwiseOrderingScreen():
                                          height=40, command=lambda: self.submit_comparison(0), font=('Helvetica bold', 20))
         self.more_button = ctk.CTkButton(master=self.buttons_frame, text="Older (4)", width=160,
                                          height=40, command=lambda: self.submit_comparison(1), font=('Helvetica bold', 20))
-        self.alot_more_button = ctk.CTkButton(master=self.buttons_frame, text="A lot older (5)", width=160,
+        self.alot_more_button = ctk.CTkButton(master=self.buttons_frame, text="Much older (5)", width=160,
                                               height=40, command=lambda: self.submit_comparison(2), font=('Helvetica bold', 20))
 
         self.tab_index = -1
