@@ -1,5 +1,6 @@
 import copy
 from pathlib import Path
+import random
 import customtkinter as ctk
 import numpy as np
 from helper_functions import DiffLevel
@@ -167,14 +168,19 @@ class PairwiseOrderingScreen():
 
     def display_new_comparison(self):
         keys = self.sort_alg.get_comparison(self.user)
-        self.images = [[img, self.file_2_CTkImage(img), 0]
-                       for img in keys]
 
         df_res = self.check_df_for_comp(keys)
         if df_res is not None:
             self.submit_comparison(df_res, df_annotatation=True)
-        else:
+        elif keys:
+            self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]
             self.update_images()
+        else:
+            keys = random.sample(self.sort_alg.data, 2)
+            self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]
+            self.update_images()
+            IsFinishedPopOut(self.root, self.center,
+                             self.back_to_menu, 'no annotations')
 
     def check_df_for_comp(self, keys):
 
