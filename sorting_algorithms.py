@@ -775,6 +775,9 @@ class TrueSkill (SortingAlgorithm):
         self.comparison_size = comparison_size
         self.comp_count = 0
 
+        self.user_comparisons = {}
+        self.user_comparisons['DF'] = []
+
     def intervals_overlap(self, key1, key2):
         r1_low = self.ratings[key1].mu - 2 * self.ratings[key1].sigma
         r1_high = self.ratings[key1].mu + 2 * self.ratings[key1].sigma
@@ -797,19 +800,48 @@ class TrueSkill (SortingAlgorithm):
         max_sum = 0
         comparisons = []
 
+        if user_id not in self.user_comparisons:
+            self.user_comparisons[user_id] = []
+
         for i in range(self.n):
-            indices = np.argpartition(
-                self.overlap_matrix[i], -self.comparison_size+1)[-self.comparison_size+1:]
-            indices = [
-                ind for ind in indices if self.overlap_matrix[i][ind] > 0]
+            if self.comparison_size == 2:
+                indices = np.argsort(self.overlap_matrix[i])
+                indices = [
+                    ind for ind in indices if self.overlap_matrix[i][ind] > 0]
 
-            sum_i = sum(self.overlap_matrix[i][indices])
-            if max_sum < sum_i:
-                max_sum = sum_i
-                comparisons = [i] + list(indices)
+                while indices and not self.check_w_user_and_df(user_id, [list(self.ratings.keys())[c] for c in [i] + [indices[-1]]]):
+                    indices.pop()
 
-        keys_list = list(self.ratings.keys())
-        return [keys_list[c] for c in comparisons]
+                if not indices:
+                    continue
+
+                sum_i = self.overlap_matrix[i][indices[-1]]
+                if max_sum < sum_i:
+                    max_sum = sum_i
+                    comparisons = [i] + [indices[-1]]
+
+            else:
+                indices = np.argpartition(
+                    self.overlap_matrix[i], -self.comparison_size+1)[-self.comparison_size+1:]
+                indices = [
+                    ind for ind in indices if self.overlap_matrix[i][ind] > 0]
+
+                sum_i = sum(self.overlap_matrix[i][indices])
+                if max_sum < sum_i:
+                    max_sum = sum_i
+                    comparisons = [i] + list(indices)
+
+        keys_output = [list(self.ratings.keys())[c] for c in comparisons]
+
+        return keys_output
+
+    def check_w_user_and_df(self, user_id, keys):
+
+        user_check = not any(set(user_comps) == set(keys)
+                             for user_comps in self.user_comparisons[user_id])
+        df_check = any(set(user_comps) == set(keys)
+                       for user_comps in self.user_comparisons['DF'])
+        return user_check or df_check
 
     def inference(self, user_id, keys, diff_lvls):
 
@@ -844,18 +876,21 @@ class TrueSkill (SortingAlgorithm):
 
         self.comp_count += 1
 
+        if user_id not in self.user_comparisons:
+            self.user_comparisons[user_id] = [keys]
+        else:
+            self.user_comparisons[user_id].append(keys)
+
     def get_result(self):
         return [k for k, _ in sorted(self.ratings.items(), key=lambda x:x[1])]
 
     def is_finished(self):
-        k = max(int(len(self.data) * 0.3), 1)
 
         if self.comp_count == self.comparison_max or self.overlap_matrix.max() <= 0:
             return True
 
         for row in self.overlap_matrix:
-            min_overlaps = sorted(row, reverse=True)[:k]
-            if min(min_overlaps) > self.start_sigma * self.sigma_fraction:
+            if max(row) > self.start_sigma * self.sigma_fraction:
                 return False
 
         return True

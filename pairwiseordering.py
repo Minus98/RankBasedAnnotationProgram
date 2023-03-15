@@ -166,7 +166,7 @@ class PairwiseOrderingScreen():
                 "<MouseWheel>", command=lambda event, i=i: self.on_image_scroll(event, i))
 
     def display_new_comparison(self):
-        keys = self.sort_alg.get_comparison("1")
+        keys = self.sort_alg.get_comparison(self.user)
         self.images = [[img, self.file_2_CTkImage(img), 0]
                        for img in keys]
 
@@ -320,7 +320,8 @@ class PairwiseOrderingScreen():
 
         diff_lvls = [DiffLevel(abs(difflevel))]
 
-        self.sort_alg.inference("1", keys, diff_lvls)
+        user = 'DF' if df_annotatation else self.user
+        self.sort_alg.inference(user, keys, diff_lvls)
 
         self.save_to_csv_file(keys, diff_lvls, df_annotatation)
         self.comp_count += 1
