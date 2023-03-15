@@ -14,6 +14,7 @@ from uuid import uuid4
 import shutil
 import nibabel as nib
 import sorting_algorithms as sa
+from utils import *
 
 
 class PairwiseOrderingScreen():
@@ -178,7 +179,8 @@ class PairwiseOrderingScreen():
 
     def check_df_for_comp(self, keys):
 
-        df_check = pd.read_csv(self.save_obj["path_to_save"] + '.csv')
+        df_check = pd.read_csv(get_full_path(
+            self.save_obj["path_to_save"] + '.csv'))
 
         a_v_b = df_check.loc[(df_check['result'] == str(keys))
                              & (df_check['undone'] == False)]
@@ -203,6 +205,9 @@ class PairwiseOrderingScreen():
         return None
 
     def file_2_CTkImage(self, img_src):
+
+        img_src = get_full_path(img_src)
+
         _, extension = os.path.splitext(img_src)
 
         if extension == '.nii':
@@ -335,7 +340,8 @@ class PairwiseOrderingScreen():
             self.display_new_comparison()
 
     def save_algorithm(self):
-        f = open(self.save_obj["path_to_save"] + ".pickle", "wb")
+        f = open(get_full_path(
+            self.save_obj["path_to_save"] + ".pickle"), "wb")
         pickle.dump(self.save_obj, f)
         f.close()
 
@@ -361,10 +367,12 @@ class PairwiseOrderingScreen():
         self.menu_callback()
 
     def undo_csv_file(self):
-        copy_df = pd.read_csv(self.save_obj["path_to_save"] + '.csv')
+
+        path = get_full_path(
+            self.save_obj["path_to_save"] + '.csv')
+        copy_df = pd.read_csv(path)
         copy_df.iloc[-1, copy_df.columns.get_loc('undone')] = True
-        output_path = self.save_obj["path_to_save"] + ".csv"
-        copy_df.to_csv(output_path, index=False)
+        copy_df.to_csv(path, index=False)
 
     def save_to_csv_file(self, keys, diff_lvls, df_annotatation=False):
 
@@ -376,6 +384,6 @@ class PairwiseOrderingScreen():
                            'user': [user],
                            'undone': [False]})
 
-        output_path = self.save_obj["path_to_save"] + ".csv"
+        output_path = get_full_path(self.save_obj["path_to_save"] + ".csv")
         df.to_csv(output_path, mode='a',
                   header=not os.path.exists(output_path))
