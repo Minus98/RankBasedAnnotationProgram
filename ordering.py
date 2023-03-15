@@ -462,7 +462,7 @@ class OrderingScreen():
     def save_to_csv_file(self, keys, diff_lvls):
         df = pd.DataFrame({'result': [keys],
                            'diff_levels': [diff_lvls],
-                           'time': [time.time() - self.session_start_time - self.session_elapsed_time_prev],
+                           'time': [time.time() - self.session_start_time],
                            'session': [self.session_id],
                            'user': [self.user],
                            'undone': [False]})

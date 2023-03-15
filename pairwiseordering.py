@@ -386,7 +386,7 @@ class PairwiseOrderingScreen():
         user = 'DF' if df_annotatation else self.user
         df = pd.DataFrame({'result': [keys],
                            'diff_levels': [diff_lvls],
-                           'time': [time.time()-self.session_start_time - self.session_elapsed_time_prev],
+                           'time': [time.time()-self.session_start_time],
                            'session': [self.session_id],
                            'user': [user],
                            'undone': [False]})
