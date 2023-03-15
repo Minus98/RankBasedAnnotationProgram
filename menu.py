@@ -70,13 +70,16 @@ class MenuScreen():
             master=self.instructions_frame, text="Welcome to the Rank-Based Annotation program", font=('Helvetica bold', 24), wraplength=400)
 
         self.text = ctk.CTkLabel(master=self.instructions_frame, text="Every annotation is saved immediately, and you can quit the program at any time and pick up where you left off. \n \n" +
-                                 "2 images per comparison: \n \n" +
-                                 "2 or more buttons available, pick the option that best describes the relation of the image on the right to the image on the left. \n \n" +
-                                 "You can also use keys 1-5 on your keyboard. \n \n" +
-                                 "3 or more per comparison: \n \n" +
-                                 "Order the images youngest to oldest, left to right. \n \n" +
-                                 "You can use the arrow buttons, or drag and drop the images. \n \n" +
-                                 "Specify the difference between two images using the radio buttons.", font=('Helvetica bold', 18), wraplength=400, anchor="w", justify=ctk.LEFT)
+                                 "Make sure you have read and understood the instructions before you begin. \n \n" +
+                                 "Reach out to us if you have any questions, or if you were to encounter a bug.", font=('Helvetica bold', 18), wraplength=400, anchor="w", justify=ctk.LEFT)
+        # self.text = ctk.CTkLabel(master=self.instructions_frame, text="Every annotation is saved immediately, and you can quit the program at any time and pick up where you left off. \n \n" +
+        #                         "2 images per comparison: \n \n" +
+        #                         "2 or more buttons available, pick the option that best describes the relation of the image on the right to the image on the left. \n \n" +
+        #                         "You can also use keys 1-5 on your keyboard. \n \n" +
+        #                         "3 or more per comparison: \n \n" +
+        #                         "Order the images youngest to oldest, left to right. \n \n" +
+        #                         "You can use the arrow buttons, or drag and drop the images. \n \n" +
+        #                         "Specify the difference between two images using the radio buttons.", font=('Helvetica bold', 18), wraplength=400, anchor="w", justify=ctk.LEFT)
 
         self.text.bind(
             '<Configure>', lambda event: self.update_wraplength(self.text))
