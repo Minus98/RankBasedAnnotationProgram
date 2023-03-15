@@ -134,6 +134,7 @@ class CreationPopOut():
             application_path = os.path.dirname(__file__)
 
         path = application_path + "/Saves"
+
         if not os.path.exists(path):
             os.makedirs(path)
 
@@ -146,8 +147,10 @@ class CreationPopOut():
         df.to_csv(output_path, mode='a',
                   header=not os.path.exists(output_path))
 
+        rel_path_to_save = "Saves/" + file_name
+
         save_obj = {"sort_alg": sort_alg, "name": final_name,
-                    "image_directory": directory, "path_to_save": path_to_save}
+                    "image_directory": directory, "path_to_save": rel_path_to_save}
 
         f = open(path + "/" + file_name + ".pickle", "wb")
         pickle.dump(save_obj, f)
