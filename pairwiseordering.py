@@ -185,16 +185,20 @@ class PairwiseOrderingScreen():
         b_v_a = df_check.loc[(df_check['result'] == str(keys[::-1]))
                              & (df_check['undone'] == False)]
 
-        a_v_b_draw = a_v_b.loc[df_check['diff_levels'] == str([DiffLevel(0)])]
-        b_v_a_draw = b_v_a.loc[df_check['diff_levels'] == str([DiffLevel(0)])]
+        a_v_b_draw = a_v_b.loc[a_v_b['diff_levels'] == str([DiffLevel(0)])]
+        a_v_b_win = a_v_b.loc[a_v_b['diff_levels'] != str([DiffLevel(0)])]
+
+        b_v_a_draw = b_v_a.loc[b_v_a['diff_levels'] == str([DiffLevel(0)])]
+        b_v_a_win = b_v_a.loc[b_v_a['diff_levels'] != str([DiffLevel(0)])]
 
         n = len(a_v_b) + len(b_v_a)
+
         if n > 2:
             if len(a_v_b_draw) + len(b_v_a_draw) / n > .7:
                 return 0
-            elif len(a_v_b) / n > .7:
+            elif len(a_v_b_win) / n > .7:
                 return 1
-            elif len(b_v_a) / n > .7:
+            elif len(b_v_a_win) / n > .7:
                 return -1
         return None
 
