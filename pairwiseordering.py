@@ -90,7 +90,8 @@ class PairwiseOrderingScreen():
 
         csv_df = pd.read_csv(get_full_path(
             self.save_obj["path_to_save"] + '.csv'))
-        current_user_count = len(csv_df.loc[csv_df['user'] == self.user])
+        current_user_count = len(
+            csv_df.loc[(csv_df['user'] == self.user) & (csv_df['undone'] == False)])
 
         self.comp_count = 0 + current_user_count
         self.comp_count_label = ctk.CTkLabel(
