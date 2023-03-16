@@ -88,9 +88,13 @@ class PairwiseOrderingScreen():
         self.session_duration_label = ctk.CTkLabel(
             master=self.root, text="0:00", font=('Helvetica bold', 30))
 
-        self.comp_count = 0
+        csv_df = pd.read_csv(get_full_path(
+            self.save_obj["path_to_save"] + '.csv'))
+        current_user_count = len(csv_df.loc[csv_df['user'] == self.user])
+
+        self.comp_count = 0 + current_user_count
         self.comp_count_label = ctk.CTkLabel(
-            master=self.root, text=f"Comparison count: {self.comp_count}", font=('Helvetica bold', 30))
+            master=self.root, text=f"Your comparison count: {self.comp_count}", font=('Helvetica bold', 30))
 
         self.back_button = ctk.CTkButton(
             master=self.root, text="Back To Menu", width=200, height=40, command=self.back_to_menu, font=('Helvetica bold', 18))
