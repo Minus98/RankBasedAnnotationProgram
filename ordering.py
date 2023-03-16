@@ -451,7 +451,7 @@ class OrderingScreen():
             new_name = str(i) + extension
             dst = path + '/sorted/' + new_name
             os.makedirs(os.path.dirname(dst), exist_ok=True)
-            shutil.copy(src, dst)
+            shutil.copy(get_full_path(src), dst)
 
     def back_to_menu(self):
         self.root.after_cancel(self.timer_after)
