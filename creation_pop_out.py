@@ -113,8 +113,10 @@ class CreationPopOut():
         directory = os.path.relpath(image_directory.get())
         final_name = name.get()
 
+        approved_sets = ['.jpg', '.png', '.nii']
+
         img_paths = [os.path.join(directory, f) for f in os.listdir(
-            directory) if os.path.isfile(os.path.join(directory, f))]
+            directory) if os.path.isfile(os.path.join(directory, f)) and os.path.splitext(os.path.join(directory, f))[1] in approved_sets]
 
         random.shuffle(img_paths)
 
