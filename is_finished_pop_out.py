@@ -23,10 +23,10 @@ class IsFinishedPopOut():
 
         if state == 'finished':
             label = ctk.CTkLabel(text="Hello! \n You are now done annotating thank you very much. \n What do you want to do next?",
-                                 master=pop_out, font=('Helvetica bold', 30))
+                                 master=pop_out, font=('Helvetica bold', 26))
         else:
             label = ctk.CTkLabel(text="Hello! \n You have now done all your possible annotations! \n What do you want to do next?",
-                                 master=pop_out, font=('Helvetica bold', 30))
+                                 master=pop_out, font=('Helvetica bold', 26))
 
         label.grid(row=0, column=0, sticky='nsew', columnspan=2)
 
