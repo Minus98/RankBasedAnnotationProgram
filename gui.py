@@ -2,8 +2,9 @@ import customtkinter as ctk
 from pairwiseordering import PairwiseOrderingScreen
 from sorting_algorithms import *
 from menu import MenuScreen
-from ordering import OrderingScreen
+from multiordering import MultiOrderingScreen
 from user_selection_popout import UserSelectionPopOut
+
 
 class TestGui():
 
@@ -26,7 +27,7 @@ class TestGui():
         self.display_menu()
 
         UserSelectionPopOut(self.root, self.center, self.select_user)
-        
+
         self.root.mainloop()
 
     def clear_screen(self):
@@ -59,7 +60,7 @@ class TestGui():
                 ordering_screen = PairwiseOrderingScreen(
                     self.root, save_obj, self.display_menu, self.center, self.selected_user)
             else:
-                ordering_screen = OrderingScreen(
+                ordering_screen = MultiOrderingScreen(
                     self.root, save_obj, self.display_menu, self.center, self.selected_user)
 
             ordering_screen.display()
