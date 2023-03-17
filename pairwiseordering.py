@@ -1,43 +1,23 @@
 import copy
-from pathlib import Path
 import random
 import customtkinter as ctk
-import numpy as np
 from helper_functions import DiffLevel
 import time
-import pickle
 import os
-from PIL import Image
-from tkinter import PhotoImage
 import pandas as pd
 from is_finished_pop_out import IsFinishedPopOut
-from uuid import uuid4
-import shutil
-import nibabel as nib
 import sorting_algorithms as sa
 from utils import *
+from ordering import OrderingScreen
 
 
-class PairwiseOrderingScreen():
+class PairwiseOrderingScreen(OrderingScreen):
 
     def __init__(self, root, save_obj, menu_callback, center, user):
 
-        self.root = root
-        self.menu_callback = menu_callback
-        self.center = center
-        self.user = user
+        super().__init__(root, save_obj, menu_callback, center, user)
 
-        self.save_obj = save_obj
-        self.sort_alg = save_obj["sort_alg"]
-        self.prev_sort_alg = None
-
-        self.images_frame = ctk.CTkFrame(master=self.root)
         self.buttons_frame = ctk.CTkFrame(master=self.root)
-
-        self.init_image_frames()
-
-        self.header = ctk.CTkLabel(
-            master=self.root, text="Rank-Based Annotation", font=('Helvetica bold', 40))
 
         self.question = ctk.CTkLabel(
             master=self.root, text="The person on the right looks to be ...", font=('Helvetica bold', 20))
@@ -79,25 +59,6 @@ class PairwiseOrderingScreen():
 
         self.root.bind(
             "<Tab>", lambda event: self.on_tab())
-
-        self.root.bind("<Control-z>", lambda event: self.undo_annotation())
-        self.root.bind("<Control-Z>", lambda event: self.undo_annotation())
-        self.root.bind("<Command-z>", lambda event: self.undo_annotation())
-        self.root.bind("<Command-Z>", lambda event: self.undo_annotation())
-
-        self.session_duration_label = ctk.CTkLabel(
-            master=self.root, text="0:00", font=('Helvetica bold', 30))
-
-        self.comp_count = 0
-        self.comp_count_label = ctk.CTkLabel(
-            master=self.root, text=f"Comparison count: {self.comp_count}", font=('Helvetica bold', 30))
-
-        self.back_button = ctk.CTkButton(
-            master=self.root, text="Back To Menu", width=200, height=40, command=self.back_to_menu, font=('Helvetica bold', 18))
-
-        self.motion_allowed = True
-
-        self.session_id = uuid4()
 
     def display(self):
 
@@ -168,6 +129,9 @@ class PairwiseOrderingScreen():
                 "<MouseWheel>", command=lambda event, i=i: self.on_image_scroll(event, i))
 
     def display_new_comparison(self):
+
+        self.reset_tab()
+
         keys = self.sort_alg.get_comparison(self.user)
 
         df_res = self.check_df_for_comp(keys)
@@ -210,64 +174,6 @@ class PairwiseOrderingScreen():
                 return -1
         return None
 
-    def file_2_CTkImage(self, img_src):
-
-        img_src = get_full_path(img_src)
-
-        _, extension = os.path.splitext(img_src)
-
-        if extension == '.nii':
-            ctk_imgs = []
-            nib_imgs = nib.load(img_src).get_fdata() + 1024
-            nib_imgs = (nib_imgs / np.max(nib_imgs)) * 255
-
-            for i in range(0, nib_imgs.shape[2], 10):
-                img = nib_imgs[:, :, i]
-                sz = img.shape
-                ctk_imgs.append(ctk.CTkImage(Image.fromarray(img), size=sz))
-
-            return ctk_imgs
-        else:
-            return [ctk.CTkImage(Image.open(img_src), size=(250, 250))]
-
-    def update_images(self):
-
-        for i, img_info in enumerate(self.images):
-            self.displayed_images[i].configure(
-                image=img_info[1][img_info[2]])
-
-    def update_time(self):
-
-        current_time = time.time()
-
-        elapsed = int(current_time - self.session_start_time)
-        (min, sec) = divmod(elapsed, 60)
-        (hours, min) = divmod(min, 60)
-
-        if hours:
-            text_input = '{:02}:{:02}:{:02}'.format(
-                int(hours), int(min), int(sec))
-        elif min < 10:
-            text_input = '{:01}:{:02}'.format(int(min), int(sec))
-        else:
-            text_input = '{:02}:{:02}'.format(int(min), int(sec))
-
-        self.session_duration_label.configure(text=text_input)
-
-        self.timer_after = self.root.after(1000, self.update_time)
-
-    # perhaps use "<Button-4> defines the scroll up event on mice with wheel support and and <Button-5> the scroll down." for linux
-    def on_image_scroll(self, event, idx):
-
-        if event.delta < 0:
-            self.images[idx][2] = max(self.images[idx][2]-1, 0)
-
-        elif event.delta > 0:
-            self.images[idx][2] = min(
-                self.images[idx][2]+1, len(self.images[idx][1])-1)
-
-        self.update_images()
-
     def on_tab(self):
 
         if self.tab_index >= 0:
@@ -304,22 +210,6 @@ class PairwiseOrderingScreen():
     def on_shortcmd(self, index):
         self.tab_items[index].invoke()
 
-    def undo_annotation(self):
-        if self.prev_sort_alg is not None:
-            self.reset_tab()
-
-            self.sort_alg = self.prev_sort_alg
-            self.save_obj['sort_alg'] = self.prev_sort_alg
-            self.prev_sort_alg = None
-
-            self.undo_csv_file()
-            self.save_algorithm()
-            self.display_new_comparison()
-
-            self.comp_count -= 1
-            self.comp_count_label.configure(
-                text=f"Comparison count: {self.comp_count}")
-
     def submit_comparison(self, difflevel, df_annotatation=False):
         self.reset_tab()
         self.prev_sort_alg = copy.deepcopy(self.sort_alg)
@@ -345,41 +235,6 @@ class PairwiseOrderingScreen():
 
         if not self.is_finished_check():
             self.display_new_comparison()
-
-    def save_algorithm(self):
-        f = open(get_full_path(
-            self.save_obj["path_to_save"] + ".pickle"), "wb")
-        pickle.dump(self.save_obj, f)
-        f.close()
-
-    def is_finished_check(self):
-        if self.sort_alg.is_finished():
-            self.save_sorted_images()
-            IsFinishedPopOut(self.root, self.center, self.back_to_menu)
-            return True
-        return False
-
-    def save_sorted_images(self):
-        res = self.sort_alg.get_result()
-        for i, src in enumerate(res):
-            path = get_full_path(str(Path(src).parent))
-            _, extension = os.path.splitext(src)
-            new_name = str(i) + extension
-            dst = path + '/sorted/' + new_name
-            os.makedirs(os.path.dirname(dst), exist_ok=True)
-            shutil.copy(src, dst)
-
-    def back_to_menu(self):
-        self.root.after_cancel(self.timer_after)
-        self.menu_callback()
-
-    def undo_csv_file(self):
-
-        path = get_full_path(
-            self.save_obj["path_to_save"] + '.csv')
-        copy_df = pd.read_csv(path)
-        copy_df.iloc[-1, copy_df.columns.get_loc('undone')] = True
-        copy_df.to_csv(path, index=False)
 
     def save_to_csv_file(self, keys, diff_lvls, df_annotatation=False):
 
