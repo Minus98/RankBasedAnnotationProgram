@@ -10,6 +10,7 @@ from is_finished_pop_out import IsFinishedPopOut
 import shutil
 import pandas as pd
 from pathlib import Path
+import sorting_algorithms as sa
 
 
 class OrderingScreen():
@@ -135,7 +136,14 @@ class OrderingScreen():
         f.close()
 
     def is_finished_check(self):
-        if self.sort_alg.is_finished():
+        # Quick fix
+        # if self.sort_alg.is_finished():
+        if type(self.sort_alg) == sa.TrueSkill:
+            if self.sort_alg.comparison_max <= self.sort_alg.comp_count:
+                self.save_sorted_images()
+                IsFinishedPopOut(self.root, self.center, self.back_to_menu)
+                return True
+        elif self.sort_alg.is_finished():
             self.save_sorted_images()
             IsFinishedPopOut(self.root, self.center, self.back_to_menu)
             return True
