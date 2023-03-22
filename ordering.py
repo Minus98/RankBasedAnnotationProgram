@@ -104,7 +104,6 @@ class OrderingScreen():
 
     # perhaps use "<Button-4> defines the scroll up event on mice with wheel support and and <Button-5> the scroll down." for linux
     def on_image_scroll(self, event, idx):
-
         if event.delta < 0:
             self.images[idx][2] = max(self.images[idx][2]-1, 0)
 
@@ -112,6 +111,17 @@ class OrderingScreen():
             self.images[idx][2] = min(
                 self.images[idx][2]+1, len(self.images[idx][1])-1)
 
+        self.update_images()
+
+    def on_image_scroll_up(self,idx):
+        self.images[idx][2] = min(
+                self.images[idx][2]+1, len(self.images[idx][1])-1)
+        
+        self.update_images()
+
+    def on_image_scroll_down(self,idx):
+        self.images[idx][2] = max(self.images[idx][2]-1, 0)
+        
         self.update_images()
 
     def undo_annotation(self):

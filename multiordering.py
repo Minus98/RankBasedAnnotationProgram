@@ -101,6 +101,16 @@ class MultiOrderingScreen(OrderingScreen):
             displayed_image.bind(
                 "<MouseWheel>", command=lambda event, i=i: self.on_image_scroll(event, i))
 
+            image_frame.bind("<Button-4>", command=lambda event,
+                    i=i: self.on_image_scroll_up(i))
+            displayed_image.bind("<Button-4>", command=lambda event,
+                             i=i: self.on_image_scroll_up(i))
+
+            image_frame.bind("<Button-5>", command=lambda event,
+                             i=i: self.on_image_scroll_down(i))
+            displayed_image.bind("<Button-5>", command=lambda event,
+                             i=i: self.on_image_scroll_down(i))
+
             self.root.bind(
                 "<Return>", lambda event: self.submit_comparison())
 
