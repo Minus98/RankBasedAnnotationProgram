@@ -64,13 +64,13 @@ class OrderingScreen():
 
         if extension == '.nii':
             ctk_imgs = []
-            nib_imgs = nib.load(img_src).get_fdata() + 1024
+            nib_imgs = nib.load(img_src).get_fdata() + 1250
             nib_imgs = (nib_imgs / np.max(nib_imgs)) * 255
 
-            for i in range(0, nib_imgs.shape[2], 10):
+            for i in range(nib_imgs.shape[2]):
                 img = nib_imgs[:, :, i]
-                sz = img.shape
-                ctk_imgs.append(ctk.CTkImage(Image.fromarray(img), size=sz))
+                print(img.shape)
+                ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)), size=(250, 370)))
 
             return ctk_imgs
         else:

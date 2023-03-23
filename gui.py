@@ -15,8 +15,8 @@ class TestGui():
 
         self.root = ctk.CTk()
 
-        w = 1300
-        h = 720
+        w = 1500
+        h = 830
         x, y = self.center(w, h)
 
         self.root.geometry('%dx%d+%d+%d' % (w, h, x, y))
