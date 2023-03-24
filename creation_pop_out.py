@@ -3,7 +3,6 @@ import pickle
 import time
 from pathlib import Path
 import random
-
 import pandas as pd
 from sorting_algorithms import *
 import os
@@ -113,7 +112,8 @@ class CreationPopOut():
         directory = os.path.relpath(image_directory.get())
         final_name = name.get()
 
-        img_paths = list(str(p) for p in Path(directory).glob("**/*") if p.suffix in {'.jpg', '.png', '.nii'} and 'sorted' not in str(p).lower())
+        img_paths = list(str(p) for p in Path(directory).glob(
+            "**/*") if p.suffix in {'.jpg', '.png', '.nii'} and 'sorted' not in str(p).lower())
 
         random.shuffle(img_paths)
 
@@ -142,9 +142,7 @@ class CreationPopOut():
         df = pd.DataFrame(
             columns=['result', 'diff_levels', 'time', 'session', 'user', 'undone'])
 
-        output_path = path_to_save + ".csv"
-        df.to_csv(output_path, mode='a',
-                  header=not os.path.exists(output_path))
+        df.to_csv(path_to_save + ".csv", index=False)
 
         rel_path_to_save = "Saves/" + file_name
 

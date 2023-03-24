@@ -1,3 +1,4 @@
+import copy
 import customtkinter as ctk
 from uuid import uuid4
 from utils import *
@@ -68,8 +69,8 @@ class OrderingScreen():
 
             for i in range(nib_imgs.shape[2]):
                 img = nib_imgs[:, :, i]
-                
-                ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)), size=img.shape))
+                ctk_imgs.append(ctk.CTkImage(
+                    Image.fromarray(np.rot90(img)), size=img.shape))
 
             return ctk_imgs
         else:
@@ -112,15 +113,15 @@ class OrderingScreen():
 
         self.update_images()
 
-    def on_image_scroll_up(self,idx):
+    def on_image_scroll_up(self, idx):
         self.images[idx][2] = min(
-                self.images[idx][2]+1, len(self.images[idx][1])-1)
-        
+            self.images[idx][2]+1, len(self.images[idx][1])-1)
+
         self.update_images()
 
-    def on_image_scroll_down(self,idx):
+    def on_image_scroll_down(self, idx):
         self.images[idx][2] = max(self.images[idx][2]-1, 0)
-        
+
         self.update_images()
 
     def undo_annotation(self):
@@ -145,8 +146,6 @@ class OrderingScreen():
         f.close()
 
     def is_finished_check(self):
-        # Quick fix
-        # if self.sort_alg.is_finished():
         if type(self.sort_alg) == sa.TrueSkill:
             if self.sort_alg.comparison_max <= self.sort_alg.comp_count:
                 self.save_sorted_images()
@@ -167,6 +166,40 @@ class OrderingScreen():
             dst = path + '/sorted/' + new_name
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             shutil.copy(get_full_path(src), dst)
+
+    def submit_comparison(self, keys, diff_lvls, df_annotatation=False):
+
+        self.prev_sort_alg = copy.deepcopy(self.sort_alg)
+
+        user = 'DF' if df_annotatation else self.user
+        self.sort_alg.inference(user, keys, diff_lvls)
+
+        self.save_to_csv_file(keys, diff_lvls, df_annotatation)
+
+        self.comp_count += 1
+        self.comp_count_label.configure(
+            text=f"Comparison count: {self.comp_count}")
+
+        self.save_algorithm()
+
+        self.session_elapsed_time_prev = time.time() - self.session_start_time
+
+        if not self.is_finished_check():
+            self.display_new_comparison()
+
+    def save_to_csv_file(self, keys, diff_lvls, df_annotatation=False):
+
+        user = 'DF' if df_annotatation else self.user
+        df = pd.DataFrame({'result': [keys],
+                           'diff_levels': [diff_lvls],
+                           'time': [time.time()-self.session_start_time],
+                           'session': [self.session_id],
+                           'user': [user],
+                           'undone': [False]})
+
+        output_path = get_full_path(self.save_obj["path_to_save"] + ".csv")
+        df.to_csv(output_path, mode='a',
+                  header=not os.path.exists(output_path), index=False)
 
     def undo_csv_file(self):
         path = get_full_path(self.save_obj["path_to_save"] + '.csv')

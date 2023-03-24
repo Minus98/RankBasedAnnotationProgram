@@ -1,9 +1,6 @@
-import copy
 import customtkinter as ctk
 from helper_functions import DiffLevel
 import time
-import os
-import pandas as pd
 from utils import *
 from ordering import OrderingScreen
 
@@ -18,7 +15,7 @@ class MultiOrderingScreen(OrderingScreen):
                                 for _ in range(self.comparison_size - 1)]
 
         self.submit_button = ctk.CTkButton(
-            master=self.root, text="Submit Ordering", width=280, height=60, command=self.submit_comparison, font=('Helvetica bold', 20))
+            master=self.root, text="Submit Ordering", width=280, height=60, command=self.submit, font=('Helvetica bold', 20))
 
         self.motion_allowed = True
 
@@ -102,17 +99,17 @@ class MultiOrderingScreen(OrderingScreen):
                 "<MouseWheel>", command=lambda event, i=i: self.on_image_scroll(event, i))
 
             image_frame.bind("<Button-4>", command=lambda event,
-                    i=i: self.on_image_scroll_up(i))
-            displayed_image.bind("<Button-4>", command=lambda event,
                              i=i: self.on_image_scroll_up(i))
+            displayed_image.bind("<Button-4>", command=lambda event,
+                                 i=i: self.on_image_scroll_up(i))
 
             image_frame.bind("<Button-5>", command=lambda event,
                              i=i: self.on_image_scroll_down(i))
             displayed_image.bind("<Button-5>", command=lambda event,
-                             i=i: self.on_image_scroll_down(i))
+                                 i=i: self.on_image_scroll_down(i))
 
             self.root.bind(
-                "<Return>", lambda event: self.submit_comparison())
+                "<Return>", lambda event: self.submit())
 
     def init_diff_level_buttons(self):
 
@@ -193,9 +190,13 @@ class MultiOrderingScreen(OrderingScreen):
         return image_frame
 
     def display_new_comparison(self):
-        keys = self.sort_alg.get_comparison("1")
+        self.reset_diff_levels()
+
+        keys = self.sort_alg.get_comparison(self.user)
+
         self.images = [[img, self.file_2_CTkImage(img), 0]
                        for img in keys]
+
         self.update_images()
 
     def move_left(self, index):
@@ -220,8 +221,8 @@ class MultiOrderingScreen(OrderingScreen):
 
     def on_drag_start(self, event, frame, idx):
 
-        self.black_frame = ctk.CTkFrame(master=self.images_frame, width=frame.winfo_width(
-        ), height=frame.winfo_height())
+        self.black_frame = ctk.CTkFrame(
+            master=self.images_frame, width=frame.winfo_width(), height=frame.winfo_height())
 
         self.black_frame.place(x=frame.winfo_x(), y=frame.winfo_y())
 
@@ -272,7 +273,6 @@ class MultiOrderingScreen(OrderingScreen):
 
         width = widget.winfo_width()
 
-        # Change 20 to get padx of images_frame
         relative_x = frame.winfo_x() + event.x - widget.winfo_x() + 20
 
         from_right_bonus = 0
@@ -296,40 +296,11 @@ class MultiOrderingScreen(OrderingScreen):
         self.update_images()
         self.reset_diff_levels()
 
-    def submit_comparison(self):
-
-        self.prev_sort_alg = copy.deepcopy(self.sort_alg)
+    def submit(self):
 
         keys = [key for key, _, _ in self.images]
 
         diff_lvls = [DiffLevel(int_diff_lvl.get())
                      for int_diff_lvl in self.int_diff_levels]
 
-        self.sort_alg.inference("1", keys, diff_lvls)
-
-        self.save_algorithm()
-
-        self.save_to_csv_file(keys, diff_lvls)
-
-        self.comp_count += 1
-        self.comp_count_label.configure(
-            text=f"Comparison count: {self.comp_count}")
-
-        self.session_elapsed_time_prev = time.time() - self.session_start_time
-
-        if not self.is_finished_check():
-            self.display_new_comparison()
-
-        self.reset_diff_levels()
-
-    def save_to_csv_file(self, keys, diff_lvls):
-        df = pd.DataFrame({'result': [keys],
-                           'diff_levels': [diff_lvls],
-                           'time': [time.time() - self.session_start_time],
-                           'session': [self.session_id],
-                           'user': [self.user],
-                           'undone': [False]})
-
-        output_path = get_full_path(self.save_obj["path_to_save"] + ".csv")
-        df.to_csv(output_path, mode='a',
-                  header=not os.path.exists(output_path))
+        self.submit_comparison(keys, diff_lvls)
