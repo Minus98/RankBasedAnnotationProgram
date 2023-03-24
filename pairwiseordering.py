@@ -1,9 +1,7 @@
-import copy
 import random
 import customtkinter as ctk
 from helper_functions import DiffLevel
 import time
-import os
 import pandas as pd
 from is_finished_pop_out import IsFinishedPopOut
 import sorting_algorithms as sa
@@ -23,15 +21,15 @@ class PairwiseOrderingScreen(OrderingScreen):
             master=self.root, text="The bronchial wall thickening on the right looks to be ...", font=('Helvetica bold', 20))
 
         self.alot_less_button = ctk.CTkButton(master=self.buttons_frame, text="Much Less Severe (1)", width=160,
-                                              height=40, command=lambda: self.submit_comparison(-2), font=('Helvetica bold', 20))
+                                              height=40, command=lambda: self.submit(-2), font=('Helvetica bold', 20))
         self.less_button = ctk.CTkButton(master=self.buttons_frame, text="Less Severe (2)", width=160,
-                                         height=40, command=lambda: self.submit_comparison(-1), font=('Helvetica bold', 20))
+                                         height=40, command=lambda: self.submit(-1), font=('Helvetica bold', 20))
         self.same_button = ctk.CTkButton(master=self.buttons_frame, text="Equally Severe (3)", width=160,
-                                         height=40, command=lambda: self.submit_comparison(0), font=('Helvetica bold', 20))
+                                         height=40, command=lambda: self.submit(0), font=('Helvetica bold', 20))
         self.more_button = ctk.CTkButton(master=self.buttons_frame, text="More Severe (4)", width=160,
-                                         height=40, command=lambda: self.submit_comparison(1), font=('Helvetica bold', 20))
+                                         height=40, command=lambda: self.submit(1), font=('Helvetica bold', 20))
         self.alot_more_button = ctk.CTkButton(master=self.buttons_frame, text="Much More Severe (5)", width=160,
-                                              height=40, command=lambda: self.submit_comparison(2), font=('Helvetica bold', 20))
+                                              height=40, command=lambda: self.submit(2), font=('Helvetica bold', 20))
 
         self.tab_index = -1
 
@@ -132,12 +130,12 @@ class PairwiseOrderingScreen(OrderingScreen):
             image_frame.bind("<Button-4>", command=lambda event,
                              i=i: self.on_image_scroll_up(i))
             displayed_image.bind("<Button-4>", command=lambda event,
-                             i=i: self.on_image_scroll_up(i))
+                                 i=i: self.on_image_scroll_up(i))
 
             image_frame.bind("<Button-5>", command=lambda event,
                              i=i: self.on_image_scroll_down(i))
             displayed_image.bind("<Button-5>", command=lambda event,
-                             i=i: self.on_image_scroll_down(i))
+                                 i=i: self.on_image_scroll_down(i))
 
     def display_new_comparison(self):
 
@@ -147,7 +145,7 @@ class PairwiseOrderingScreen(OrderingScreen):
 
         df_res = self.check_df_for_comp(keys)
         if df_res is not None:
-            self.submit_comparison(df_res, df_annotatation=True)
+            self.submit(df_res, df_annotatation=True)
         elif keys:
             self.progress_bar.grid(row=3, column=0, columnspan=2, sticky="N", pady=5)
             self.images = [[img, self.load_initial_image(img), 0] for img in keys] #load initial images
@@ -227,9 +225,7 @@ class PairwiseOrderingScreen(OrderingScreen):
     def on_shortcmd(self, index):
         self.tab_items[index].invoke()
 
-    def submit_comparison(self, difflevel, df_annotatation=False):
-        self.reset_tab()
-        self.prev_sort_alg = copy.deepcopy(self.sort_alg)
+    def submit(self, difflevel, df_annotatation=False):
 
         keys = [key for key, _, _ in self.images]
 
@@ -238,31 +234,4 @@ class PairwiseOrderingScreen(OrderingScreen):
 
         diff_lvls = [DiffLevel(abs(difflevel))]
 
-        user = 'DF' if df_annotatation else self.user
-        self.sort_alg.inference(user, keys, diff_lvls)
-
-        self.save_to_csv_file(keys, diff_lvls, df_annotatation)
-        self.comp_count += 1
-        self.comp_count_label.configure(
-            text=f"Comparison count: {self.comp_count}")
-
-        self.save_algorithm()
-
-        self.session_elapsed_time_prev = time.time() - self.session_start_time
-
-        if not self.is_finished_check():
-            self.display_new_comparison()
-
-    def save_to_csv_file(self, keys, diff_lvls, df_annotatation=False):
-
-        user = 'DF' if df_annotatation else self.user
-        df = pd.DataFrame({'result': [keys],
-                           'diff_levels': [diff_lvls],
-                           'time': [time.time()-self.session_start_time],
-                           'session': [self.session_id],
-                           'user': [user],
-                           'undone': [False]})
-
-        output_path = get_full_path(self.save_obj["path_to_save"] + ".csv")
-        df.to_csv(output_path, mode='a',
-                  header=not os.path.exists(output_path))
+        self.submit_comparison(keys, diff_lvls, df_annotatation)
