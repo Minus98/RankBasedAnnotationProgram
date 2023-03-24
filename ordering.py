@@ -69,7 +69,7 @@ class OrderingScreen():
             for i in range(nib_imgs.shape[2]):
                 img = nib_imgs[:, :, i]
                 
-                ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)), size=(250, 370)))
+                ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)), size=img.shape))
 
             return ctk_imgs
         else:
