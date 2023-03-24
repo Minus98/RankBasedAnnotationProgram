@@ -20,7 +20,7 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.buttons_frame = ctk.CTkFrame(master=self.root)
 
         self.question = ctk.CTkLabel(
-            master=self.root, text="The person on the right looks to be ...", font=('Helvetica bold', 20))
+            master=self.root, text="The bronchial wall thickening on the right looks to be ...", font=('Helvetica bold', 20))
 
         self.alot_less_button = ctk.CTkButton(master=self.buttons_frame, text="Much Less Severe (1)", width=160,
                                               height=40, command=lambda: self.submit_comparison(-2), font=('Helvetica bold', 20))
@@ -65,11 +65,12 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.session_start_time = time.time()
         self.session_elapsed_time_prev = 0
 
-        self.root.grid_rowconfigure(0, weight=1, uniform="ordering")
-        self.root.grid_rowconfigure(1, weight=1, uniform="ordering")
-        self.root.grid_rowconfigure(2, weight=6, uniform="ordering")
+        self.root.grid_rowconfigure(0, weight=2, uniform="ordering")
+        self.root.grid_rowconfigure(1, weight=2, uniform="ordering")
+        self.root.grid_rowconfigure(2, weight=12, uniform="ordering")
         self.root.grid_rowconfigure(3, weight=1, uniform="ordering")
         self.root.grid_rowconfigure(4, weight=2, uniform="ordering")
+        self.root.grid_rowconfigure(5, weight=4, uniform="ordering")
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
 
@@ -77,9 +78,9 @@ class PairwiseOrderingScreen(OrderingScreen):
 
         self.header.grid(row=0, column=0, columnspan=2, sticky="S")
 
-        self.question.grid(row=3, column=0, columnspan=2, pady=10, sticky="S")
+        self.question.grid(row=4, column=0, columnspan=2, pady=10, sticky="S")
 
-        self.buttons_frame.grid(row=4, column=0, columnspan=2, sticky="N")
+        self.buttons_frame.grid(row=5, column=0, columnspan=2, sticky="N")
 
         if not type(self.sort_alg) == sa.MergeSort:
             self.alot_less_button.grid(row=0, column=0, padx=(10, 5), pady=10)
@@ -148,8 +149,14 @@ class PairwiseOrderingScreen(OrderingScreen):
         if df_res is not None:
             self.submit_comparison(df_res, df_annotatation=True)
         elif keys:
+            self.progress_bar.grid(row=3, column=0, columnspan=2, sticky="N", pady=5)
+            self.images = [[img, self.load_initial_image(img), 0] for img in keys] #load initial images
+            self.update_images()
+            self.root.update()
             self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]
             self.update_images()
+            self.progress_bar.grid_forget()
+            self.progress_bar_progress = 0
         else:
             keys = random.sample(self.sort_alg.data, 2)
             self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]

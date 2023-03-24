@@ -56,6 +56,10 @@ class OrderingScreen():
         self.root.bind("<Command-z>", lambda event: self.undo_annotation())
         self.root.bind("<Command-Z>", lambda event: self.undo_annotation())
 
+        self.progress_bar = ctk.CTkProgressBar(self.root, width=400)
+        self.progress_bar_progress = 0
+        self.progress_bar.set(0)
+
     def file_2_CTkImage(self, img_src):
 
         img_src = get_full_path(img_src)
@@ -68,12 +72,32 @@ class OrderingScreen():
 
             for i in range(nib_imgs.shape[2]):
                 img = nib_imgs[:, :, i]
-                
                 ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)), size=img.shape))
+
+                self.progress_bar_progress += 1
+                self.progress_bar.set(self.progress_bar_progress / (self.comparison_size * nib_imgs.shape[2]))
+                self.root.update()
 
             return ctk_imgs
         else:
             return [ctk.CTkImage(Image.open(img_src), size=(250, 250))]
+
+    def load_initial_image(self, img_src):
+        img_src = get_full_path(img_src)
+        _, extension = os.path.splitext(img_src)
+
+        if extension == '.nii':
+            ctk_imgs = []
+            nib_imgs = nib.load(img_src).get_fdata()
+
+            img = nib_imgs[:, :, 0]
+            
+            ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)), size=img.shape))
+
+            return ctk_imgs
+        else:
+            return [ctk.CTkImage(Image.open(img_src), size=(250, 250))]
+
 
     def update_images(self):
 

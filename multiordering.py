@@ -21,23 +21,25 @@ class MultiOrderingScreen(OrderingScreen):
             master=self.root, text="Submit Ordering", width=280, height=60, command=self.submit_comparison, font=('Helvetica bold', 20))
 
         self.motion_allowed = True
+        self.ordering_allowed = False
 
     def display(self):
 
         self.session_start_time = time.time()
         self.session_elapsed_time_prev = 0
 
-        self.root.grid_rowconfigure(0, weight=1, uniform="ordering")
-        self.root.grid_rowconfigure(1, weight=1, uniform="ordering")
-        self.root.grid_rowconfigure(2, weight=6, uniform="ordering")
+        self.root.grid_rowconfigure(0, weight=2, uniform="ordering")
+        self.root.grid_rowconfigure(1, weight=2, uniform="ordering")
+        self.root.grid_rowconfigure(2, weight=12, uniform="ordering")
         self.root.grid_rowconfigure(3, weight=1, uniform="ordering")
+        self.root.grid_rowconfigure(4, weight=2, uniform="ordering")
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
 
         self.images_frame.grid(row=2, column=0, columnspan=2, padx=0, pady=0)
 
         self.header.grid(row=0, column=0, columnspan=2, sticky="S")
-        self.submit_button.grid(row=3, column=0, columnspan=2, sticky="N")
+        self.submit_button.grid(row=4, column=0, columnspan=2, sticky="N")
         self.session_duration_label.grid(
             row=1, column=1, sticky='SE', padx=100)
         self.comp_count_label.grid(row=1, column=0, sticky='SW', padx=100)
@@ -46,9 +48,10 @@ class MultiOrderingScreen(OrderingScreen):
 
         self.timer_after = self.root.after(1000, self.update_time)
 
+        self.buttons_initialized = False
+
         if not self.is_finished_check():
             self.display_new_comparison()
-            self.init_diff_level_buttons()
 
     def init_image_frames(self):
 
@@ -194,11 +197,32 @@ class MultiOrderingScreen(OrderingScreen):
 
     def display_new_comparison(self):
         keys = self.sort_alg.get_comparison("1")
+        self.ordering_allowed = False
+
+        self.progress_bar.grid(row = 3, column=0, columnspan = 2, sticky="N", pady=5)
+
+        self.images = [[img, self.load_initial_image(img), 0]
+                       for img in keys]
+        self.update_images()
+
+        if not self.buttons_initialized: 
+            self.init_diff_level_buttons()
+            self.buttons_initialized = True
+        self.root.update()
+
         self.images = [[img, self.file_2_CTkImage(img), 0]
                        for img in keys]
         self.update_images()
 
+        self.progress_bar.grid_forget()
+        self.progress_bar_progress = 0
+        self.ordering_allowed = True
+
+
     def move_left(self, index):
+
+        if not self.ordering_allowed:
+            return
 
         if index > 0:
             self.images[index], self.images[index -
@@ -210,6 +234,9 @@ class MultiOrderingScreen(OrderingScreen):
 
     def move_right(self, index):
 
+        if not self.ordering_allowed:
+            return
+
         if index < len(self.images) - 1:
             self.images[index], self.images[index +
                                             1] = self.images[index + 1], self.images[index]
@@ -219,6 +246,9 @@ class MultiOrderingScreen(OrderingScreen):
         self.reset_diff_levels()
 
     def on_drag_start(self, event, frame, idx):
+
+        if not self.ordering_allowed:
+            return
 
         self.black_frame = ctk.CTkFrame(master=self.images_frame, width=frame.winfo_width(
         ), height=frame.winfo_height())
@@ -241,7 +271,7 @@ class MultiOrderingScreen(OrderingScreen):
 
     def on_drag_motion(self, event, frame, idx):
 
-        if not self.motion_allowed:
+        if not self.motion_allowed or not self.ordering_allowed:
             return
         else:
             self.motion_allowed = False
@@ -258,6 +288,9 @@ class MultiOrderingScreen(OrderingScreen):
         self.root.update_idletasks()
 
     def on_drag_stop(self, event, frame, idx):
+
+        if not self.ordering_allowed:
+            return
 
         self.drag_frame.place_forget()
         self.black_frame.place_forget()
@@ -317,10 +350,11 @@ class MultiOrderingScreen(OrderingScreen):
 
         self.session_elapsed_time_prev = time.time() - self.session_start_time
 
+        self.reset_diff_levels()
+
         if not self.is_finished_check():
             self.display_new_comparison()
 
-        self.reset_diff_levels()
 
     def save_to_csv_file(self, keys, diff_lvls):
         df = pd.DataFrame({'result': [keys],
