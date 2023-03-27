@@ -18,7 +18,6 @@ class MultiOrderingScreen(OrderingScreen):
             master=self.root, text="Submit Ordering", width=280, height=60, command=self.submit, font=('Helvetica bold', 20))
 
         self.motion_allowed = True
-        self.ordering_allowed = False
 
     def display(self):
 
@@ -49,6 +48,8 @@ class MultiOrderingScreen(OrderingScreen):
 
         if not self.is_finished_check():
             self.display_new_comparison()
+        
+        self.is_loading = True
 
     def init_image_frames(self):
 
@@ -196,7 +197,6 @@ class MultiOrderingScreen(OrderingScreen):
         self.reset_diff_levels()
 
         keys = self.sort_alg.get_comparison(self.user)
-        self.ordering_allowed = False
 
         self.progress_bar.grid(row = 3, column=0, columnspan = 2, sticky="N", pady=5)
 
@@ -216,12 +216,10 @@ class MultiOrderingScreen(OrderingScreen):
 
         self.progress_bar.grid_forget()
         self.progress_bar_progress = 0
-        self.ordering_allowed = True
-
 
     def move_left(self, index):
 
-        if not self.ordering_allowed:
+        if self.is_loading:
             return
 
         if index > 0:
@@ -234,7 +232,7 @@ class MultiOrderingScreen(OrderingScreen):
 
     def move_right(self, index):
 
-        if not self.ordering_allowed:
+        if self.is_loading:
             return
 
         if index < len(self.images) - 1:
@@ -247,7 +245,7 @@ class MultiOrderingScreen(OrderingScreen):
 
     def on_drag_start(self, event, frame, idx):
 
-        if not self.ordering_allowed:
+        if self.is_loading:
             return
 
         self.black_frame = ctk.CTkFrame(master=self.images_frame, width=frame.winfo_width(
@@ -271,7 +269,7 @@ class MultiOrderingScreen(OrderingScreen):
 
     def on_drag_motion(self, event, frame, idx):
 
-        if not self.motion_allowed or not self.ordering_allowed:
+        if not self.motion_allowed or self.is_loading:
             return
         else:
             self.motion_allowed = False
@@ -289,7 +287,7 @@ class MultiOrderingScreen(OrderingScreen):
 
     def on_drag_stop(self, event, frame, idx):
 
-        if not self.ordering_allowed:
+        if self.is_loading:
             return
 
         self.drag_frame.place_forget()

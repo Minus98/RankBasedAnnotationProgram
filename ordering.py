@@ -61,6 +61,8 @@ class OrderingScreen():
         self.progress_bar_progress = 0
         self.progress_bar.set(0)
 
+        self.is_loading = False
+
     def file_2_CTkImage(self, img_src):
 
         img_src = get_full_path(img_src)
@@ -194,6 +196,8 @@ class OrderingScreen():
 
     def submit_comparison(self, keys, diff_lvls, df_annotatation=False):
 
+        self.is_loading = True
+
         self.prev_sort_alg = copy.deepcopy(self.sort_alg)
 
         user = 'DF' if df_annotatation else self.user
@@ -211,6 +215,8 @@ class OrderingScreen():
 
         if not self.is_finished_check():
             self.display_new_comparison()
+
+        self.is_loading = False
 
     def save_to_csv_file(self, keys, diff_lvls, df_annotatation=False):
 

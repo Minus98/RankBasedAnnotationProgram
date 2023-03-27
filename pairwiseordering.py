@@ -227,6 +227,9 @@ class PairwiseOrderingScreen(OrderingScreen):
 
     def submit(self, difflevel, df_annotatation=False):
 
+        if self.is_loading:
+            return
+
         keys = [key for key, _, _ in self.images]
 
         if difflevel < 0:
