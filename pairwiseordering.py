@@ -63,9 +63,9 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.session_start_time = time.time()
         self.session_elapsed_time_prev = 0
 
-        self.root.grid_rowconfigure(0, weight=2, uniform="ordering")
-        self.root.grid_rowconfigure(1, weight=2, uniform="ordering")
-        self.root.grid_rowconfigure(2, weight=12, uniform="ordering")
+        self.root.grid_rowconfigure(0, weight=4, uniform="ordering")
+        self.root.grid_rowconfigure(1, weight=4, uniform="ordering")
+        self.root.grid_rowconfigure(2, weight=26, uniform="ordering")
         self.root.grid_rowconfigure(3, weight=1, uniform="ordering")
         self.root.grid_rowconfigure(4, weight=2, uniform="ordering")
         self.root.grid_rowconfigure(5, weight=4, uniform="ordering")

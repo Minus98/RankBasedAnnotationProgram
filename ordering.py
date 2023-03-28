@@ -76,8 +76,7 @@ class OrderingScreen():
             for i in range(nib_imgs.shape[2]):
                 img = nib_imgs[:, :, i]
                 ctk_imgs.append(ctk.CTkImage(
-                    Image.fromarray(np.rot90(img)), size=img.shape))
-
+                    Image.fromarray(np.rot90(img)).resize((img.shape[0] * 2, img.shape[1] * 2), resample= 2), size=(img.shape[0] * 2, img.shape[1] * 2)))
                 self.progress_bar_progress += 1
                 self.progress_bar.set(self.progress_bar_progress / (self.comparison_size * nib_imgs.shape[2]))
                 self.root.update()
@@ -96,7 +95,7 @@ class OrderingScreen():
 
             img = nib_imgs[:, :, 0]
             
-            ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)), size=img.shape))
+            ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)).resize((img.shape[0] * 2, img.shape[1] * 2), resample= 2), size=(img.shape[0] * 2, img.shape[1] * 2)))
 
             return ctk_imgs
         else:
