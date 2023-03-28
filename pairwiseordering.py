@@ -18,7 +18,7 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.buttons_frame = ctk.CTkFrame(master=self.root)
 
         self.question = ctk.CTkLabel(
-            master=self.root, text="The bronchial wall thickening on the right looks to be ...", font=('Helvetica bold', 20))
+            master=self.root, text="Compared to image A, the bronchial wall thickening in image B appears to be ... ", font=('Helvetica bold', 20))
 
         self.alot_less_button = ctk.CTkButton(master=self.buttons_frame, text="Much Less Severe (1)", width=160,
                                               height=40, command=lambda: self.submit(-2), font=('Helvetica bold', 20))
@@ -103,6 +103,8 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.displayed_images = []
         self.image_frames = []
 
+        img_info = {"A":'sw', "B":'se'}
+
         for i in range(2):
 
             image_frame = ctk.CTkFrame(master=self.images_frame)
@@ -113,11 +115,18 @@ class PairwiseOrderingScreen(OrderingScreen):
 
             displayed_image = ctk.CTkLabel(
                 master=image_frame, text="")
+            
+            img_name = list(img_info.keys())[i]
 
+            img_label = ctk.CTkLabel(
+                master=displayed_image, text=img_name, font=('Helvetica bold', 20), width=30, height=30, bg_color = image_frame.cget('fg_color'))
+            
             self.displayed_images.append(displayed_image)
 
             displayed_image.grid(row=0, column=0, columnspan=2,
                                  sticky="ew", padx=10, pady=10)
+            
+            img_label.place(relx=abs(i - 0.01),rely=0.99,anchor=img_info[img_name])
 
             image_frame.bind("<MouseWheel>", command=lambda event,
                              i=i: self.on_image_scroll(event, i))
