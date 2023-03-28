@@ -1,3 +1,4 @@
+import sys
 import customtkinter as ctk
 from pairwiseordering import PairwiseOrderingScreen
 from sorting_algorithms import *
@@ -22,7 +23,8 @@ class AnnotationGui():
         self.root.geometry('%dx%d+%d+%d' % (w, h, x, y))
         self.root.title("Rank-Based Annotation")
 
-        self.root.attributes('-zoomed', True)
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.root.attributes('-zoomed', True)
 
     def run(self):
 
