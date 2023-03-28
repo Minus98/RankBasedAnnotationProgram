@@ -59,6 +59,7 @@ class UserSelectionPopOut():
         self.new_button.grid(column=1, row=2, sticky="nw")
 
         self.pop_out.grab_set()
+        self.pop_out.attributes("-topmost", True)
 
     def display_users(self):
 

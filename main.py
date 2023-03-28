@@ -1,4 +1,4 @@
-from gui import TestGui
+from gui import AnnotationGui
 
-gui = TestGui()
+gui = AnnotationGui()
 gui.run()

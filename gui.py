@@ -6,7 +6,7 @@ from multiordering import MultiOrderingScreen
 from user_selection_popout import UserSelectionPopOut
 
 
-class TestGui():
+class AnnotationGui():
 
     def __init__(self):
 
@@ -21,6 +21,8 @@ class TestGui():
 
         self.root.geometry('%dx%d+%d+%d' % (w, h, x, y))
         self.root.title("Rank-Based Annotation")
+
+        self.root.attributes('-zoomed', True)
 
     def run(self):
 
