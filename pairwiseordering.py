@@ -63,22 +63,19 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.session_start_time = time.time()
         self.session_elapsed_time_prev = 0
 
-        self.root.grid_rowconfigure(0, weight=4, uniform="ordering")
-        self.root.grid_rowconfigure(1, weight=4, uniform="ordering")
-        self.root.grid_rowconfigure(2, weight=26, uniform="ordering")
-        self.root.grid_rowconfigure(3, weight=1, uniform="ordering")
-        self.root.grid_rowconfigure(4, weight=2, uniform="ordering")
-        self.root.grid_rowconfigure(5, weight=4, uniform="ordering")
+        self.root.grid_rowconfigure(0, weight=3, uniform="ordering")
+        self.root.grid_rowconfigure(1, weight=26, uniform="ordering")
+        self.root.grid_rowconfigure(2, weight=1, uniform="ordering")
+        self.root.grid_rowconfigure(3, weight=2, uniform="ordering")
+        self.root.grid_rowconfigure(4, weight=4, uniform="ordering")
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
 
-        self.images_frame.grid(row=2, column=0, columnspan=2, padx=0, pady=0)
+        self.images_frame.grid(row=1, column=0, columnspan=2, padx=0, pady=0)
 
-        self.header.grid(row=0, column=0, columnspan=2, sticky="S")
+        self.question.grid(row=3, column=0, columnspan=2, pady=10, sticky="S")
 
-        self.question.grid(row=4, column=0, columnspan=2, pady=10, sticky="S")
-
-        self.buttons_frame.grid(row=5, column=0, columnspan=2, sticky="N")
+        self.buttons_frame.grid(row=4, column=0, columnspan=2, sticky="N")
 
         if not type(self.sort_alg) == sa.MergeSort:
             self.alot_less_button.grid(row=0, column=0, padx=(10, 5), pady=10)
@@ -90,9 +87,9 @@ class PairwiseOrderingScreen(OrderingScreen):
             self.less_button.grid(row=0, column=0, padx=(10, 5), pady=10)
             self.more_button.grid(row=0, column=1, padx=(5, 10), pady=10)
 
-        self.session_duration_label.grid(
-            row=1, column=1, sticky='SE', padx=100)
-        self.comp_count_label.grid(row=1, column=0, sticky='SW', padx=100)
+        self.session_duration_label.place(relx = 0.98, y=20, anchor = "ne")
+
+        self.comp_count_label.grid(row=0, column=0, columnspan=2, sticky="S")
 
         self.back_button.place(x=20, y=20)
 
@@ -147,7 +144,7 @@ class PairwiseOrderingScreen(OrderingScreen):
         if df_res is not None:
             self.submit(df_res, df_annotatation=True)
         elif keys:
-            self.progress_bar.grid(row=3, column=0, columnspan=2, sticky="N", pady=5)
+            self.progress_bar.grid(row=2, column=0, columnspan=2, sticky="N", pady=5)
             self.images = [[img, self.load_initial_image(img), 0] for img in keys] #load initial images
             self.update_images()
             self.root.update()

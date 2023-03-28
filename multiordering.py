@@ -25,20 +25,19 @@ class MultiOrderingScreen(OrderingScreen):
         self.session_elapsed_time_prev = 0
 
         self.root.grid_rowconfigure(0, weight=2, uniform="ordering")
-        self.root.grid_rowconfigure(1, weight=2, uniform="ordering")
-        self.root.grid_rowconfigure(2, weight=12, uniform="ordering")
-        self.root.grid_rowconfigure(3, weight=1, uniform="ordering")
-        self.root.grid_rowconfigure(4, weight=2, uniform="ordering")
+        self.root.grid_rowconfigure(1, weight=16, uniform="ordering")
+        self.root.grid_rowconfigure(2, weight=1, uniform="ordering")
+        self.root.grid_rowconfigure(3, weight=2, uniform="ordering")
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
 
-        self.images_frame.grid(row=2, column=0, columnspan=2, padx=0, pady=0)
+        self.images_frame.grid(row=1, column=0, columnspan=2, padx=0, pady=0)
 
-        self.header.grid(row=0, column=0, columnspan=2, sticky="S")
-        self.submit_button.grid(row=4, column=0, columnspan=2, sticky="N")
-        self.session_duration_label.grid(
-            row=1, column=1, sticky='SE', padx=100)
-        self.comp_count_label.grid(row=1, column=0, sticky='SW', padx=100)
+        self.submit_button.grid(row=3, column=0, columnspan=2, sticky="N")
+
+
+        self.session_duration_label.place(relx = 0.98, y=20, anchor = "ne")
+        self.comp_count_label.grid(row=0, column=0, columnspan=2, sticky="S")
 
         self.back_button.place(x=20, y=20)
 
@@ -46,10 +45,12 @@ class MultiOrderingScreen(OrderingScreen):
 
         self.buttons_initialized = False
 
+        self.is_loading = True
+
         if not self.is_finished_check():
             self.display_new_comparison()
         
-        self.is_loading = True
+        self.is_loading = False
 
     def init_image_frames(self):
 
@@ -198,7 +199,7 @@ class MultiOrderingScreen(OrderingScreen):
 
         keys = self.sort_alg.get_comparison(self.user)
 
-        self.progress_bar.grid(row = 3, column=0, columnspan = 2, sticky="N", pady=5)
+        self.progress_bar.grid(row = 2, column=0, columnspan = 2, sticky="N", pady=5)
 
         self.images = [[img, self.load_initial_image(img), 0]
                        for img in keys]

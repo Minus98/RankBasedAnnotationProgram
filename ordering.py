@@ -75,8 +75,10 @@ class OrderingScreen():
 
             for i in range(nib_imgs.shape[2]):
                 img = nib_imgs[:, :, i]
+                resize_factor = (self.root.winfo_screenheight()/2) / img.shape[1]
+                new_shape = (int(img.shape[0] * resize_factor), int(img.shape[1] * resize_factor)) 
                 ctk_imgs.append(ctk.CTkImage(
-                    Image.fromarray(np.rot90(img)).resize((img.shape[0] * 2, img.shape[1] * 2), resample= 2), size=(img.shape[0] * 2, img.shape[1] * 2)))
+                    Image.fromarray(np.rot90(img)).resize(new_shape, resample= 2), size=(new_shape)))
                 self.progress_bar_progress += 1
                 self.progress_bar.set(self.progress_bar_progress / (self.comparison_size * nib_imgs.shape[2]))
                 self.root.update()
@@ -94,8 +96,9 @@ class OrderingScreen():
             nib_imgs = nib.load(img_src).get_fdata()
 
             img = nib_imgs[:, :, 0]
-            
-            ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)).resize((img.shape[0] * 2, img.shape[1] * 2), resample= 2), size=(img.shape[0] * 2, img.shape[1] * 2)))
+            resize_factor = (self.root.winfo_screenheight()/2) / img.shape[1]
+            new_shape = (int(img.shape[0] * resize_factor), int(img.shape[1] * resize_factor)) 
+            ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)).resize(new_shape, resample= 2), size=(new_shape)))
 
             return ctk_imgs
         else:
