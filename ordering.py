@@ -57,6 +57,9 @@ class OrderingScreen():
         self.root.bind("<Command-z>", lambda event: self.undo_annotation())
         self.root.bind("<Command-Z>", lambda event: self.undo_annotation())
 
+        self.root.bind("<Up>", lambda event: self.on_image_key_scroll('up'))
+        self.root.bind("<Down>", lambda event: self.on_image_key_scroll('down'))
+
         self.progress_bar = ctk.CTkProgressBar(self.root, width=400)
         self.progress_bar_progress = 0
         self.progress_bar.set(0)
@@ -152,6 +155,16 @@ class OrderingScreen():
         self.images[idx][2] = max(self.images[idx][2]-1, 0)
 
         self.update_images()
+
+    def on_image_key_scroll(self, dir):
+        if self.image_hover_idx >= 0:
+            if dir == 'up':
+                self.on_image_scroll_up(self.image_hover_idx)
+            elif dir == 'down':
+                self.on_image_scroll_down(self.image_hover_idx)
+
+    def set_image_hover_idx(self, idx):
+        self.image_hover_idx = idx
 
     def undo_annotation(self):
         if self.prev_sort_alg is not None:

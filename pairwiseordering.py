@@ -142,6 +142,10 @@ class PairwiseOrderingScreen(OrderingScreen):
                              i=i: self.on_image_scroll_down(i))
             displayed_image.bind("<Button-5>", command=lambda event,
                                  i=i: self.on_image_scroll_down(i))
+            
+            displayed_image.bind("<Enter>",command=lambda event, i=i: self.set_image_hover_idx(i))
+            
+            displayed_image.bind("<Leave>",command=lambda event: self.set_image_hover_idx(-1))
 
     def display_new_comparison(self):
 

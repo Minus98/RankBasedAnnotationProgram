@@ -115,6 +115,10 @@ class MultiOrderingScreen(OrderingScreen):
 
             self.root.bind(
                 "<Return>", lambda event: self.submit())
+            
+            displayed_image.bind("<Enter>",command=lambda event, i=i: self.set_image_hover_idx(i))
+            
+            displayed_image.bind("<Leave>",command=lambda event: self.set_image_hover_idx(-1))
 
     def init_diff_level_buttons(self):
 
