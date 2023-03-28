@@ -217,7 +217,8 @@ class PairwiseOrderingScreen(OrderingScreen):
         widget.configure(fg_color=['#3a7ebf', '#1f538d'])
 
     def on_enter(self):
-        self.tab_items[self.tab_index].invoke()
+        if self.tab_index >= 0:
+            self.tab_items[self.tab_index].invoke()
 
     def on_shortcmd(self, index):
         self.tab_items[index].invoke()
