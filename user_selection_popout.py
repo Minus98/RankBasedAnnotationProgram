@@ -72,7 +72,7 @@ class UserSelectionPopOut():
             master=self.saved_users_frame, fg_color=self.pop_out.cget("fg_color"))
 
         saved_users_row.bind(
-            "<Button-1>", command=lambda event, i=i: self.select_user(user))
+            "<Button-1>", command=lambda event: self.select_user(user))
 
         saved_users_row.grid(row=i, column=0, sticky="ew", pady=3)
 
@@ -80,6 +80,10 @@ class UserSelectionPopOut():
 
         save_name_label = ctk.CTkLabel(
             master=saved_users_row, text=user, font=('Helvetica bold', 20))
+
+        save_name_label.bind(
+            "<Button-1>", command=lambda event: self.select_user(user))
+
         save_name_label.grid(row=0, column=0, padx=10, pady=4, sticky="w")
 
         add_hover(saved_users_row)
