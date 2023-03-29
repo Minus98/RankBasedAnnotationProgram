@@ -131,7 +131,6 @@ class RatingScreen(OrderingScreen):
     def display_new_comparison(self):
 
         self.reset_tab()
-
         key = self.sort_alg.get_comparison(self.user)
 
         if key:
@@ -146,7 +145,7 @@ class RatingScreen(OrderingScreen):
             self.progress_bar.grid_forget()
             self.progress_bar_progress = 0
         else:
-            key = random.sample(self.sort_alg.data, 1)
+            key = random.choice(self.sort_alg.data)
             self.images = [[key, self.file_2_CTkImage(key), 0]]
             self.update_images()
             IsFinishedPopOut(self.root, self.center,

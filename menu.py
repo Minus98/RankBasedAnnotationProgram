@@ -9,13 +9,14 @@ from utils import *
 
 class MenuScreen():
 
-    def __init__(self, root, creation_callback, ordering_callback, center):
+    def __init__(self, root, creation_callback, ordering_callback, center, open_user_selection):
 
         self.root = root
 
         self.creation_callback = creation_callback
         self.ordering_callback = ordering_callback
         self.center = center
+        self.open_user_selection = open_user_selection
 
         path = get_full_path("Saves")
 
@@ -52,6 +53,16 @@ class MenuScreen():
         self.header_name_label = ctk.CTkLabel(
             master=self.saved_annotations_header, text="Name:", font=('Helvetica bold', 20))
 
+        self.user_label = ctk.CTkLabel(
+            master=self.root, text="", font=('Helvetica bold', 24))
+
+        self.user_label.bind(
+            "<Enter>", lambda event, og_color=self.user_label.cget('text_color'): self.highlight_label(self.user_label, og_color))
+        self.user_label.bind(
+            "<Leave>", lambda event, og_color=self.user_label.cget('text_color'): self.remove_highlight_label(self.user_label, og_color))
+        self.user_label.bind(
+            "<Button-1>", lambda event: self.open_user_selection())
+
         self.header_algorithm_label = ctk.CTkLabel(
             master=self.saved_annotations_header, text="Algorithm:", font=('Helvetica bold', 20))
 
@@ -59,7 +70,7 @@ class MenuScreen():
             master=self.saved_annotations_header, text="Images:", font=('Helvetica bold', 20))
 
         self.header_count_label = ctk.CTkLabel(
-            master=self.saved_annotations_header, text="Comparisons made:", font=('Helvetica bold', 20))
+            master=self.saved_annotations_header, text="Total annotations made:", font=('Helvetica bold', 20))
 
         self.saved_annotations_frame = ctk.CTkScrollableFrame(
             master=self.menu_frame, height=400)
@@ -93,6 +104,7 @@ class MenuScreen():
         self.root.grid_columnconfigure(1, weight=1)
 
         self.header.grid(row=0, column=0, columnspan=2, sticky="S")
+        self.user_label.place(relx=0.98, rely=0.02, anchor='ne')
         self.menu_frame.grid(row=1, column=0, sticky="nsew",
                              padx=(20, 10), pady=20)
 
@@ -133,6 +145,9 @@ class MenuScreen():
 
         self.text_header.grid(row=0, column=0, padx=10, pady=10, sticky="new")
         self.text.grid(row=1, column=0, padx=20, pady=10, sticky="new")
+
+    def display_user(self, user):
+        self.user_label.configure(text=user)
 
     def display_saves(self):
 
@@ -176,7 +191,7 @@ class MenuScreen():
         if hasattr(sort_alg, 'comp_count'):
             comp_count = sort_alg.comp_count
         else:
-            comp_count = ''
+            comp_count = '-'
 
         count_label = ctk.CTkLabel(
             master=saved_annotations_row, text=comp_count, font=('Helvetica bold', 20))
@@ -205,3 +220,15 @@ class MenuScreen():
         if abs(label.winfo_width() - self.old_size) > 20:
             self.old_size = label.winfo_width()
             label.configure(wraplength=label.winfo_width() - 10)
+
+    def highlight_label(self, widget, color):
+
+        gray_color = int(color[1][-2:]) + 10
+
+        if gray_color > 100:
+            gray_color = 100
+
+        widget.configure(text_color='gray' + str((gray_color)))
+
+    def remove_highlight_label(self, widget, original_color):
+        widget.configure(text_color=original_color)

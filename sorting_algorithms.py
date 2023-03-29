@@ -915,16 +915,20 @@ class RatingAlgorithm (SortingAlgorithm):
         self.n = len(data)
         self.data = list(data)
 
+        self.comp_count = 0
         self.comparison_size = 1
         self.user_ratings = {}
 
     def get_comparison(self, user_id):
         user_dict = self.get_user(user_id)
-        return random.choice(user_dict['toRate'])
+        if user_dict['toRate']:
+            return random.choice(user_dict['toRate'])
+        return []
 
     def get_user(self, user_id):
         if user_id not in self.user_ratings:
-            self.user_ratings[user_id] = {'toRate': self.data, 'rated': {}}
+            self.user_ratings[user_id] = {
+                'toRate': copy.deepcopy(self.data), 'rated': {}}
 
         return self.user_ratings[user_id]
 
@@ -935,6 +939,7 @@ class RatingAlgorithm (SortingAlgorithm):
         if key in user_dict['toRate']:
             user_dict['toRate'].remove(key)
             user_dict['rated'][key] = rating
+            self.comp_count += 1
 
     def get_result(self):
         return {user: self.get_user_result(user) for user in self.user_ratings.keys()}

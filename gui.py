@@ -52,9 +52,11 @@ class AnnotationGui():
     def display_menu(self):
 
         self.clear_screen()
-        menu_screen = MenuScreen(
-            self.root, self.display_menu, self.display_ordering_screen, self.center)
-        menu_screen.display()
+        self.menu_screen = MenuScreen(
+            self.root, self.display_menu, self.display_ordering_screen, self.center, self.open_user_selection)
+        if hasattr(self, 'selected_user'):
+            self.menu_screen.display_user(self.selected_user)
+        self.menu_screen.display()
 
     def display_ordering_screen(self, save_obj):
 
@@ -88,3 +90,7 @@ class AnnotationGui():
 
     def select_user(self, user):
         self.selected_user = user
+        self.menu_screen.display_user(user)
+
+    def open_user_selection(self):
+        UserSelectionPopOut(self.root, self.center, self.select_user)
