@@ -134,16 +134,19 @@ class RatingScreen(OrderingScreen):
         key = self.sort_alg.get_comparison(self.user)
 
         if key:
-            self.progress_bar.grid(
-                row=2, column=0, columnspan=2, sticky="N", pady=5)
             # load initial images
             self.images = [[key, self.load_initial_image(key), 0]]
             self.update_images()
             self.root.update()
-            self.images = [[key, self.file_2_CTkImage(key), 0]]
-            self.update_images()
-            self.progress_bar.grid_forget()
-            self.progress_bar_progress = 0
+            if self.scroll_allowed:
+                self.progress_bar.grid(
+                    row=2, column=0, columnspan=2, sticky="N", pady=5)
+                self.images = [[key, self.file_2_CTkImage(key), 0]]
+                self.update_images()
+                self.progress_bar.grid_forget()
+                self.progress_bar_progress = 0
+            if self.prev_sort_alg is not None:
+                self.undo_label.place(x=20, y=70)
         else:
             key = random.choice(self.sort_alg.data)
             self.images = [[key, self.file_2_CTkImage(key), 0]]

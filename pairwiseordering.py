@@ -166,16 +166,17 @@ class PairwiseOrderingScreen(OrderingScreen):
         if df_res is not None:
             self.submit(df_res, df_annotatation=True)
         elif keys:
-            self.progress_bar.grid(
-                row=2, column=0, columnspan=2, sticky="N", pady=5)
             self.images = [[img, self.load_initial_image(
                 img), 0] for img in keys]  # load initial images
             self.update_images()
             self.root.update()
-            self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]
-            self.update_images()
-            self.progress_bar.grid_forget()
-            self.progress_bar_progress = 0
+            if self.scroll_allowed:
+                self.progress_bar.grid(
+                    row=2, column=0, columnspan=2, sticky="N", pady=5)
+                self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]
+                self.update_images()
+                self.progress_bar.grid_forget()
+                self.progress_bar_progress = 0
 
             if self.prev_sort_alg is not None:
                 self.undo_label.place(x=20, y=70)

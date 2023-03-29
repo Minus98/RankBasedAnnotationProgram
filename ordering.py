@@ -77,6 +77,7 @@ class OrderingScreen():
         self.undo_label.bind("<Button-1>", lambda event: self.undo_annotation())
 
         self.is_loading = False
+        self.scroll_allowed = save_obj["scroll_allowed"]
 
     def file_2_CTkImage(self, img_src):
 

@@ -29,6 +29,8 @@ class CreationPopOut():
         pop_out.rowconfigure(index=1, weight=1)
         pop_out.rowconfigure(index=2, weight=1)
         pop_out.rowconfigure(index=3, weight=1)
+        pop_out.rowconfigure(index=4, weight=1)
+        pop_out.rowconfigure(index=5, weight=1)
 
         self.selected_algorithm = ctk.StringVar()
 
@@ -89,13 +91,20 @@ class CreationPopOut():
         directory_entry.grid(row=3, column=1, padx=10,
                              pady=(2, 10), sticky="w")
 
+
+        ctk.CTkLabel(master=pop_out, text="Enable Scrolling:", font=('Helvetica bold', 20)).grid(
+            row=4, column=0, padx=10, pady=2, sticky="e")
+        scroll_enabled = ctk.BooleanVar()
+        scroll_enabled_checkbox = ctk.CTkCheckBox(master = pop_out, variable=scroll_enabled, text="", checkbox_width=30, checkbox_height=30, onvalue=True, offvalue=False)
+        scroll_enabled_checkbox.grid(row=4, column=1, padx=10, pady=2, sticky="w")
+
         button_frame = ctk.CTkFrame(
             master=pop_out, fg_color=pop_out.cget("fg_color"))
-        button_frame.grid(row=4, column=0, columnspan=2,
+        button_frame.grid(row=5, column=0, columnspan=2,
                           sticky="ew", pady=(0, 10))
 
         create_button = ctk.CTkButton(
-            master=button_frame, text="Create Annotation", width=200, height=40, font=('Helvetica bold', 20), command=lambda name=name, algorithm_selection=algorithm_selection, slider=slider, image_directory=image_directory, pop_out=pop_out: self.create_save(name, algorithm_selection, slider, image_directory, pop_out))
+            master=button_frame, text="Create Annotation", width=200, height=40, font=('Helvetica bold', 20), command=lambda name=name, algorithm_selection=algorithm_selection, slider=slider, image_directory=image_directory, pop_out=pop_out, scroll_enabled = scroll_enabled: self.create_save(name, algorithm_selection, slider, image_directory, pop_out, scroll_enabled))
         delete_button = ctk.CTkButton(
             master=button_frame, text="Cancel", width=200, height=40, font=('Helvetica bold', 20), command=pop_out.destroy)
 
@@ -107,7 +116,7 @@ class CreationPopOut():
 
         pop_out.grab_set()
 
-    def create_save(self, name, algorithm, comparison_size, image_directory, pop_out):
+    def create_save(self, name, algorithm, comparison_size, image_directory, pop_out, scroll_enabled):
 
         directory = os.path.relpath(image_directory.get())
         final_name = name.get()
@@ -153,7 +162,8 @@ class CreationPopOut():
         rel_path_to_save = "Saves/" + file_name
 
         save_obj = {"sort_alg": sort_alg, "name": final_name,
-                    "image_directory": directory, "path_to_save": rel_path_to_save}
+                    "image_directory": directory, "path_to_save": rel_path_to_save,
+                    "scroll_allowed": scroll_enabled.get()}
 
         f = open(path + "/" + file_name + ".pickle", "wb")
         pickle.dump(save_obj, f)
