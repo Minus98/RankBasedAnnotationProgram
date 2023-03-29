@@ -52,6 +52,12 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.root.bind(
             "5", lambda event: self.on_shortcmd(4))
 
+        self.root.bind("<KeyRelease-1>", lambda event: self.on_shortcmd_up(0))
+        self.root.bind("<KeyRelease-2>", lambda event: self.on_shortcmd_up(1))
+        self.root.bind("<KeyRelease-3>", lambda event: self.on_shortcmd_up(2))
+        self.root.bind("<KeyRelease-4>", lambda event: self.on_shortcmd_up(3))
+        self.root.bind("<KeyRelease-5>", lambda event: self.on_shortcmd_up(4))
+
         self.root.bind(
             "<Return>", lambda event: self.on_enter())
 
@@ -165,6 +171,10 @@ class PairwiseOrderingScreen(OrderingScreen):
             self.update_images()
             self.progress_bar.grid_forget()
             self.progress_bar_progress = 0
+
+            if self.prev_sort_alg is not None:
+                print(self.undo_label.winfo_exists())
+                self.undo_label.place(x=20, y=70)
         else:
             keys = random.sample(self.sort_alg.data, 2)
             self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]
@@ -216,15 +226,7 @@ class PairwiseOrderingScreen(OrderingScreen):
             self.tab_index = -1
 
     def highlight(self, widget):
-
-        hex = widget.cget("fg_color")[1]
-
-        rgb = [int(hex[i:i+2], 16) for i in (1, 3, 5)]
-        for i in range(len(rgb)):
-            rgb[i] = min(rgb[i]+50, 255)
-
-        new_hex = '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
-        widget.configure(fg_color=new_hex)
+        widget.configure(fg_color=widget.cget("hover_color"))
 
     def remove_highlight(self, widget):
         widget.configure(fg_color=['#3a7ebf', '#1f538d'])
@@ -234,6 +236,19 @@ class PairwiseOrderingScreen(OrderingScreen):
             self.tab_items[self.tab_index].invoke()
 
     def on_shortcmd(self, index):
+
+        if index >= len(self.tab_items):
+            return
+
+        self.highlight(self.tab_items[index])
+
+    def on_shortcmd_up(self, index):
+
+        if index >= len(self.tab_items):
+            return
+
+        self.remove_highlight(self.tab_items[index])
+        self.root.update()
         self.tab_items[index].invoke()
 
     def submit(self, difflevel, df_annotatation=False):
