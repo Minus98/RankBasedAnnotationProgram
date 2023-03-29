@@ -173,8 +173,13 @@ class MenuScreen():
 
         total_images_label.grid(row=0, column=2, padx=10, pady=4, sticky="w")
 
+        if hasattr(sort_alg, 'comp_count'):
+            comp_count = sort_alg.comp_count
+        else:
+            comp_count = ''
+
         count_label = ctk.CTkLabel(
-            master=saved_annotations_row, text=sort_alg.comp_count, font=('Helvetica bold', 20))
+            master=saved_annotations_row, text=comp_count, font=('Helvetica bold', 20))
 
         count_label.grid(row=0, column=3, padx=10, pady=4, sticky="w")
 

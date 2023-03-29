@@ -907,3 +907,48 @@ class TrueSkill (SortingAlgorithm):
 
     def comparison_is_available(self, user_id):
         return not self.is_finished() or not self.get_comparison(user_id)
+
+
+class RatingAlgorithm (SortingAlgorithm):
+
+    def __init__(self, data):
+
+        self.n = len(data)
+        self.data = list(data)
+
+        self.comparison_size = 1
+        self.user_ratings = {}
+
+    def get_comparison(self, user_id):
+        user_dict = self.get_user(user_id)
+        return random.choice(user_dict['toRate'])
+
+    def get_user(self, user_id):
+        if user_id not in self.user_ratings:
+            self.user_ratings[user_id] = {'toRate': self.data, 'rated': {}}
+
+        return self.user_ratings[user_id]
+
+    def inference(self, user_id, key, rating):
+
+        user_dict = self.get_user(user_id)
+
+        if key in user_dict['toRate']:
+            user_dict['toRate'].remove(key)
+            user_dict['rated'][key] = rating
+
+    def get_result(self):
+        return {user: self.get_user_result(user) for user in self.user_ratings.keys()}
+
+    def get_user_result(self, user_id):
+        user_dict = self.get_user(user_id)
+        return user_dict['rated']
+
+    def is_finished(self):
+        return False  # never finished
+
+    def comparison_is_available(self, user_id):
+        user_dict = self.get_user(user_id)
+        if len(user_dict['toRate']):
+            return True
+        return False

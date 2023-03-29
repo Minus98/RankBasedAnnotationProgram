@@ -1,6 +1,7 @@
 import sys
 import customtkinter as ctk
 from pairwiseordering import PairwiseOrderingScreen
+from rating import RatingScreen
 from sorting_algorithms import *
 from menu import MenuScreen
 from multiordering import MultiOrderingScreen
@@ -60,7 +61,10 @@ class AnnotationGui():
         if hasattr(self, 'selected_user'):
             self.clear_screen()
 
-            if save_obj["sort_alg"].comparison_size == 2:
+            if type(save_obj["sort_alg"]) == RatingAlgorithm:
+                ordering_screen = RatingScreen(
+                    self.root, save_obj, self.display_menu, self.center, self.selected_user)
+            elif save_obj["sort_alg"].comparison_size == 2:
                 ordering_screen = PairwiseOrderingScreen(
                     self.root, save_obj, self.display_menu, self.center, self.selected_user)
             else:

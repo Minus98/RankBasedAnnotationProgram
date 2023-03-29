@@ -44,8 +44,12 @@ class OrderingScreen():
             csv_df.loc[(csv_df['user'] == self.user) & (csv_df['undone'] == False)])
 
         self.comp_count = 0 + current_user_count
-        self.comp_count_label = ctk.CTkLabel(
-            master=self.root, text=f"Comparison count: {self.comp_count}", font=('Helvetica bold', 30))
+        if not type(self.sort_alg) == sa.RatingAlgorithm:
+            self.comp_count_label = ctk.CTkLabel(
+                master=self.root, text=f"Comparison count: {self.comp_count}", font=('Helvetica bold', 30))
+        else:
+            self.comp_count_label = ctk.CTkLabel(
+                master=self.root, text=f"Rating count: {self.comp_count}", font=('Helvetica bold', 30))
 
         self.back_button = ctk.CTkButton(
             master=self.root, text="Back To Menu", width=200, height=40, command=self.back_to_menu, font=('Helvetica bold', 18))
@@ -58,7 +62,8 @@ class OrderingScreen():
         self.root.bind("<Command-Z>", lambda event: self.undo_annotation())
 
         self.root.bind("<Up>", lambda event: self.on_image_key_scroll('up'))
-        self.root.bind("<Down>", lambda event: self.on_image_key_scroll('down'))
+        self.root.bind(
+            "<Down>", lambda event: self.on_image_key_scroll('down'))
 
         self.progress_bar = ctk.CTkProgressBar(self.root, width=400)
         self.progress_bar_progress = 0
@@ -78,12 +83,15 @@ class OrderingScreen():
 
             for i in range(nib_imgs.shape[2]):
                 img = nib_imgs[:, :, i]
-                resize_factor = (self.root.winfo_screenheight()/2) / img.shape[1]
-                new_shape = (int(img.shape[0] * resize_factor), int(img.shape[1] * resize_factor)) 
+                resize_factor = (
+                    self.root.winfo_screenheight()/2) / img.shape[1]
+                new_shape = (
+                    int(img.shape[0] * resize_factor), int(img.shape[1] * resize_factor))
                 ctk_imgs.append(ctk.CTkImage(
-                    Image.fromarray(np.rot90(img)).resize(new_shape, resample= 2), size=(new_shape)))
+                    Image.fromarray(np.rot90(img)).resize(new_shape, resample=2), size=(new_shape)))
                 self.progress_bar_progress += 1
-                self.progress_bar.set(self.progress_bar_progress / (self.comparison_size * nib_imgs.shape[2]))
+                self.progress_bar.set(
+                    self.progress_bar_progress / (self.comparison_size * nib_imgs.shape[2]))
                 self.root.update()
 
             return ctk_imgs
@@ -100,13 +108,14 @@ class OrderingScreen():
 
             img = nib_imgs[:, :, 0]
             resize_factor = (self.root.winfo_screenheight()/2) / img.shape[1]
-            new_shape = (int(img.shape[0] * resize_factor), int(img.shape[1] * resize_factor)) 
-            ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)).resize(new_shape, resample= 2), size=(new_shape)))
+            new_shape = (int(img.shape[0] * resize_factor),
+                         int(img.shape[1] * resize_factor))
+            ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)).resize(
+                new_shape, resample=2), size=(new_shape)))
 
             return ctk_imgs
         else:
             return [ctk.CTkImage(Image.open(img_src), size=(250, 250))]
-
 
     def update_images(self):
 
@@ -209,20 +218,28 @@ class OrderingScreen():
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             shutil.copy(get_full_path(src), dst)
 
-    def submit_comparison(self, keys, diff_lvls, df_annotatation=False):
+    def submit_comparison(self, keys, lvl, df_annotatation=False):
 
         self.is_loading = True
 
         self.prev_sort_alg = copy.deepcopy(self.sort_alg)
 
         user = 'DF' if df_annotatation else self.user
-        self.sort_alg.inference(user, keys, diff_lvls)
 
-        self.save_to_csv_file(keys, diff_lvls, df_annotatation)
+        self.sort_alg.inference(user, keys, lvl)
+
+        self.save_to_csv_file(keys, lvl, df_annotatation)
 
         self.comp_count += 1
         self.comp_count_label.configure(
             text=f"Comparison count: {self.comp_count}")
+
+        if not type(self.sort_alg) == sa.RatingAlgorithm:
+            self.comp_count_label.configure(
+                text=f"Comparison count: {self.comp_count}")
+        else:
+            self.comp_count_label.configure(
+                text=f"Rating count: {self.comp_count}")
 
         self.save_algorithm()
 
@@ -233,11 +250,19 @@ class OrderingScreen():
 
         self.is_loading = False
 
-    def save_to_csv_file(self, keys, diff_lvls, df_annotatation=False):
+    def save_to_csv_file(self, keys, lvls, df_annotatation=False):
 
         user = 'DF' if df_annotatation else self.user
-        df = pd.DataFrame({'result': [keys],
-                           'diff_levels': [diff_lvls],
+
+        if hasattr(keys, "__len__"):
+            key_label = 'result'
+            lvl_label = 'diff_levels'
+        else:
+            key_label = 'src'
+            lvl_label = 'rating'
+
+        df = pd.DataFrame({key_label: [keys],
+                           lvl_label: [lvls],
                            'time': [time.time()-self.session_start_time],
                            'session': [self.session_id],
                            'user': [user],

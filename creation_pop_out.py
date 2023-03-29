@@ -69,7 +69,7 @@ class CreationPopOut():
         comparison_count_label.grid(row=0, column=1, padx=5)
 
         algorithm_selection = ctk.CTkOptionMenu(
-            master=pop_out, values=["True Skill", "Merge Sort"], width=200, height=40, font=('Helvetica bold', 20), command=lambda value, slider=slider, label=comparison_count_label, comp_label=comp_label: self.algorithm_changed(value, slider, label, comp_label))
+            master=pop_out, values=["True Skill", "Merge Sort", "Rating"], width=200, height=40, font=('Helvetica bold', 20), command=lambda value, pop_out=pop_out, slider=slider, slider_frame=slider_frame, label=comparison_count_label, comp_label=comp_label: self.algorithm_changed(value, pop_out, slider, slider_frame, label, comp_label))
 
         algorithm_selection.grid(
             row=1, column=1, padx=10, pady=2, sticky="w")
@@ -121,6 +121,8 @@ class CreationPopOut():
 
         if alg == "Merge Sort":
             sort_alg = MergeSort(data=img_paths)
+        elif alg == "Rating":
+            sort_alg = RatingAlgorithm(data=img_paths)
         else:
             sort_alg = TrueSkill(
                 data=img_paths, comparison_size=int(comparison_size.get()))
@@ -139,8 +141,12 @@ class CreationPopOut():
 
         path_to_save = path + "/" + file_name
 
-        df = pd.DataFrame(
-            columns=['result', 'diff_levels', 'time', 'session', 'user', 'undone'])
+        if alg == "Rating":
+            df = pd.DataFrame(
+                columns=['src', 'rating', 'time', 'session', 'user', 'undone'])
+        else:
+            df = pd.DataFrame(
+                columns=['result', 'diff_levels', 'time', 'session', 'user', 'undone'])
 
         df.to_csv(path_to_save + ".csv", index=False)
 
@@ -157,17 +163,34 @@ class CreationPopOut():
 
         self.creation_callback()
 
-    def algorithm_changed(self, value, slider, label, comp_label):
+    def algorithm_changed(self, value, pop_out, slider, slider_frame, label, comp_label):
 
         if value == "Merge Sort":
+            self.change_slider_row_state(
+                True, pop_out, slider_frame, comp_label)
             slider.set(2)
             label.configure(text=2, state=ctk.DISABLED)
             comp_label.configure(state=ctk.DISABLED)
             slider.configure(state=ctk.DISABLED)
+        elif value == "Rating":
+            self.change_slider_row_state(
+                False, pop_out, slider_frame, comp_label)
         else:
+            self.change_slider_row_state(
+                True, pop_out, slider_frame, comp_label)
             slider.configure(state=ctk.NORMAL)
             label.configure(state=ctk.NORMAL)
             comp_label.configure(state=ctk.NORMAL)
+
+    def change_slider_row_state(self, state, pop_out, slider_frame, comp_label):
+        if state == True:
+            comp_label.grid()
+            slider_frame.grid()
+            pop_out.rowconfigure(index=2, weight=1)
+        else:
+            comp_label.grid_remove()
+            slider_frame.grid_remove()
+            pop_out.rowconfigure(index=2, weight=0)
 
     def update_comparison_size(self, val, label):
         label.configure(text=int(val))
