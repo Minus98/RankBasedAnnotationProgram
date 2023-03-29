@@ -191,6 +191,4 @@ class RatingScreen(OrderingScreen):
 
         key = [key for key, _, _ in self.images][0]
 
-        print(self.sort_alg.user_ratings)
-
         self.submit_comparison(key, lvl)

@@ -93,7 +93,7 @@ class PairwiseOrderingScreen(OrderingScreen):
             self.less_button.grid(row=0, column=0, padx=(10, 5), pady=10)
             self.more_button.grid(row=0, column=1, padx=(5, 10), pady=10)
 
-        self.session_duration_label.place(relx = 0.98, y=20, anchor = "ne")
+        self.session_duration_label.place(relx=0.98, y=20, anchor="ne")
 
         self.comp_count_label.grid(row=0, column=0, columnspan=2, sticky="S")
 
@@ -109,7 +109,7 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.displayed_images = []
         self.image_frames = []
 
-        img_info = {"A":'sw', "B":'se'}
+        img_info = {"A": 'sw', "B": 'se'}
 
         for i in range(2):
 
@@ -121,18 +121,19 @@ class PairwiseOrderingScreen(OrderingScreen):
 
             displayed_image = ctk.CTkLabel(
                 master=image_frame, text="")
-            
+
             img_name = list(img_info.keys())[i]
 
             img_label = ctk.CTkLabel(
-                master=displayed_image, text=img_name, font=('Helvetica bold', 20), width=30, height=30, bg_color = image_frame.cget('fg_color'))
-            
+                master=displayed_image, text=img_name, font=('Helvetica bold', 20), width=30, height=30, bg_color=image_frame.cget('fg_color'))
+
             self.displayed_images.append(displayed_image)
 
             displayed_image.grid(row=0, column=0, columnspan=2,
                                  sticky="ew", padx=10, pady=10)
-            
-            img_label.place(relx=abs(i - 0.01),rely=0.99,anchor=img_info[img_name])
+
+            img_label.place(relx=abs(i - 0.01), rely=0.99,
+                            anchor=img_info[img_name])
 
             image_frame.bind("<MouseWheel>", command=lambda event,
                              i=i: self.on_image_scroll(event, i))
@@ -148,10 +149,12 @@ class PairwiseOrderingScreen(OrderingScreen):
                              i=i: self.on_image_scroll_down(i))
             displayed_image.bind("<Button-5>", command=lambda event,
                                  i=i: self.on_image_scroll_down(i))
-            
-            displayed_image.bind("<Enter>",command=lambda event, i=i: self.set_image_hover_idx(i))
-            
-            displayed_image.bind("<Leave>",command=lambda event: self.set_image_hover_idx(-1))
+
+            displayed_image.bind(
+                "<Enter>", command=lambda event, i=i: self.set_image_hover_idx(i))
+
+            displayed_image.bind(
+                "<Leave>", command=lambda event: self.set_image_hover_idx(-1))
 
     def display_new_comparison(self):
 
@@ -163,8 +166,10 @@ class PairwiseOrderingScreen(OrderingScreen):
         if df_res is not None:
             self.submit(df_res, df_annotatation=True)
         elif keys:
-            self.progress_bar.grid(row=2, column=0, columnspan=2, sticky="N", pady=5)
-            self.images = [[img, self.load_initial_image(img), 0] for img in keys] #load initial images
+            self.progress_bar.grid(
+                row=2, column=0, columnspan=2, sticky="N", pady=5)
+            self.images = [[img, self.load_initial_image(
+                img), 0] for img in keys]  # load initial images
             self.update_images()
             self.root.update()
             self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]
@@ -173,7 +178,6 @@ class PairwiseOrderingScreen(OrderingScreen):
             self.progress_bar_progress = 0
 
             if self.prev_sort_alg is not None:
-                print(self.undo_label.winfo_exists())
                 self.undo_label.place(x=20, y=70)
         else:
             keys = random.sample(self.sort_alg.data, 2)

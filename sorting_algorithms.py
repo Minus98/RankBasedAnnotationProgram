@@ -625,7 +625,6 @@ class MedianMergeSort(SortingAlgorithm):
         self.items = [[item] for item in data]
         self.task_layers = [[]]
         self.get_lists_to_compare()
-        #print([[t for t in l] for l in self.task_layers])
 
         self.comp_count = 0
 
