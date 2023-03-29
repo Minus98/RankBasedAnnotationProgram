@@ -69,6 +69,13 @@ class OrderingScreen():
         self.progress_bar_progress = 0
         self.progress_bar.set(0)
 
+        self.undo_label = ctk.CTkLabel(
+            master=self.root, text="Undo Last Annotation", font=('Helvetica bold', 20), text_color="#777777")
+        
+        self.undo_label.bind("<Enter>", lambda event: self.highlight_label(self.undo_label))
+        self.undo_label.bind("<Leave>", lambda event: self.remove_highlight_label(self.undo_label))
+        self.undo_label.bind("<Button-1>", lambda event: self.undo_annotation())
+
         self.is_loading = False
 
     def file_2_CTkImage(self, img_src):
@@ -97,6 +104,21 @@ class OrderingScreen():
             return ctk_imgs
         else:
             return [ctk.CTkImage(Image.open(img_src), size=(250, 250))]
+
+    def highlight_label(self, widget):
+
+        hex = widget.cget("text_color")
+
+        rgb = [int(hex[i:i+2], 16) for i in (1, 3, 5)]
+        for i in range(len(rgb)):
+            rgb[i] = min(rgb[i]+50, 255)
+
+        new_hex = '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
+        widget.configure(text_color=new_hex)
+
+    def remove_highlight_label(self, widget):
+        widget.configure(text_color="#777777")
+
 
     def load_initial_image(self, img_src):
         img_src = get_full_path(img_src)
@@ -181,6 +203,8 @@ class OrderingScreen():
             self.sort_alg = self.prev_sort_alg
             self.save_obj['sort_alg'] = self.prev_sort_alg
             self.prev_sort_alg = None
+
+            self.undo_label.place_forget()
 
             self.undo_csv_file()
             self.save_algorithm()
