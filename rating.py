@@ -42,6 +42,11 @@ class RatingScreen(OrderingScreen):
         self.root.bind(
             "4", lambda event: self.on_shortcmd(3))
 
+        self.root.bind("<KeyRelease-1>", lambda event: self.on_shortcmd_up(0))
+        self.root.bind("<KeyRelease-2>", lambda event: self.on_shortcmd_up(1))
+        self.root.bind("<KeyRelease-3>", lambda event: self.on_shortcmd_up(2))
+        self.root.bind("<KeyRelease-4>", lambda event: self.on_shortcmd_up(3))
+
         self.root.bind(
             "<Return>", lambda event: self.on_enter())
 
@@ -163,16 +168,17 @@ class RatingScreen(OrderingScreen):
             self.remove_highlight(self.tab_items[self.tab_index])
             self.tab_index = -1
 
+    def on_shortcmd_up(self, index):
+
+        if index >= len(self.tab_items):
+            return
+
+        self.remove_highlight(self.tab_items[index])
+        self.root.update()
+        self.tab_items[index].invoke()
+
     def highlight(self, widget):
-
-        hex = widget.cget("fg_color")[1]
-
-        rgb = [int(hex[i:i+2], 16) for i in (1, 3, 5)]
-        for i in range(len(rgb)):
-            rgb[i] = min(rgb[i]+50, 255)
-
-        new_hex = '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
-        widget.configure(fg_color=new_hex)
+        widget.configure(fg_color=widget.cget("hover_color"))
 
     def remove_highlight(self, widget):
         widget.configure(fg_color=['#3a7ebf', '#1f538d'])
@@ -182,7 +188,11 @@ class RatingScreen(OrderingScreen):
             self.tab_items[self.tab_index].invoke()
 
     def on_shortcmd(self, index):
-        self.tab_items[index].invoke()
+
+        if index >= len(self.tab_items):
+            return
+
+        self.highlight(self.tab_items[index])
 
     def submit(self, lvl):
 
