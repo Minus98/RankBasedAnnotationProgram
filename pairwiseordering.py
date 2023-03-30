@@ -17,18 +17,15 @@ class PairwiseOrderingScreen(OrderingScreen):
 
         self.buttons_frame = ctk.CTkFrame(master=self.root)
 
-        self.question = ctk.CTkLabel(
-            master=self.root, text="Compared to image A, the bronchial wall thickening in image B appears to be ... ", font=('Helvetica bold', 20))
-
-        self.alot_less_button = ctk.CTkButton(master=self.buttons_frame, text="Much Less Severe (1)", width=160,
+        self.alot_less_button = ctk.CTkButton(master=self.buttons_frame, text="A much more severe (1)", width=160,
                                               height=40, command=lambda: self.submit(-2), font=('Helvetica bold', 20))
-        self.less_button = ctk.CTkButton(master=self.buttons_frame, text="Less Severe (2)", width=160,
+        self.less_button = ctk.CTkButton(master=self.buttons_frame, text="A more severe (2)", width=160,
                                          height=40, command=lambda: self.submit(-1), font=('Helvetica bold', 20))
-        self.same_button = ctk.CTkButton(master=self.buttons_frame, text="Equally Severe (3)", width=160,
+        self.same_button = ctk.CTkButton(master=self.buttons_frame, text="A & B equal (3)", width=160,
                                          height=40, command=lambda: self.submit(0), font=('Helvetica bold', 20))
-        self.more_button = ctk.CTkButton(master=self.buttons_frame, text="More Severe (4)", width=160,
+        self.more_button = ctk.CTkButton(master=self.buttons_frame, text="B more severe (4)", width=160,
                                          height=40, command=lambda: self.submit(1), font=('Helvetica bold', 20))
-        self.alot_more_button = ctk.CTkButton(master=self.buttons_frame, text="Much More Severe (5)", width=160,
+        self.alot_more_button = ctk.CTkButton(master=self.buttons_frame, text="B much more severe (5)", width=160,
                                               height=40, command=lambda: self.submit(2), font=('Helvetica bold', 20))
 
         self.tab_index = -1
@@ -38,8 +35,8 @@ class PairwiseOrderingScreen(OrderingScreen):
                               self.same_button, self.more_button, self.alot_more_button]
         else:
             self.tab_items = [self.less_button, self.more_button]
-            self.less_button.configure(text="Less Severe (1)")
-            self.more_button.configure(text="More Severe (2)")
+            self.less_button.configure(text="A more severe (1)")
+            self.more_button.configure(text="B more severe (2)")
 
         self.root.bind(
             "1", lambda event: self.on_shortcmd(0))
@@ -72,16 +69,13 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.root.grid_rowconfigure(0, weight=3, uniform="ordering")
         self.root.grid_rowconfigure(1, weight=26, uniform="ordering")
         self.root.grid_rowconfigure(2, weight=1, uniform="ordering")
-        self.root.grid_rowconfigure(3, weight=2, uniform="ordering")
-        self.root.grid_rowconfigure(4, weight=4, uniform="ordering")
+        self.root.grid_rowconfigure(3, weight=4, uniform="ordering")
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
 
         self.images_frame.grid(row=1, column=0, columnspan=2, padx=0, pady=0)
 
-        self.question.grid(row=3, column=0, columnspan=2, pady=10, sticky="S")
-
-        self.buttons_frame.grid(row=4, column=0, columnspan=2, sticky="N")
+        self.buttons_frame.grid(row=3, column=0, columnspan=2, pady=10, sticky="N")
 
         if not type(self.sort_alg) == sa.MergeSort:
             self.alot_less_button.grid(row=0, column=0, padx=(10, 5), pady=10)
