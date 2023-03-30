@@ -1,6 +1,11 @@
 import sys
 import os
+from enum import Enum
 
+class DiffLevel(Enum):
+    none = 0
+    normal = 1
+    major = 2
 
 def add_hover(widget):
 

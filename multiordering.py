@@ -1,5 +1,4 @@
 import customtkinter as ctk
-from helper_functions import DiffLevel
 import time
 from utils import *
 from ordering import OrderingScreen

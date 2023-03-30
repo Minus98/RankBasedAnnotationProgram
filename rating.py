@@ -1,10 +1,7 @@
 import random
 import customtkinter as ctk
-from helper_functions import DiffLevel
 import time
-import pandas as pd
 from is_finished_pop_out import IsFinishedPopOut
-import sorting_algorithms as sa
 from utils import *
 from ordering import OrderingScreen
 
