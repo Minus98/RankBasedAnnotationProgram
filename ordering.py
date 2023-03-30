@@ -78,6 +78,7 @@ class OrderingScreen():
 
         self.is_loading = False
         self.scroll_allowed = save_obj["scroll_allowed"]
+        self.submission_timeout = False
 
     def file_2_CTkImage(self, img_src):
 
@@ -245,6 +246,11 @@ class OrderingScreen():
 
     def submit_comparison(self, keys, lvl, df_annotatation=False):
 
+        if self.submission_timeout:
+            return
+        
+        self.submission_timeout = True
+        
         self.is_loading = True
 
         self.prev_sort_alg = copy.deepcopy(self.sort_alg)
@@ -274,6 +280,11 @@ class OrderingScreen():
             self.display_new_comparison()
 
         self.is_loading = False
+
+        self.root.after(1000, self.remove_submission_timeout)
+
+    def remove_submission_timeout(self):
+        self.submission_timeout = False
 
     def save_to_csv_file(self, keys, lvls, df_annotatation=False):
 
