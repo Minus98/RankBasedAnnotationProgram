@@ -922,14 +922,16 @@ class RatingAlgorithm (SortingAlgorithm):
     def get_comparison(self, user_id):
         user_dict = self.get_user(user_id)
         if user_dict['toRate']:
-            return random.choice(user_dict['toRate'])
+            return user_dict['toRate'][0]
         return []
 
     def get_user(self, user_id):
         if user_id not in self.user_ratings:
+            user_hash = abs(hash(user_id)) % (10 ** 8)
+            to_sort = copy.deepcopy(self.data)
+            random.Random(user_hash).shuffle(to_sort)
             self.user_ratings[user_id] = {
-                'toRate': copy.deepcopy(self.data), 'rated': {}}
-
+                'toRate': to_sort, 'rated': {}}
         return self.user_ratings[user_id]
 
     def inference(self, user_id, key, rating):
