@@ -753,7 +753,7 @@ class MedianMergeSort(SortingAlgorithm):
 
 class TrueSkill (SortingAlgorithm):
 
-    def __init__(self, data, comparison_size=2, comparison_max=None, threshold=0.1, mod=10):
+    def __init__(self, data, comparison_size=2, comparison_max=None, threshold=0.1, mod=10, initial_mus=None):
 
         self.n = len(data)
         self.data = list(data)
@@ -763,9 +763,10 @@ class TrueSkill (SortingAlgorithm):
         else:
             self.comparison_max = comparison_max
 
-        self.ratings = {k: Rating() for k in data}
-        self.start_mu = self.ratings[self.data[0]].mu
-        self.start_sigma = self.ratings[self.data[0]].sigma
+        if initial_mus:
+            self.ratings = {k: Rating(initial_mus[k]) for k in data}
+        else:
+            self.ratings = {k: Rating() for k in data}
 
         self.prev_ratings = copy.deepcopy(self.ratings)
 
