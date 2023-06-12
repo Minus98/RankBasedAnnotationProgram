@@ -17,16 +17,23 @@ class RatingScreen(OrderingScreen):
         self.question = ctk.CTkLabel(
             master=self.root, text="The bronchial wall thickening in the image appears to be ... ", font=('Helvetica bold', 20))
 
-        self.none_button = ctk.CTkButton(master=self.buttons_frame, text="None (1)", width=160,
+        self.not_assessable_button = ctk.CTkButton(master=self.buttons_frame, text="Non-assessable (1)", width=160,
+                                         height=40, command=lambda: self.submit(-1), font=('Helvetica bold', 20))
+        
+        self.absolute_none_button = ctk.CTkButton(master=self.buttons_frame, text="Clearly None (2)", width=160,
                                          height=40, command=lambda: self.submit(0), font=('Helvetica bold', 20))
-        self.mild_button = ctk.CTkButton(master=self.buttons_frame, text="Mild (2)", width=160,
-                                         height=40, command=lambda: self.submit(1), font=('Helvetica bold', 20))
-        self.moderate_button = ctk.CTkButton(master=self.buttons_frame, text="Moderate (3)", width=160,
-                                             height=40, command=lambda: self.submit(2), font=('Helvetica bold', 20))
-        self.severe_button = ctk.CTkButton(master=self.buttons_frame, text="Severe (4)", width=160,
-                                           height=40, command=lambda: self.submit(3), font=('Helvetica bold', 20))
 
-        self.tab_items = [self.none_button, self.mild_button,
+        self.none_button = ctk.CTkButton(master=self.buttons_frame, text="None (3)", width=160,
+                                         height=40, command=lambda: self.submit(1), font=('Helvetica bold', 20))
+        self.mild_button = ctk.CTkButton(master=self.buttons_frame, text="Mild (4)", width=160,
+                                         height=40, command=lambda: self.submit(2), font=('Helvetica bold', 20))
+        self.moderate_button = ctk.CTkButton(master=self.buttons_frame, text="Moderate (5)", width=160,
+                                             height=40, command=lambda: self.submit(3), font=('Helvetica bold', 20))
+        self.severe_button = ctk.CTkButton(master=self.buttons_frame, text="Severe (6)", width=160,
+                                           height=40, command=lambda: self.submit(4), font=('Helvetica bold', 20))
+
+        self.tab_items = [self.not_assessable_button, self.absolute_none_button, 
+                          self.none_button, self.mild_button,
                           self.moderate_button, self.severe_button]
         self.tab_index = -1
 
@@ -38,11 +45,17 @@ class RatingScreen(OrderingScreen):
             "3", lambda event: self.on_shortcmd(2))
         self.root.bind(
             "4", lambda event: self.on_shortcmd(3))
+        self.root.bind(
+            "5", lambda event: self.on_shortcmd(4))
+        self.root.bind(
+            "6", lambda event: self.on_shortcmd(5))
 
         self.root.bind("<KeyRelease-1>", lambda event: self.on_shortcmd_up(0))
         self.root.bind("<KeyRelease-2>", lambda event: self.on_shortcmd_up(1))
         self.root.bind("<KeyRelease-3>", lambda event: self.on_shortcmd_up(2))
         self.root.bind("<KeyRelease-4>", lambda event: self.on_shortcmd_up(3))
+        self.root.bind("<KeyRelease-5>", lambda event: self.on_shortcmd_up(4))
+        self.root.bind("<KeyRelease-6>", lambda event: self.on_shortcmd_up(5))
 
         self.root.bind(
             "<Return>", lambda event: self.on_enter())
@@ -69,10 +82,12 @@ class RatingScreen(OrderingScreen):
 
         self.buttons_frame.grid(row=4, column=0, columnspan=2, sticky="N")
 
-        self.none_button.grid(row=0, column=0, padx=(10, 5), pady=10)
-        self.mild_button.grid(row=0, column=1, padx=5, pady=10)
-        self.moderate_button.grid(row=0, column=2, padx=5, pady=10)
-        self.severe_button.grid(row=0, column=3, padx=5, pady=10)
+        self.not_assessable_button.grid(row=0, column=0, padx=(10, 5), pady=10)
+        self.absolute_none_button.grid(row=0, column=1, padx=5, pady=10)
+        self.none_button.grid(row=0, column=2, padx=5, pady=10)
+        self.mild_button.grid(row=0, column=3, padx=5, pady=10)
+        self.moderate_button.grid(row=0, column=4, padx=5, pady=10)
+        self.severe_button.grid(row=0, column=5, padx=(5,10), pady=10)
 
         self.session_duration_label.place(relx=0.98, y=20, anchor="ne")
 
