@@ -40,3 +40,4 @@ class IsFinishedPopOut():
                          pady=(0, 10), padx=(5, 10))
 
         pop_out.grab_set()
+        pop_out.attributes("-topmost", True)

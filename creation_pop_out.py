@@ -115,6 +115,7 @@ class CreationPopOut():
         delete_button.grid(row=0, column=1, padx=(5, 10), pady=10)
 
         pop_out.grab_set()
+        pop_out.attributes("-topmost", True)
 
     def create_save(self, name, algorithm, comparison_size, image_directory, pop_out, scroll_enabled):
 
