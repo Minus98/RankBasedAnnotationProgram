@@ -29,6 +29,10 @@ class SortingAlgorithm (ABC):
     def comparison_is_available(self, user_id):
         pass
 
+    @abstractmethod
+    def get_comparison_max(self):
+        pass
+
 
 class MergeSort(SortingAlgorithm):
 
@@ -91,6 +95,10 @@ class MergeSort(SortingAlgorithm):
 
     def comparison_is_available(self, user_id):
         return not self.is_finished()
+
+    def get_comparison_max(self):
+        # Fix me pleeeez
+        return 0
 
 
 class TrueSkill (SortingAlgorithm):
@@ -230,8 +238,10 @@ class TrueSkill (SortingAlgorithm):
         return False
 
     def comparison_is_available(self, user_id):
-
         return not self.is_finished() or not self.get_comparison(user_id)
+
+    def get_comparison_max(self):
+        return self.comparison_max
 
 
 class RatingAlgorithm (SortingAlgorithm):
@@ -285,6 +295,9 @@ class RatingAlgorithm (SortingAlgorithm):
             return True
         return False
 
+    def get_comparison_max(self):
+        return len(self.data)
+
 
 class HybridTrueSkill (SortingAlgorithm):
 
@@ -327,3 +340,6 @@ class HybridTrueSkill (SortingAlgorithm):
     def rating_to_mu(self, rating):
         # With mu = 25 and 1/2 standard deviation spacing
         return 25 + ((rating - 1) * 2 + 1) / 4 * 8.333
+
+    def get_comparison_max(self):
+        return self.sort_alg.get_comparison_max()

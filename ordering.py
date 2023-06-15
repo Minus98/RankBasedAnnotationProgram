@@ -62,10 +62,14 @@ class OrderingScreen():
         self.comp_count = 0 + current_user_count
         if not type(self.sort_alg) == sa.RatingAlgorithm:
             self.comp_count_label = ctk.CTkLabel(
-                master=self.root, text=f"Comparison count: {self.comp_count}", font=('Helvetica bold', 30))
+                master=self.root, text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}", font=('Helvetica bold', 30))
         else:
             self.comp_count_label = ctk.CTkLabel(
                 master=self.root, text=f"Rating count: {self.comp_count}", font=('Helvetica bold', 30))
+
+        self.comparison_bar = ctk.CTkProgressBar(
+            self.root, width=400, height=20)
+        self.update_comparison_bar()
 
         self.back_button = ctk.CTkButton(
             master=self.root, text="Back To Menu", width=200, height=40, command=self.back_to_menu, font=('Helvetica bold', 18))
@@ -232,7 +236,12 @@ class OrderingScreen():
 
             self.comp_count -= 1
             self.comp_count_label.configure(
-                text=f"Comparison count: {self.comp_count}")
+                text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}")
+            self.update_comparison_bar()
+
+    def update_comparison_bar(self):
+        self.comparison_bar.set(
+            self.comp_count / self.sort_alg.get_comparison_max())
 
     def save_algorithm(self):
         f = open(get_full_path(
@@ -281,14 +290,16 @@ class OrderingScreen():
 
         self.comp_count += 1
         self.comp_count_label.configure(
-            text=f"Comparison count: {self.comp_count}")
+            text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}")
 
         if not type(self.sort_alg) == sa.RatingAlgorithm:
             self.comp_count_label.configure(
-                text=f"Comparison count: {self.comp_count}")
+                text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}")
         else:
             self.comp_count_label.configure(
-                text=f"Rating count: {self.comp_count}")
+                text=f"Rating count: {self.comp_count}/{self.sort_alg.get_comparison_max()}")
+
+        self.update_comparison_bar()
 
         self.save_algorithm()
 
