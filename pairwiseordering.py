@@ -10,9 +10,10 @@ from ordering import OrderingScreen
 
 class PairwiseOrderingScreen(OrderingScreen):
 
-    def __init__(self, root, save_obj, menu_callback, center, user):
+    def __init__(self, root, save_obj, menu_callback, center, user, reload_ordering_screen):
 
-        super().__init__(root, save_obj, menu_callback, center, user)
+        super().__init__(root, save_obj, menu_callback,
+                         center, user, reload_ordering_screen, True)
 
         self.buttons_frame = ctk.CTkFrame(master=self.root)
 
@@ -74,7 +75,8 @@ class PairwiseOrderingScreen(OrderingScreen):
 
         self.images_frame.grid(row=1, column=0, columnspan=2, padx=0, pady=0)
 
-        self.buttons_frame.grid(row=3, column=0, columnspan=2, pady=10, sticky="N")
+        self.buttons_frame.grid(
+            row=3, column=0, columnspan=2, pady=10, sticky="N")
 
         if not type(self.sort_alg) == sa.MergeSort:
             self.alot_less_button.grid(row=0, column=0, padx=(10, 5), pady=10)
@@ -166,7 +168,8 @@ class PairwiseOrderingScreen(OrderingScreen):
             if self.scroll_allowed:
                 self.progress_bar.grid(
                     row=2, column=0, columnspan=2, sticky="N", pady=5)
-                self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]
+                self.images = [
+                    [img, self.file_2_CTkImage(img), 0] for img in keys]
                 self.update_images()
                 self.progress_bar.grid_forget()
                 self.progress_bar_progress = 0

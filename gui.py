@@ -58,20 +58,23 @@ class AnnotationGui():
             self.menu_screen.display_user(self.selected_user)
         self.menu_screen.display()
 
-    def display_ordering_screen(self, save_obj):
+    def display_ordering_screen(self, save_obj, hybrid_transition_made=False):
 
         if hasattr(self, 'selected_user'):
             self.clear_screen()
 
-            if type(save_obj["sort_alg"]) == RatingAlgorithm:
+            sort_alg = save_obj["sort_alg"] if type(
+                save_obj["sort_alg"]) != HybridTrueSkill else save_obj["sort_alg"].sort_alg
+
+            if type(sort_alg) == RatingAlgorithm:
                 ordering_screen = RatingScreen(
-                    self.root, save_obj, self.display_menu, self.center, self.selected_user)
-            elif save_obj["sort_alg"].comparison_size == 2:
+                    self.root, save_obj, self.display_menu, self.center, self.selected_user, self.reload_ordering_screen, hybrid_transition_made)
+            elif sort_alg.comparison_size == 2:
                 ordering_screen = PairwiseOrderingScreen(
-                    self.root, save_obj, self.display_menu, self.center, self.selected_user)
+                    self.root, save_obj, self.display_menu, self.center, self.selected_user, self.reload_ordering_screen)
             else:
                 ordering_screen = MultiOrderingScreen(
-                    self.root, save_obj, self.display_menu, self.center, self.selected_user)
+                    self.root, save_obj, self.display_menu, self.center, self.selected_user, self.reload_ordering_screen)
 
             ordering_screen.display()
         else:
@@ -94,3 +97,6 @@ class AnnotationGui():
 
     def open_user_selection(self):
         UserSelectionPopOut(self.root, self.center, self.select_user)
+
+    def reload_ordering_screen(self, save_obj):
+        self.display_ordering_screen(save_obj, hybrid_transition_made=True)

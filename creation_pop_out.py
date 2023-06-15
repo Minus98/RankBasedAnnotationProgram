@@ -71,7 +71,7 @@ class CreationPopOut():
         comparison_count_label.grid(row=0, column=1, padx=5)
 
         algorithm_selection = ctk.CTkOptionMenu(
-            master=pop_out, values=["True Skill", "Merge Sort", "Rating"], width=200, height=40, font=('Helvetica bold', 20), command=lambda value, pop_out=pop_out, slider=slider, slider_frame=slider_frame, label=comparison_count_label, comp_label=comp_label: self.algorithm_changed(value, pop_out, slider, slider_frame, label, comp_label))
+            master=pop_out, values=["True Skill", "Merge Sort", "Rating", "Hybrid"], width=200, height=40, font=('Helvetica bold', 20), command=lambda value, pop_out=pop_out, slider=slider, slider_frame=slider_frame, label=comparison_count_label, comp_label=comp_label: self.algorithm_changed(value, pop_out, slider, slider_frame, label, comp_label))
 
         algorithm_selection.grid(
             row=1, column=1, padx=10, pady=2, sticky="w")
@@ -91,12 +91,13 @@ class CreationPopOut():
         directory_entry.grid(row=3, column=1, padx=10,
                              pady=(2, 10), sticky="w")
 
-
         ctk.CTkLabel(master=pop_out, text="Enable Scrolling:", font=('Helvetica bold', 20)).grid(
             row=4, column=0, padx=10, pady=2, sticky="e")
         scroll_enabled = ctk.BooleanVar()
-        scroll_enabled_checkbox = ctk.CTkCheckBox(master = pop_out, variable=scroll_enabled, text="", checkbox_width=30, checkbox_height=30, onvalue=True, offvalue=False)
-        scroll_enabled_checkbox.grid(row=4, column=1, padx=10, pady=2, sticky="w")
+        scroll_enabled_checkbox = ctk.CTkCheckBox(
+            master=pop_out, variable=scroll_enabled, text="", checkbox_width=30, checkbox_height=30, onvalue=True, offvalue=False)
+        scroll_enabled_checkbox.grid(
+            row=4, column=1, padx=10, pady=2, sticky="w")
 
         button_frame = ctk.CTkFrame(
             master=pop_out, fg_color=pop_out.cget("fg_color"))
@@ -104,7 +105,7 @@ class CreationPopOut():
                           sticky="ew", pady=(0, 10))
 
         create_button = ctk.CTkButton(
-            master=button_frame, text="Create Annotation", width=200, height=40, font=('Helvetica bold', 20), command=lambda name=name, algorithm_selection=algorithm_selection, slider=slider, image_directory=image_directory, pop_out=pop_out, scroll_enabled = scroll_enabled: self.create_save(name, algorithm_selection, slider, image_directory, pop_out, scroll_enabled))
+            master=button_frame, text="Create Annotation", width=200, height=40, font=('Helvetica bold', 20), command=lambda name=name, algorithm_selection=algorithm_selection, slider=slider, image_directory=image_directory, pop_out=pop_out, scroll_enabled=scroll_enabled: self.create_save(name, algorithm_selection, slider, image_directory, pop_out, scroll_enabled))
         delete_button = ctk.CTkButton(
             master=button_frame, text="Cancel", width=200, height=40, font=('Helvetica bold', 20), command=pop_out.destroy)
 
@@ -133,6 +134,9 @@ class CreationPopOut():
             sort_alg = MergeSort(data=img_paths)
         elif alg == "Rating":
             sort_alg = RatingAlgorithm(data=img_paths)
+        elif alg == "Hybrid":
+            sort_alg = HybridTrueSkill(
+                data=img_paths, comparison_size=int(comparison_size.get()))
         else:
             sort_alg = TrueSkill(
                 data=img_paths, comparison_size=int(comparison_size.get()))

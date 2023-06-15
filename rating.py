@@ -8,9 +8,10 @@ from ordering import OrderingScreen
 
 class RatingScreen(OrderingScreen):
 
-    def __init__(self, root, save_obj, menu_callback, center, user):
+    def __init__(self, root, save_obj, menu_callback, center, user, reload_ordering_screen, hybrid_transition_made):
 
-        super().__init__(root, save_obj, menu_callback, center, user)
+        super().__init__(root, save_obj, menu_callback, center,
+                         user, reload_ordering_screen, hybrid_transition_made)
 
         self.buttons_frame = ctk.CTkFrame(master=self.root)
 
@@ -18,10 +19,10 @@ class RatingScreen(OrderingScreen):
             master=self.root, text="The bronchial wall thickening in the image appears to be ... ", font=('Helvetica bold', 20))
 
         self.not_assessable_button = ctk.CTkButton(master=self.buttons_frame, text="Non-assessable (1)", width=160,
-                                         height=40, command=lambda: self.submit(-1), font=('Helvetica bold', 20))
-        
+                                                   height=40, command=lambda: self.submit(-1), font=('Helvetica bold', 20))
+
         self.absolute_none_button = ctk.CTkButton(master=self.buttons_frame, text="Clearly None (2)", width=160,
-                                         height=40, command=lambda: self.submit(0), font=('Helvetica bold', 20))
+                                                  height=40, command=lambda: self.submit(0), font=('Helvetica bold', 20))
 
         self.none_button = ctk.CTkButton(master=self.buttons_frame, text="None (3)", width=160,
                                          height=40, command=lambda: self.submit(1), font=('Helvetica bold', 20))
@@ -32,7 +33,7 @@ class RatingScreen(OrderingScreen):
         self.severe_button = ctk.CTkButton(master=self.buttons_frame, text="Severe (6)", width=160,
                                            height=40, command=lambda: self.submit(4), font=('Helvetica bold', 20))
 
-        self.tab_items = [self.not_assessable_button, self.absolute_none_button, 
+        self.tab_items = [self.not_assessable_button, self.absolute_none_button,
                           self.none_button, self.mild_button,
                           self.moderate_button, self.severe_button]
         self.tab_index = -1
@@ -87,7 +88,7 @@ class RatingScreen(OrderingScreen):
         self.none_button.grid(row=0, column=2, padx=5, pady=10)
         self.mild_button.grid(row=0, column=3, padx=5, pady=10)
         self.moderate_button.grid(row=0, column=4, padx=5, pady=10)
-        self.severe_button.grid(row=0, column=5, padx=(5,10), pady=10)
+        self.severe_button.grid(row=0, column=5, padx=(5, 10), pady=10)
 
         self.session_duration_label.place(relx=0.98, y=20, anchor="ne")
 

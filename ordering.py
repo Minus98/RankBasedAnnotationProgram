@@ -16,12 +16,15 @@ import sorting_algorithms as sa
 
 class OrderingScreen():
 
-    def __init__(self, root, save_obj, menu_callback, center, user):
+    def __init__(self, root, save_obj, menu_callback, center, user, reload_ordering_screen, hybrid_transition_made):
 
         self.root = root
         self.menu_callback = menu_callback
         self.center = center
         self.user = user
+        self.reload_ordering_screen = reload_ordering_screen
+
+        self.hybrid_transition_made = hybrid_transition_made
 
         self.save_obj = save_obj
         self.sort_alg = save_obj["sort_alg"]
@@ -292,7 +295,10 @@ class OrderingScreen():
         self.session_elapsed_time_prev = time.time() - self.session_start_time
 
         if not self.is_finished_check():
-            self.display_new_comparison()
+            if type(self.sort_alg) == sa.HybridTrueSkill and not self.sort_alg.is_rating and not self.hybrid_transition_made:
+                self.reload_ordering_screen(self.save_obj)
+            else:
+                self.display_new_comparison()
 
         self.is_loading = False
 

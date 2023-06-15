@@ -959,3 +959,42 @@ class RatingAlgorithm (SortingAlgorithm):
         if len(user_dict['toRate']):
             return True
         return False
+
+
+class HybridTrueSkill (SortingAlgorithm):
+
+    def __init__(self, data, comparison_size=2, comparison_max=None, threshold=0.1):
+
+        self.data = data
+        self.comparison_size = comparison_size
+        self.comparison_max = comparison_max
+        self.threshold = threshold
+
+        self.sort_alg = RatingAlgorithm(data)
+
+        self.is_rating = True
+
+    def get_comparison(self, user_id):
+        return self.sort_alg.get_comparison(user_id)
+
+    def inference(self, user_id, key, rating):
+        self.sort_alg.inference(user_id, key, rating)
+
+        if self.is_rating:
+            if not self.sort_alg.comparison_is_available(user_id):
+                self.change_to_trueskill(user_id)
+
+    def get_result(self):
+        return self.sort_alg.get_result()
+
+    def is_finished(self):
+        self.sort_alg.is_finished()
+
+    def comparison_is_available(self, user_id):
+        self.sort_alg.comparison_is_available(user_id)
+
+    def change_to_trueskill(self, user_id):
+        results = self.sort_alg.get_user_result(user_id)
+        self.sort_alg = TrueSkill(self.data, comparison_size=self.comparison_size,
+                                  comparison_max=self.comparison_max, threshold=self.threshold, initial_mus=results)
+        self.is_rating = False
