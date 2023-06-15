@@ -296,6 +296,7 @@ class OrderingScreen():
 
         if not self.is_finished_check():
             if type(self.sort_alg) == sa.HybridTrueSkill and not self.sort_alg.is_rating and not self.hybrid_transition_made:
+                self.root.after_cancel(self.timer_after)
                 self.reload_ordering_screen(self.save_obj)
             else:
                 self.display_new_comparison()
