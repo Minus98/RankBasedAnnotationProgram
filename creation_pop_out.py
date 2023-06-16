@@ -155,12 +155,8 @@ class CreationPopOut():
 
         path_to_save = path + "/" + file_name
 
-        if alg == "Rating":
-            df = pd.DataFrame(
-                columns=['src', 'rating', 'time', 'session', 'user', 'undone'])
-        else:
-            df = pd.DataFrame(
-                columns=['result', 'diff_levels', 'time', 'session', 'user', 'undone'])
+        df = pd.DataFrame(
+            columns=['result', 'diff_levels', 'time', 'session', 'user', 'undone', 'type'])
 
         df.to_csv(path_to_save + ".csv", index=False)
 

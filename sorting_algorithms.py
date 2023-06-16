@@ -324,10 +324,10 @@ class HybridTrueSkill (SortingAlgorithm):
         return self.sort_alg.get_result()
 
     def is_finished(self):
-        self.sort_alg.is_finished()
+        return self.sort_alg.is_finished()
 
     def comparison_is_available(self, user_id):
-        self.sort_alg.comparison_is_available(user_id)
+        return self.sort_alg.comparison_is_available(user_id)
 
     def change_to_trueskill(self, user_id):
         results = {k: self.rating_to_mu(

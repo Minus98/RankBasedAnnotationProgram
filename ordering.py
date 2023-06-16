@@ -250,12 +250,7 @@ class OrderingScreen():
         f.close()
 
     def is_finished_check(self):
-        if type(self.sort_alg) == sa.TrueSkill:
-            if self.sort_alg.comparison_max <= self.sort_alg.comp_count:
-                self.save_sorted_images()
-                IsFinishedPopOut(self.root, self.center, self.back_to_menu)
-                return True
-        elif self.sort_alg.is_finished():
+        if self.sort_alg.is_finished():
             self.save_sorted_images()
             IsFinishedPopOut(self.root, self.center, self.back_to_menu)
             return True
@@ -319,23 +314,26 @@ class OrderingScreen():
     def remove_submission_timeout(self):
         self.submission_timeout = False
 
-    def save_to_csv_file(self, keys, lvls, df_annotatation=False):
+    def save_to_csv_file(self, res, lvls, df_annotatation=False):
 
         user = 'DF' if df_annotatation else self.user
 
-        if hasattr(keys, "__len__"):
-            key_label = 'result'
-            lvl_label = 'diff_levels'
+        if isinstance(res, str):
+            result = (res, lvls)
+            diff_levels = ""
+            annotation_type = "Rating"
         else:
-            key_label = 'src'
-            lvl_label = 'rating'
+            result = res
+            diff_levels = lvls
+            annotation_type = "Ranking"
 
-        df = pd.DataFrame({key_label: [keys],
-                           lvl_label: [lvls],
+        df = pd.DataFrame({'result': [result],
+                           'diff_level': [diff_levels],
                            'time': [time.time()-self.session_start_time],
                            'session': [self.session_id],
                            'user': [user],
-                           'undone': [False]})
+                           'undone': [False],
+                           'type': [annotation_type]})
 
         output_path = get_full_path(self.save_obj["path_to_save"] + ".csv")
         df.to_csv(output_path, mode='a',
