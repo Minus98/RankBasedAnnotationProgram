@@ -8,6 +8,7 @@ import time
 import numpy as np
 import pickle
 from is_finished_pop_out import IsFinishedPopOut
+from switching_modes_pop_out import SwitchingModesPopOut
 import shutil
 import pandas as pd
 from pathlib import Path
@@ -56,8 +57,12 @@ class OrderingScreen():
             csv_df = pd.read_csv(get_full_path(
                 self.save_obj["path_to_save"] + '.csv'))
 
-        current_user_count = len(
-            csv_df.loc[(csv_df['user'] == self.user) & (csv_df['undone'] == False)])
+        if self.hybrid_transition_made:
+            current_user_count = len(
+                csv_df.loc[(csv_df['user'] == self.user) & (csv_df['undone'] == False) & (csv_df['type'] == "Ranking")])
+        else:
+            current_user_count = len(
+                csv_df.loc[(csv_df['user'] == self.user) & (csv_df['undone'] == False)])
 
         self.comp_count = 0 + current_user_count
         if not type(self.sort_alg) == sa.RatingAlgorithm:
@@ -303,13 +308,15 @@ class OrderingScreen():
         if not self.is_finished_check():
             if type(self.sort_alg) == sa.HybridTrueSkill and not self.sort_alg.is_rating and not self.hybrid_transition_made:
                 self.root.after_cancel(self.timer_after)
+                # Switching modes popout
                 self.reload_ordering_screen(self.save_obj)
+                SwitchingModesPopOut(self.root, self.center)
             else:
                 self.display_new_comparison()
 
         self.is_loading = False
-
-        self.root.after(1000, self.remove_submission_timeout)
+        # Change back to 1000
+        self.root.after(100, self.remove_submission_timeout)
 
     def remove_submission_timeout(self):
         self.submission_timeout = False
