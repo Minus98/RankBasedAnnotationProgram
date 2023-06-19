@@ -10,9 +10,10 @@ from ordering import OrderingScreen
 
 class PairwiseOrderingScreen(OrderingScreen):
 
-    def __init__(self, root, save_obj, menu_callback, center, user):
+    def __init__(self, root, save_obj, menu_callback, center, user, reload_ordering_screen):
 
-        super().__init__(root, save_obj, menu_callback, center, user)
+        super().__init__(root, save_obj, menu_callback,
+                         center, user, reload_ordering_screen, True)
 
         self.buttons_frame = ctk.CTkFrame(master=self.root)
 
@@ -66,15 +67,19 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.session_elapsed_time_prev = 0
 
         self.root.grid_rowconfigure(0, weight=3, uniform="ordering")
-        self.root.grid_rowconfigure(1, weight=26, uniform="ordering")
-        self.root.grid_rowconfigure(2, weight=1, uniform="ordering")
-        self.root.grid_rowconfigure(3, weight=4, uniform="ordering")
+        self.root.grid_rowconfigure(1, weight=1, uniform="ordering")
+        self.root.grid_rowconfigure(2, weight=26, uniform="ordering")
+        self.root.grid_rowconfigure(3, weight=1, uniform="ordering")
+        self.root.grid_rowconfigure(4, weight=4, uniform="ordering")
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
 
-        self.images_frame.grid(row=1, column=0, columnspan=2, padx=0, pady=0)
+        self.images_frame.grid(row=2, column=0, columnspan=2, padx=0, pady=0)
 
-        self.buttons_frame.grid(row=3, column=0, columnspan=2, pady=10, sticky="N")
+        self.comparison_bar.grid(row=1, column=0, columnspan=2, pady=(10, 0))
+
+        self.buttons_frame.grid(
+            row=4, column=0, columnspan=2, pady=10, sticky="N")
 
         if not type(self.sort_alg) == sa.MergeSort:
             self.alot_less_button.grid(row=0, column=0, padx=(10, 5), pady=10)
@@ -165,8 +170,9 @@ class PairwiseOrderingScreen(OrderingScreen):
             self.root.update()
             if self.scroll_allowed:
                 self.progress_bar.grid(
-                    row=2, column=0, columnspan=2, sticky="N", pady=5)
-                self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]
+                    row=3, column=0, columnspan=2, sticky="N", pady=5)
+                self.images = [
+                    [img, self.file_2_CTkImage(img), 0] for img in keys]
                 self.update_images()
                 self.progress_bar.grid_forget()
                 self.progress_bar_progress = 0

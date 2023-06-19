@@ -8,6 +8,7 @@ import time
 import numpy as np
 import pickle
 from is_finished_pop_out import IsFinishedPopOut
+from switching_modes_pop_out import SwitchingModesPopOut
 import shutil
 import pandas as pd
 from pathlib import Path
@@ -16,12 +17,15 @@ import sorting_algorithms as sa
 
 class OrderingScreen():
 
-    def __init__(self, root, save_obj, menu_callback, center, user):
+    def __init__(self, root, save_obj, menu_callback, center, user, reload_ordering_screen, hybrid_transition_made):
 
         self.root = root
         self.menu_callback = menu_callback
         self.center = center
         self.user = user
+        self.reload_ordering_screen = reload_ordering_screen
+
+        self.hybrid_transition_made = hybrid_transition_made
 
         self.save_obj = save_obj
         self.sort_alg = save_obj["sort_alg"]
@@ -53,16 +57,24 @@ class OrderingScreen():
             csv_df = pd.read_csv(get_full_path(
                 self.save_obj["path_to_save"] + '.csv'))
 
-        current_user_count = len(
-            csv_df.loc[(csv_df['user'] == self.user) & (csv_df['undone'] == False)])
+        if self.hybrid_transition_made:
+            current_user_count = len(
+                csv_df.loc[(csv_df['user'] == self.user) & (csv_df['undone'] == False) & (csv_df['type'] == "Ranking")])
+        else:
+            current_user_count = len(
+                csv_df.loc[(csv_df['user'] == self.user) & (csv_df['undone'] == False)])
 
         self.comp_count = 0 + current_user_count
         if not type(self.sort_alg) == sa.RatingAlgorithm:
             self.comp_count_label = ctk.CTkLabel(
-                master=self.root, text=f"Comparison count: {self.comp_count}", font=('Helvetica bold', 30))
+                master=self.root, text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}", font=('Helvetica bold', 30))
         else:
             self.comp_count_label = ctk.CTkLabel(
                 master=self.root, text=f"Rating count: {self.comp_count}", font=('Helvetica bold', 30))
+
+        self.comparison_bar = ctk.CTkProgressBar(
+            self.root, width=400, height=20)
+        self.update_comparison_bar()
 
         self.back_button = ctk.CTkButton(
             master=self.root, text="Back To Menu", width=200, height=40, command=self.back_to_menu, font=('Helvetica bold', 18))
@@ -229,7 +241,12 @@ class OrderingScreen():
 
             self.comp_count -= 1
             self.comp_count_label.configure(
-                text=f"Comparison count: {self.comp_count}")
+                text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}")
+            self.update_comparison_bar()
+
+    def update_comparison_bar(self):
+        self.comparison_bar.set(
+            self.comp_count / self.sort_alg.get_comparison_max())
 
     def save_algorithm(self):
         f = open(get_full_path(
@@ -238,12 +255,7 @@ class OrderingScreen():
         f.close()
 
     def is_finished_check(self):
-        if type(self.sort_alg) == sa.TrueSkill:
-            if self.sort_alg.comparison_max <= self.sort_alg.comp_count:
-                self.save_sorted_images()
-                IsFinishedPopOut(self.root, self.center, self.back_to_menu)
-                return True
-        elif self.sort_alg.is_finished():
+        if self.sort_alg.is_finished():
             self.save_sorted_images()
             IsFinishedPopOut(self.root, self.center, self.back_to_menu)
             return True
@@ -278,46 +290,57 @@ class OrderingScreen():
 
         self.comp_count += 1
         self.comp_count_label.configure(
-            text=f"Comparison count: {self.comp_count}")
+            text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}")
 
         if not type(self.sort_alg) == sa.RatingAlgorithm:
             self.comp_count_label.configure(
-                text=f"Comparison count: {self.comp_count}")
+                text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}")
         else:
             self.comp_count_label.configure(
-                text=f"Rating count: {self.comp_count}")
+                text=f"Rating count: {self.comp_count}/{self.sort_alg.get_comparison_max()}")
+
+        self.update_comparison_bar()
 
         self.save_algorithm()
 
         self.session_elapsed_time_prev = time.time() - self.session_start_time
 
         if not self.is_finished_check():
-            self.display_new_comparison()
+            if type(self.sort_alg) == sa.HybridTrueSkill and not self.sort_alg.is_rating and not self.hybrid_transition_made:
+                self.root.after_cancel(self.timer_after)
+                # Switching modes popout
+                self.reload_ordering_screen(self.save_obj)
+                SwitchingModesPopOut(self.root, self.center)
+            else:
+                self.display_new_comparison()
 
         self.is_loading = False
-
-        self.root.after(1000, self.remove_submission_timeout)
+        # Change back to 1000
+        self.root.after(100, self.remove_submission_timeout)
 
     def remove_submission_timeout(self):
         self.submission_timeout = False
 
-    def save_to_csv_file(self, keys, lvls, df_annotatation=False):
+    def save_to_csv_file(self, res, lvls, df_annotatation=False):
 
         user = 'DF' if df_annotatation else self.user
 
-        if hasattr(keys, "__len__"):
-            key_label = 'result'
-            lvl_label = 'diff_levels'
+        if isinstance(res, str):
+            result = (res, lvls)
+            diff_levels = ""
+            annotation_type = "Rating"
         else:
-            key_label = 'src'
-            lvl_label = 'rating'
+            result = res
+            diff_levels = lvls
+            annotation_type = "Ranking"
 
-        df = pd.DataFrame({key_label: [keys],
-                           lvl_label: [lvls],
+        df = pd.DataFrame({'result': [result],
+                           'diff_level': [diff_levels],
                            'time': [time.time()-self.session_start_time],
                            'session': [self.session_id],
                            'user': [user],
-                           'undone': [False]})
+                           'undone': [False],
+                           'type': [annotation_type]})
 
         output_path = get_full_path(self.save_obj["path_to_save"] + ".csv")
         df.to_csv(output_path, mode='a',

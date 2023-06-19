@@ -6,9 +6,10 @@ from ordering import OrderingScreen
 
 class MultiOrderingScreen(OrderingScreen):
 
-    def __init__(self, root, save_obj, menu_callback, center, user):
+    def __init__(self, root, save_obj, menu_callback, center, user, reload_ordering_screen):
 
-        super().__init__(root, save_obj, menu_callback, center, user)
+        super().__init__(root, save_obj, menu_callback,
+                         center, user, reload_ordering_screen, True)
 
         self.int_diff_levels = [ctk.IntVar(None, 1)
                                 for _ in range(self.comparison_size - 1)]
@@ -34,8 +35,7 @@ class MultiOrderingScreen(OrderingScreen):
 
         self.submit_button.grid(row=3, column=0, columnspan=2, sticky="N")
 
-
-        self.session_duration_label.place(relx = 0.98, y=20, anchor = "ne")
+        self.session_duration_label.place(relx=0.98, y=20, anchor="ne")
         self.comp_count_label.grid(row=0, column=0, columnspan=2, sticky="S")
 
         self.back_button.place(x=20, y=20)
@@ -48,7 +48,7 @@ class MultiOrderingScreen(OrderingScreen):
 
         if not self.is_finished_check():
             self.display_new_comparison()
-        
+
         self.is_loading = False
 
     def init_image_frames(self):
@@ -114,10 +114,12 @@ class MultiOrderingScreen(OrderingScreen):
 
             self.root.bind(
                 "<Return>", lambda event: self.submit())
-            
-            displayed_image.bind("<Enter>",command=lambda event, i=i: self.set_image_hover_idx(i))
-            
-            displayed_image.bind("<Leave>",command=lambda event: self.set_image_hover_idx(-1))
+
+            displayed_image.bind(
+                "<Enter>", command=lambda event, i=i: self.set_image_hover_idx(i))
+
+            displayed_image.bind(
+                "<Leave>", command=lambda event: self.set_image_hover_idx(-1))
 
     def init_diff_level_buttons(self):
 
@@ -206,22 +208,23 @@ class MultiOrderingScreen(OrderingScreen):
                        for img in keys]
         self.update_images()
 
-        if not self.buttons_initialized: 
+        if not self.buttons_initialized:
             self.init_diff_level_buttons()
             self.buttons_initialized = True
         self.root.update()
 
         if self.scroll_allowed:
-            self.progress_bar.grid(row = 2, column=0, columnspan = 2, sticky="N", pady=5)
+            self.progress_bar.grid(
+                row=2, column=0, columnspan=2, sticky="N", pady=5)
             self.images = [[img, self.file_2_CTkImage(img), 0]
-                       for img in keys]
+                           for img in keys]
 
             self.update_images()
             self.progress_bar.grid_forget()
             self.progress_bar_progress = 0
-        
+
         if self.prev_sort_alg is not None:
-                self.undo_label.place(x=20, y=70)
+            self.undo_label.place(x=20, y=70)
 
     def move_left(self, index):
 
