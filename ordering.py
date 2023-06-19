@@ -108,9 +108,20 @@ class OrderingScreen():
         self.scroll_allowed = save_obj["scroll_allowed"]
         self.submission_timeout = False
 
+        directory_dict = self.save_obj['user_directory_dict']
+
+        if self.user in directory_dict:
+            self.image_directory = directory_dict[self.user]
+        elif all([os.path.isfile(self.save_obj['image_directory'] + "/" + k) for k in self.sort_alg.data]):
+            directory_dict[self.user] = self.save_obj['image_directory']
+            self.image_directory = self.save_obj['image_directory']
+        else:
+            #prompt...
+            pass
+
     def file_2_CTkImage(self, img_src):
 
-        img_src = get_full_path(img_src)
+        img_src = get_full_path(self.image_directory + "/" + img_src)
 
         _, extension = os.path.splitext(img_src)
 
@@ -150,7 +161,9 @@ class OrderingScreen():
         widget.configure(text_color="#777777")
 
     def load_initial_image(self, img_src):
-        img_src = get_full_path(img_src)
+        
+        img_src = get_full_path(self.image_directory + "/" + img_src)
+
         _, extension = os.path.splitext(img_src)
 
         if extension == '.nii':

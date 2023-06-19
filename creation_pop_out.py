@@ -85,8 +85,8 @@ class CreationPopOut():
         directory_entry = ctk.CTkEntry(
             master=pop_out, textvariable=image_directory, placeholder_text="select the directory which contains the files", width=400, height=40, font=('Helvetica bold', 16), state=ctk.DISABLED)
 
-        directory_entry.bind("<Button-1>", command=lambda event,
-                             image_directory=image_directory: self.select_directory(event, image_directory))
+        directory_entry.bind("<Button-1>", command=lambda event, pop_out = pop_out,
+                             image_directory=image_directory: self.select_directory(event, pop_out, image_directory))
 
         directory_entry.grid(row=3, column=1, padx=10,
                              pady=(2, 10), sticky="w")
@@ -123,10 +123,11 @@ class CreationPopOut():
         directory = os.path.relpath(image_directory.get())
         final_name = name.get()
 
-        img_paths = list(str(p) for p in Path(directory).glob(
+        img_paths = list(str(os.path.basename(p)) for p in Path(directory).glob(
             "**/*") if p.suffix in {'.jpg', '.png', '.nii'} and 'sorted' not in str(p).lower())
 
         random.shuffle(img_paths)
+        print(img_paths)
 
         alg = algorithm.get()
 
@@ -161,10 +162,10 @@ class CreationPopOut():
         df.to_csv(path_to_save + ".csv", index=False)
 
         rel_path_to_save = "Saves/" + file_name
-
+        print(directory)
         save_obj = {"sort_alg": sort_alg, "name": final_name,
                     "image_directory": directory, "path_to_save": rel_path_to_save,
-                    "scroll_allowed": scroll_enabled.get()}
+                    "user_directory_dict": {} , "scroll_allowed": scroll_enabled.get()}
 
         f = open(path + "/" + file_name + ".pickle", "wb")
         pickle.dump(save_obj, f)
@@ -206,6 +207,6 @@ class CreationPopOut():
     def update_comparison_size(self, val, label):
         label.configure(text=int(val))
 
-    def select_directory(self, event, directory_var):
-        directory = ctk.filedialog.askdirectory()
+    def select_directory(self, event, root, directory_var):
+        directory = ctk.filedialog.askdirectory(parent=root)
         directory_var.set(directory)
