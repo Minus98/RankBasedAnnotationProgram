@@ -9,6 +9,7 @@ import numpy as np
 import pickle
 from is_finished_pop_out import IsFinishedPopOut
 from switching_modes_pop_out import SwitchingModesPopOut
+from image_directory_pop_out import ImageDirectoryPopOut
 import shutil
 import pandas as pd
 from pathlib import Path
@@ -18,6 +19,8 @@ import sorting_algorithms as sa
 class OrderingScreen():
 
     def __init__(self, root, save_obj, menu_callback, center, user, reload_ordering_screen, hybrid_transition_made):
+
+        self.image_directory_located = False
 
         self.root = root
         self.menu_callback = menu_callback
@@ -112,16 +115,18 @@ class OrderingScreen():
 
         if self.user in directory_dict:
             self.image_directory = directory_dict[self.user]
+            self.image_directory_located = True
         elif all([os.path.isfile(self.save_obj['image_directory'] + "/" + k) for k in self.sort_alg.data]):
             directory_dict[self.user] = self.save_obj['image_directory']
             self.image_directory = self.save_obj['image_directory']
+            self.image_directory_located = True
         else:
-            #prompt...
-            pass
+            ImageDirectoryPopOut(self.root, self.center, self.submit_path, self.back_to_menu)
+
 
     def file_2_CTkImage(self, img_src):
 
-        img_src = get_full_path(self.image_directory + "/" + img_src)
+        img_src = os.path.relpath(self.image_directory + "/" + img_src)
 
         _, extension = os.path.splitext(img_src)
 
@@ -161,8 +166,8 @@ class OrderingScreen():
         widget.configure(text_color="#777777")
 
     def load_initial_image(self, img_src):
-        
-        img_src = get_full_path(self.image_directory + "/" + img_src)
+
+        img_src = os.path.relpath(self.image_directory + "/" + img_src)
 
         _, extension = os.path.splitext(img_src)
 
@@ -367,7 +372,16 @@ class OrderingScreen():
         copy_df.iloc[-1, copy_df.columns.get_loc('undone')] = True
         copy_df.to_csv(path, index=False)
 
-    def back_to_menu(self):
-        self.root.after_cancel(self.timer_after)
+    def back_to_menu(self, remove_after = True):
+        if remove_after:
+            self.root.after_cancel(self.timer_after)
         self.root.unbind("<Return>")
         self.menu_callback()
+
+    def submit_path(self, path):
+        self.image_directory = path
+        self.image_directory_located = True
+        directory_dict = self.save_obj['user_directory_dict']
+        directory_dict[self.user] = path
+        self.save_algorithm()
+        self.display()

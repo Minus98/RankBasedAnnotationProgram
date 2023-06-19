@@ -1,0 +1,61 @@
+import customtkinter as ctk
+from pathlib import Path
+
+class ImageDirectoryPopOut():
+
+    def __init__(self, root, center, submit_path, back_to_menu):
+
+        self.root = root
+        self.center = center
+        self.submit_path = submit_path
+        self.back_to_menu = back_to_menu
+
+        pop_out = ctk.CTkToplevel()
+        self.pop_out = pop_out
+        w = 700
+        h = 300
+        x, y = self.center(w, h)
+
+        pop_out.geometry('%dx%d+%d+%d' % (w, h, x, y))
+        pop_out.columnconfigure(index=0, weight=1)
+        pop_out.columnconfigure(index=1, weight=1)
+        pop_out.rowconfigure(index=0, weight=1)
+        pop_out.rowconfigure(index=1, weight=1)
+
+        label = ctk.CTkLabel(text="Could not find source directory. \n Please provide the directory where \n the images are located.",
+                             master=pop_out, font=('Helvetica bold', 26))
+
+        label.grid(row=0, column=0, sticky='nsew', columnspan=2)
+
+        self.image_directory = ctk.StringVar()
+        self.image_directory.set(str(Path("Images").resolve()))
+
+        directory_entry = ctk.CTkEntry(
+            master=pop_out, textvariable=self.image_directory, placeholder_text="select the directory which contains the files", width=500, height=40, font=('Helvetica bold', 16), state=ctk.DISABLED)
+
+        
+        directory_entry.bind("<Button-1>", command=lambda event, pop_out = pop_out,
+                             image_directory=self.image_directory: self.select_directory(event, pop_out, image_directory))
+
+        directory_entry.grid(row=1, column=0, columnspan=2)        
+        
+        submit_button = ctk.CTkButton(
+            text="Submit", command=self.submit, width=w//2-20, height=h//5, master=pop_out, font=('Helvetica bold', 30))
+        submit_button.grid(row=2, column=0, sticky='sew',
+                         pady=(0, 10), padx=(10, 5))
+        menu_button = ctk.CTkButton(text="Return to menu", command=lambda: self.back_to_menu(False),
+                                    width=w//2-20, height=h//5, master=pop_out, font=('Helvetica bold', 30))
+        menu_button.grid(row=2, column=1, sticky='sew',
+                         pady=(0, 10), padx=(5, 10))
+
+        pop_out.grab_set()
+        pop_out.attributes("-topmost", True)
+
+    def select_directory(self, event, root, directory_var):
+        directory = ctk.filedialog.askdirectory(parent=root)
+        directory_var.set(directory)
+
+    def submit(self):
+        self.submit_path(self.image_directory.get())
+        self.pop_out.destroy()
+        

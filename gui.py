@@ -5,7 +5,7 @@ from rating import RatingScreen
 from sorting_algorithms import *
 from menu import MenuScreen
 from multiordering import MultiOrderingScreen
-from user_selection_popout import UserSelectionPopOut
+from user_selection_pop_out import UserSelectionPopOut
 
 
 class AnnotationGui():
@@ -76,7 +76,8 @@ class AnnotationGui():
                 ordering_screen = MultiOrderingScreen(
                     self.root, save_obj, self.display_menu, self.center, self.selected_user, self.reload_ordering_screen)
 
-            ordering_screen.display()
+            if ordering_screen.image_directory_located:
+                ordering_screen.display()
         else:
             UserSelectionPopOut(self.root, self.center, self.select_user)
 
