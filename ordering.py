@@ -113,7 +113,7 @@ class OrderingScreen():
 
         directory_dict = self.save_obj['user_directory_dict']
 
-        if self.user in directory_dict:
+        if self.user in directory_dict and all([os.path.isfile(directory_dict[self.user] + "/" + k) for k in self.sort_alg.data]):
             self.image_directory = directory_dict[self.user]
             self.image_directory_located = True
         elif all([os.path.isfile(self.save_obj['image_directory'] + "/" + k) for k in self.sort_alg.data]):
@@ -121,7 +121,7 @@ class OrderingScreen():
             self.image_directory = self.save_obj['image_directory']
             self.image_directory_located = True
         else:
-            ImageDirectoryPopOut(self.root, self.center, self.submit_path, self.back_to_menu)
+            ImageDirectoryPopOut(self.root, self.center, self.save_obj, self.submit_path, self.back_to_menu)
 
 
     def file_2_CTkImage(self, img_src):

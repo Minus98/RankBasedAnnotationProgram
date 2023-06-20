@@ -1,12 +1,14 @@
+import os
 import customtkinter as ctk
 from pathlib import Path
 
 class ImageDirectoryPopOut():
 
-    def __init__(self, root, center, submit_path, back_to_menu):
+    def __init__(self, root, center, save_obj, submit_path, back_to_menu):
 
         self.root = root
         self.center = center
+        self.save_obj = save_obj
         self.submit_path = submit_path
         self.back_to_menu = back_to_menu
 
@@ -29,6 +31,7 @@ class ImageDirectoryPopOut():
 
         self.image_directory = ctk.StringVar()
         self.image_directory.set(str(Path("Images").resolve()))
+        self.image_directory.trace("w", lambda name, index, mode, image_directory=self.image_directory: self.image_directory_callback(image_directory))
 
         directory_entry = ctk.CTkEntry(
             master=pop_out, textvariable=self.image_directory, placeholder_text="select the directory which contains the files", width=500, height=40, font=('Helvetica bold', 16), state=ctk.DISABLED)
@@ -39,9 +42,9 @@ class ImageDirectoryPopOut():
 
         directory_entry.grid(row=1, column=0, columnspan=2)        
         
-        submit_button = ctk.CTkButton(
-            text="Submit", command=self.submit, width=w//2-20, height=h//5, master=pop_out, font=('Helvetica bold', 30))
-        submit_button.grid(row=2, column=0, sticky='sew',
+        self.submit_button = ctk.CTkButton(
+            text="Submit", state=ctk.DISABLED, command=self.submit, width=w//2-20, height=h//5, master=pop_out, font=('Helvetica bold', 30))
+        self.submit_button.grid(row=2, column=0, sticky='sew',
                          pady=(0, 10), padx=(10, 5))
         menu_button = ctk.CTkButton(text="Return to menu", command=lambda: self.back_to_menu(False),
                                     width=w//2-20, height=h//5, master=pop_out, font=('Helvetica bold', 30))
@@ -50,6 +53,10 @@ class ImageDirectoryPopOut():
 
         pop_out.grab_set()
         pop_out.attributes("-topmost", True)
+
+    def image_directory_callback(self, image_directory):
+        if all([os.path.isfile(image_directory.get() + "/" + k) for k in self.save_obj["sort_alg"].data]):
+            self.submit_button.configure(state=ctk.NORMAL)
 
     def select_directory(self, event, root, directory_var):
         directory = ctk.filedialog.askdirectory(parent=root)
