@@ -277,7 +277,7 @@ class OrderingScreen():
 
     def is_finished_check(self):
         if self.sort_alg.is_finished():
-            self.save_sorted_images()
+            #self.save_sorted_images()
             IsFinishedPopOut(self.root, self.center, self.back_to_menu)
             return True
         return False

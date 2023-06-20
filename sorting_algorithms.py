@@ -347,7 +347,7 @@ class HybridTrueSkill (SortingAlgorithm):
             v) for k, v in self.sort_alg.get_user_result("hybrid").items() if v > 0}
 
         self.sort_alg = TrueSkill(results.keys(), comparison_size=self.comparison_size,
-                                  comparison_max=len(results.keys())*2, initial_mus=results)
+                                  comparison_max=len(results.keys())*4, initial_mus=results)
         self.is_rating = False
 
     def rating_to_mu(self, rating):
