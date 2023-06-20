@@ -324,14 +324,14 @@ class HybridTrueSkill (SortingAlgorithm):
         self.is_rating = True
 
     def get_comparison(self, user_id):
-        return self.sort_alg.get_comparison(user_id)
+        return self.sort_alg.get_comparison("hybrid")
 
     def inference(self, user_id, key, rating):
-        self.sort_alg.inference(user_id, key, rating)
+        self.sort_alg.inference("hybrid", key, rating)
 
         if self.is_rating:
-            if not self.sort_alg.comparison_is_available(user_id):
-                self.change_to_trueskill(user_id)
+            if not self.sort_alg.comparison_is_available("hybrid"):
+                self.change_to_trueskill("hybrid")
 
     def get_result(self):
         return self.sort_alg.get_result()
@@ -340,11 +340,11 @@ class HybridTrueSkill (SortingAlgorithm):
         return self.sort_alg.is_finished()
 
     def comparison_is_available(self, user_id):
-        return self.sort_alg.comparison_is_available(user_id)
+        return self.sort_alg.comparison_is_available("hybrid")
 
     def change_to_trueskill(self, user_id):
         results = {k: self.rating_to_mu(
-            v) for k, v in self.sort_alg.get_user_result(user_id).items() if v > 0}
+            v) for k, v in self.sort_alg.get_user_result("hybrid").items() if v > 0}
 
         self.sort_alg = TrueSkill(results.keys(), comparison_size=self.comparison_size,
                                   comparison_max=len(results.keys())*2, initial_mus=results)

@@ -60,9 +60,12 @@ class OrderingScreen():
             csv_df = pd.read_csv(get_full_path(
                 self.save_obj["path_to_save"] + '.csv'))
 
-        if self.hybrid_transition_made:
+        if type(self.sort_alg) == sa.HybridTrueSkill and self.hybrid_transition_made:
             current_user_count = len(
-                csv_df.loc[(csv_df['user'] == self.user) & (csv_df['undone'] == False) & (csv_df['type'] == "Ranking")])
+                csv_df.loc[(csv_df['undone'] == False) & (csv_df['type'] == "Ranking")])
+        elif type(self.sort_alg) == sa.HybridTrueSkill:
+            current_user_count = len(
+                csv_df.loc[(csv_df['undone'] == False)])
         else:
             current_user_count = len(
                 csv_df.loc[(csv_df['user'] == self.user) & (csv_df['undone'] == False)])
