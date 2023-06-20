@@ -73,7 +73,7 @@ class OrderingScreen():
                 master=self.root, text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}", font=('Helvetica bold', 30))
         else:
             self.comp_count_label = ctk.CTkLabel(
-                master=self.root, text=f"Rating count: {self.comp_count}", font=('Helvetica bold', 30))
+                master=self.root, text=f"Rating count: {self.comp_count}/{self.sort_alg.get_comparison_max()}", font=('Helvetica bold', 30))
 
         self.comparison_bar = ctk.CTkProgressBar(
             self.root, width=400, height=20)

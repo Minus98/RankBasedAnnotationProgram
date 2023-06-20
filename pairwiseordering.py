@@ -74,7 +74,9 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
 
-        self.images_frame.grid(row=2, column=0, columnspan=2, padx=0, pady=0)
+        if not self.sort_alg.is_finished():
+            self.images_frame.grid(
+                row=2, column=0, columnspan=2, padx=0, pady=0)
 
         self.comparison_bar.grid(row=1, column=0, columnspan=2, pady=(10, 0))
 

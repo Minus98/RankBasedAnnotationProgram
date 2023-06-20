@@ -20,7 +20,7 @@ class SwitchingModesPopOut():
         pop_out.rowconfigure(index=0, weight=1)
         pop_out.rowconfigure(index=1, weight=1)
 
-        label = ctk.CTkLabel(text="Hello! \n Each Image has now been rated. \n The system will now switch to ranking.",
+        label = ctk.CTkLabel(text="Each Image has now been rated! \n The system will now switch to ranking.",
                              master=pop_out, font=('Helvetica bold', 26))
 
         label.grid(row=0, column=0, sticky='nsew', columnspan=2)
