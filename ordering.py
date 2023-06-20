@@ -337,8 +337,8 @@ class OrderingScreen():
                 self.display_new_comparison()
 
         self.is_loading = False
-        # Change back to 1000
-        self.root.after(100, self.remove_submission_timeout)
+
+        self.root.after(500, self.remove_submission_timeout)
 
     def remove_submission_timeout(self):
         self.submission_timeout = False
