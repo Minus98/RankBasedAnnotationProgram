@@ -127,7 +127,6 @@ class CreationPopOut():
             "**/*") if p.suffix in {'.jpg', '.png', '.nii'} and 'sorted' not in str(p).lower())
 
         random.shuffle(img_paths)
-        print(img_paths)
 
         alg = algorithm.get()
 
@@ -162,7 +161,6 @@ class CreationPopOut():
         df.to_csv(path_to_save + ".csv", index=False)
 
         rel_path_to_save = "Saves/" + file_name
-        print(directory)
         save_obj = {"sort_alg": sort_alg, "name": final_name,
                     "image_directory": directory, "path_to_save": rel_path_to_save,
                     "user_directory_dict": {} , "scroll_allowed": scroll_enabled.get()}
