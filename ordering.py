@@ -121,8 +121,8 @@ class OrderingScreen():
             self.image_directory = self.save_obj['image_directory']
             self.image_directory_located = True
         else:
-            ImageDirectoryPopOut(self.root, self.center, self.save_obj, self.submit_path, self.back_to_menu)
-
+            ImageDirectoryPopOut(
+                self.root, self.center, self.save_obj, self.submit_path, self.back_to_menu)
 
     def file_2_CTkImage(self, img_src):
 
@@ -282,12 +282,11 @@ class OrderingScreen():
     def save_sorted_images(self):
         res = self.sort_alg.get_result()
         for i, src in enumerate(res):
-            path = str(Path(get_full_path(src)).parent)
             _, extension = os.path.splitext(src)
             new_name = str(i) + extension
-            dst = path + '/sorted/' + new_name
+            dst = self.image_directory + '/sorted/' + new_name
             os.makedirs(os.path.dirname(dst), exist_ok=True)
-            shutil.copy(get_full_path(src), dst)
+            shutil.copy(os.path.relpath(self.image_directory + "/" + src), dst)
 
     def submit_comparison(self, keys, lvl, df_annotatation=False):
 
@@ -372,7 +371,7 @@ class OrderingScreen():
         copy_df.iloc[-1, copy_df.columns.get_loc('undone')] = True
         copy_df.to_csv(path, index=False)
 
-    def back_to_menu(self, remove_after = True):
+    def back_to_menu(self, remove_after=True):
         if remove_after:
             self.root.after_cancel(self.timer_after)
         self.root.unbind("<Return>")
