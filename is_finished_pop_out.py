@@ -39,5 +39,7 @@ class IsFinishedPopOut():
         quit_button.grid(row=1, column=1, sticky='sew',
                          pady=(0, 10), padx=(5, 10))
 
+        pop_out.protocol("WM_DELETE_WINDOW", self.back_to_menu)
+
         pop_out.grab_set()
         pop_out.attributes("-topmost", True)
