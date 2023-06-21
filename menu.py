@@ -205,7 +205,8 @@ class MenuScreen():
         CreationPopOut(self.creation_callback, self.center)
 
     def load_save(self, index):
-
+        '''Loads the save object associated with the index
+        '''
         file = open(self.paths[index], 'rb')
 
         save_obj = pickle.load(file)
