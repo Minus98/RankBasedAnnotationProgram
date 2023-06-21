@@ -15,6 +15,8 @@ class SortingAlgorithm (ABC):
 
     @abstractmethod
     def inference(self):
+        '''Updates the algorithms estimated ordering based on the results of a comparison.
+        '''
         pass
 
     @abstractmethod
