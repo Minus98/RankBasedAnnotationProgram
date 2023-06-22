@@ -5,6 +5,7 @@ import numpy as np
 
 from abc import ABC, abstractmethod
 from trueskill import Rating, rate_1vs1
+import utils
 
 
 class SortingAlgorithm (ABC):
@@ -14,16 +15,20 @@ class SortingAlgorithm (ABC):
         '''Fetches a new comparison based on the state of the sorting algorithm.
 
         Args:
-            user_id (str): the id of the user that is to perform the comparison.
+            user_id: the id of the user that is to perform the comparison.
         Returns:
             a list containing the keys of the elements that are to be compared.'''
         
         pass
 
     @abstractmethod
-    def inference(self):
+    def inference(self, user_id: str, keys: list[str], diff_lvls: list[utils.DiffLevel]):
         '''Updates the algorithms estimated ordering based on the results of a comparison.
-        '''
+
+        Args:
+            user_id: the id of the user that has performed the comparison.
+            keys: an ordered list of the keys which the user compared.
+            diff_lvls: a list containing the DiffLevels of adjacent elements in keys.'''
         pass
 
     @abstractmethod
