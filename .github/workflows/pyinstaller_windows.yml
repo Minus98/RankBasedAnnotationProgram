@@ -1,4 +1,4 @@
-name: Package Application with Pyinstaller
+name: Create Windows Executeable
 on: [push, pull_request, workflow_dispatch]
 permissions:
     contents: write
@@ -21,8 +21,6 @@ jobs:
       - name: Show ctk path
         run: |
           pip show customtkinter
-          VERSION=$(pip show customtkinter)
-          echo VERSION
       
       #Path should be fetched dynamically if possible...
       - name: Run PyInstaller
@@ -33,7 +31,3 @@ jobs:
         with:
             name: windows-executeable
             path: dist/main
-#      - uses: actions/upload-artifact@v2
-#        with:
-#          name: Windows_qwiklabs
-#          path: dist/main
