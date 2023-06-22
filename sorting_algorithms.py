@@ -10,7 +10,14 @@ from trueskill import Rating, rate_1vs1
 class SortingAlgorithm (ABC):
 
     @abstractmethod
-    def get_comparison(self):
+    def get_comparison(self, user_id: str) -> list[str]:
+        '''Fetches a new comparison based on the state of the sorting algorithm.
+
+        Args:
+            user_id (str): the id of the user that is to perform the comparison.
+        Returns:
+            a list containing the keys of the elements that are to be compared.'''
+        
         pass
 
     @abstractmethod
