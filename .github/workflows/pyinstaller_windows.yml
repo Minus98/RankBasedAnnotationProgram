@@ -18,9 +18,9 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
           
-#      - name: Show ctk path
-#        run: |
-#          pip show customtkinter
+      - name: Show ctk path
+        run: |
+          pip show customtkinter
       
       #Path should be fetched dynamically if possible...
       - name: Run PyInstaller
