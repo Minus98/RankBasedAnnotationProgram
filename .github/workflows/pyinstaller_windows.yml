@@ -1,0 +1,32 @@
+name: Package Application with Pyinstaller
+on: [push, pull_request, workflow_dispatch]
+permissions:
+    contents: write
+jobs:
+  build-windows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with: 
+            python-version: "3.10"
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+          
+      - name: Create annotation for build error
+        run: |
+          pip show customtkinter
+           
+#      - name: Run PyInstaller
+#        run: |
+#          python -m PyInstaller qwiklab_badge_checker.spec
+      
+#      - uses: actions/upload-artifact@v2
+#        with:
+#          name: Windows_qwiklabs
+#          path: dist/main
