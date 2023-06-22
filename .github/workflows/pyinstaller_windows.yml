@@ -21,6 +21,8 @@ jobs:
       - name: Show ctk path
         run: |
           pip show customtkinter
+          VERSION=$(pip show customtkinter)
+          echo VERSION
       
       #Path should be fetched dynamically if possible...
       - name: Run PyInstaller
