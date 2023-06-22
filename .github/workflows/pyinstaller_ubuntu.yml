@@ -3,7 +3,7 @@ on: [push, pull_request, workflow_dispatch]
 permissions:
     contents: write
 jobs:
-  build-windows:
+  build-ubuntu:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -22,12 +22,12 @@ jobs:
         run: |
           pip show customtkinter
       
-#      #Path should be fetched dynamically if possible...
-#      - name: Run PyInstaller
-#        run: |
-#          pyinstaller --noconfirm --onedir --windowed --add-data "c:\hostedtoolcache\windows\python\3.10.11\x64\lib\site-packages\customtkinter;customtkinter\" main.py;
+      #Path should be fetched dynamically if possible...
+      - name: Run PyInstaller
+        run: |
+          pyinstaller --noconfirm --onedir --windowed --add-data "/opt/hostedtoolcache/Python/3.10.12/x64/lib/python3.10/site-packages/customtkinter:customtkinter/" main.py;
 #      
-#      - uses: actions/upload-artifact@v3
-#        with:
-#            name: windows-executeable
-#            path: dist/main
+      - uses: actions/upload-artifact@v3
+        with:
+            name: ubuntu-executeable
+            path: dist/main/
