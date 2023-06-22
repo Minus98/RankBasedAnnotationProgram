@@ -4,7 +4,7 @@ permissions:
     contents: write
 jobs:
   build-windows:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
       
@@ -18,14 +18,18 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
           
-      - name: Create annotation for build error
-        run: |
-          pip show customtkinter
-           
-#      - name: Run PyInstaller
+#      - name: Show ctk path
 #        run: |
-#          python -m PyInstaller qwiklab_badge_checker.spec
+#          pip show customtkinter
+           
+      - name: Run PyInstaller
+        run: |
+          pyinstaller --noconfirm --onedir --windowed --add-data "/opt/hostedtoolcache/Python/3.10.12/x64/lib/python3.10/site-packages/customtkinter:customtkinter/" main.py;
       
+      - uses: actions/upload-artifact@v3
+        with:
+            name: windows-executeable
+            path: dist/main
 #      - uses: actions/upload-artifact@v2
 #        with:
 #          name: Windows_qwiklabs
