@@ -26,8 +26,8 @@ jobs:
       #Path should be fetched dynamically if possible...
       - name: Run PyInstaller
         run: |
-          pyinstaller --noconfirm --onedir --windowed --add-data "/opt/hostedtoolcache/Python/3.10.12/x64/lib/python3.10/site-packages/customtkinter:customtkinter/" main.py;
-      
+          pyinstaller --noconfirm --onedir --windowed --add-data "/opt/hostedtoolcache/Python/3.10.12/x64/lib/python3.10/site-packages/customtkinter:customtkinter/" --add-data "/opt/hostedtoolcache/Python/3.10.12/x64/lib/python3.10/site-packages/PIL:PIL/" main.py;
+
       - uses: actions/upload-artifact@v3
         with:
             name: ubuntu-executeable
