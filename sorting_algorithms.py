@@ -189,7 +189,11 @@ class TrueSkill (SortingAlgorithm):
         r2_low = self.ratings[key2].mu - 2 * self.ratings[key2].sigma
         r2_high = self.ratings[key2].mu + 2 * self.ratings[key2].sigma
 
-        return (min(r1_high, r2_high) - max(r1_low, r2_low))/(max(r1_high, r2_high) - min(r1_low, r2_low)) * max(r1_high-r1_low, r2_high-r2_low)
+        common_gap = min(r1_high, r2_high) - max(r1_low, r2_low)
+        overall_gap = (max(r1_high, r2_high) - min(r1_low, r2_low))
+        largest_span = max(r1_high-r1_low, r2_high-r2_low)
+
+        return common_gap / overall_gap * largest_span
 
     def update_overlap_matrix(self, key):
         key_i = self.data.index(key)
@@ -226,7 +230,8 @@ class TrueSkill (SortingAlgorithm):
 
                 else:
                     indices = np.argpartition(
-                        self.overlap_matrix[i], -self.comparison_size+1)[-self.comparison_size+1:]
+                        self.overlap_matrix[i], -self.comparison_size+1)[
+                            -self.comparison_size+1:]
                     indices = [
                         ind for ind in indices
                         if self.overlap_matrix[i][ind] > 0]
@@ -287,7 +292,8 @@ class TrueSkill (SortingAlgorithm):
 
     def is_finished(self):
 
-        if self.comp_count >= self.comparison_max or self.overlap_matrix.max() <= 0:
+        if (self.comp_count >= self.comparison_max or
+                self.overlap_matrix.max() <= 0):
             return True
 
         return False
@@ -339,7 +345,8 @@ class RatingAlgorithm (SortingAlgorithm):
             self.comp_count += 1
 
     def get_result(self):
-        return {user: self.get_user_result(user) for user in self.user_ratings.keys()}
+        return ({user: self.get_user_result(user) for
+                 user in self.user_ratings.keys()})
 
     def get_user_result(self, user_id):
         user_dict = self.get_user(user_id)

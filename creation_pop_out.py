@@ -244,7 +244,7 @@ class CreationPopOut():
 
     def change_slider_row_state(
             self, state, pop_out, slider_frame, comp_label):
-        if state == True:
+        if state:
             comp_label.grid()
             slider_frame.grid()
             pop_out.rowconfigure(index=2, weight=1)

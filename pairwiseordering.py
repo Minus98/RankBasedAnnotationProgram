@@ -161,7 +161,8 @@ class PairwiseOrderingScreen(OrderingScreen):
             image_frame.bind("<MouseWheel>", command=lambda event,
                              i=i: self.on_image_scroll(event, i))
             displayed_image.bind(
-                "<MouseWheel>", command=lambda event, i=i: self.on_image_scroll(event, i))
+                "<MouseWheel>", command=lambda event,
+                i=i: self.on_image_scroll(event, i))
 
             image_frame.bind("<Button-4>", command=lambda event,
                              i=i: self.on_image_scroll_up(i))
@@ -174,7 +175,8 @@ class PairwiseOrderingScreen(OrderingScreen):
                                  i=i: self.on_image_scroll_down(i))
 
             displayed_image.bind(
-                "<Enter>", command=lambda event, i=i: self.set_image_hover_idx(i))
+                "<Enter>", command=lambda event,
+                i=i: self.set_image_hover_idx(i))
 
             displayed_image.bind(
                 "<Leave>", command=lambda event: self.set_image_hover_idx(-1))
@@ -217,10 +219,10 @@ class PairwiseOrderingScreen(OrderingScreen):
             self.save_obj["path_to_save"] + '.csv'))
 
         a_v_b = df_check.loc[(df_check['result'] == str(keys))
-                             & (df_check['undone'] == False)]
+                             & (~df_check['undone'])]
 
         b_v_a = df_check.loc[(df_check['result'] == str(keys[::-1]))
-                             & (df_check['undone'] == False)]
+                             & (~df_check['undone'])]
 
         a_v_b_draw = a_v_b.loc[a_v_b['diff_levels'] == str([DiffLevel(0)])]
         a_v_b_win = a_v_b.loc[a_v_b['diff_levels'] != str([DiffLevel(0)])]

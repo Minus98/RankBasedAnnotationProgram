@@ -88,7 +88,10 @@ class MultiOrderingScreen(OrderingScreen):
                 state=left_button_state)
             move_left_button.grid(row=1, column=0, padx=(5, 0), pady=(0, 10))
 
-            right_button_state = ctk.NORMAL if i != self.comparison_size - 1 else ctk.DISABLED
+            if i != self.comparison_size - 1:
+                right_button_state = ctk.NORMAL
+            else:
+                right_button_state = ctk.DISABLED
 
             move_right_button = ctk.CTkButton(
                 master=image_frame, text=">", width=120, height=36,
@@ -113,15 +116,19 @@ class MultiOrderingScreen(OrderingScreen):
             displayed_image.bind(
                 "<Button-1>", command=lambda event, image_frame=image_frame,
                 i=i: self.on_drag_start(event, image_frame, i))
+
             displayed_image.bind(
                 "<B1-Motion>", command=lambda event, image_frame=image_frame,
                 i=i: self.on_drag_motion(event, image_frame, i))
+
             displayed_image.bind(
                 "<ButtonRelease-1>", command=lambda event,
-                image_frame=image_frame, i=i: self.on_drag_stop(
-                    event, image_frame, i))
+                image_frame=image_frame,
+                i=i: self.on_drag_stop(event, image_frame, i))
+
             displayed_image.bind(
-                "<MouseWheel>", command=lambda event, i=i: self.on_image_scroll(event, i))
+                "<MouseWheel>", command=lambda event, i=i:
+                self.on_image_scroll(event, i))
 
             image_frame.bind("<Button-4>", command=lambda event,
                              i=i: self.on_image_scroll_up(i))
@@ -265,8 +272,8 @@ class MultiOrderingScreen(OrderingScreen):
             return
 
         if index > 0:
-            self.images[index], self.images[index -
-                                            1] = self.images[index - 1], self.images[index]
+            self.images[index] = self.images[index - 1]
+            self.images[index - 1] = self.images[index]
 
         self.update_images()
 
@@ -278,8 +285,8 @@ class MultiOrderingScreen(OrderingScreen):
             return
 
         if index < len(self.images) - 1:
-            self.images[index], self.images[index +
-                                            1] = self.images[index + 1], self.images[index]
+            self.images[index] = self.images[index + 1]
+            self.images[index + 1] = self.images[index]
 
         self.update_images()
 

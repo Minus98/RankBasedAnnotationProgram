@@ -6,8 +6,7 @@ from menu import MenuScreen
 from multiordering import MultiOrderingScreen
 from pairwiseordering import PairwiseOrderingScreen
 from rating import RatingScreen
-from sorting_algorithms import (HybridTrueSkill, MergeSort, RatingAlgorithm,
-                                TrueSkill)
+from sorting_algorithms import HybridTrueSkill, RatingAlgorithm
 from user_selection_pop_out import UserSelectionPopOut
 
 
@@ -67,8 +66,9 @@ class AnnotationGui():
         if hasattr(self, 'selected_user'):
             self.clear_screen()
 
-            sort_alg = save_obj["sort_alg"] if type(
-                save_obj["sort_alg"]) != HybridTrueSkill else save_obj["sort_alg"].sort_alg
+            sort_alg = save_obj["sort_alg"]
+            if type(sort_alg) == HybridTrueSkill:
+                sort_alg = sort_alg.sort_alg
 
             if type(sort_alg) == RatingAlgorithm:
                 ordering_screen = RatingScreen(

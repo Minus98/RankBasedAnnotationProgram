@@ -65,28 +65,36 @@ class OrderingScreen():
             csv_df = pd.read_csv(get_full_path(
                 self.save_obj["path_to_save"] + '.csv'))
 
-        if type(self.sort_alg) == sa.HybridTrueSkill and self.hybrid_transition_made:
+        if (type(self.sort_alg) == sa.HybridTrueSkill
+                and self.hybrid_transition_made):
+
             current_user_count = len(
                 csv_df.loc
-                [(csv_df['undone'] == False) & (csv_df['type'] == "Ranking")])
+                [(~csv_df['undone']) & (csv_df['type'] == "Ranking")])
+
         elif type(self.sort_alg) == sa.HybridTrueSkill:
+
             current_user_count = len(
-                csv_df.loc[(csv_df['undone'] == False)])
+                csv_df.loc[(~csv_df['undone'])])
+
         else:
+
             current_user_count = len(
                 csv_df.loc
-                [(csv_df['user'] == self.user) & (csv_df['undone'] == False)])
+                [(csv_df['user'] == self.user) & (~csv_df['undone'])])
 
         self.comp_count = 0 + current_user_count
         if not type(self.sort_alg) == sa.RatingAlgorithm:
             self.comp_count_label = ctk.CTkLabel(
                 master=self.root,
-                text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}",
+                text='Comparison count: ' + str(self.comp_count) +
+                '/' + str(self.sort_alg.get_comparison_max()),
                 font=('Helvetica bold', 30))
         else:
             self.comp_count_label = ctk.CTkLabel(
                 master=self.root,
-                text=f"Rating count: {self.comp_count}/{self.sort_alg.get_comparison_max()}",
+                text='Rating count: ' + + str(self.comp_count) +
+                '/' + str(self.sort_alg.get_comparison_max()),
                 font=('Helvetica bold', 30))
 
         self.comparison_bar = ctk.CTkProgressBar(
@@ -134,15 +142,21 @@ class OrderingScreen():
         if self.user in directory_dict and all(
             [os.path.isfile(directory_dict[self.user] + "/" + k)
              for k in self.sort_alg.data]):
+
             self.image_directory = directory_dict[self.user]
             self.image_directory_located = True
-        elif all([os.path.isfile(self.save_obj['image_directory'] + "/" + k) for k in self.sort_alg.data]):
+
+        elif all([os.path.isfile(self.save_obj['image_directory'] + "/" + k)
+                  for k in self.sort_alg.data]):
+
             directory_dict[self.user] = self.save_obj['image_directory']
             self.image_directory = self.save_obj['image_directory']
             self.image_directory_located = True
+
         else:
             ImageDirectoryPopOut(
-                self.root, self.center, self.save_obj, self.submit_path, self.back_to_menu)
+                self.root, self.center, self.save_obj,
+                self.submit_path, self.back_to_menu)
 
     def file_2_CTkImage(self, img_src):
 
@@ -284,7 +298,8 @@ class OrderingScreen():
 
             self.comp_count -= 1
             self.comp_count_label.configure(
-                text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}")
+                text='Comparison count: ' + str(self.comp_count) +
+                '/' + str(self.sort_alg.get_comparison_max()))
             self.update_comparison_bar()
 
     def update_comparison_bar(self):
@@ -332,14 +347,17 @@ class OrderingScreen():
 
         self.comp_count += 1
         self.comp_count_label.configure(
-            text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}")
+            text='Comparison count: ' + str(self.comp_count) +
+            '/' + str(self.sort_alg.get_comparison_max()))
 
         if not type(self.sort_alg) == sa.RatingAlgorithm:
             self.comp_count_label.configure(
-                text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}")
+                text='Comparison count: ' + str(self.comp_count) +
+                '/' + str(self.sort_alg.get_comparison_max()))
         else:
             self.comp_count_label.configure(
-                text=f"Rating count: {self.comp_count}/{self.sort_alg.get_comparison_max()}")
+                text='Rating count: ' + str(self.comp_count) +
+                '/' + str(self.sort_alg.get_comparison_max()))
 
         self.update_comparison_bar()
 
@@ -348,13 +366,17 @@ class OrderingScreen():
         self.session_elapsed_time_prev = time.time() - self.session_start_time
 
         if not self.is_finished_check():
-            if type(self.sort_alg) == sa.HybridTrueSkill and not self.sort_alg.is_rating and not self.hybrid_transition_made:
+            if (type(self.sort_alg) == sa.HybridTrueSkill and
+                not self.sort_alg.is_rating and
+                    not self.hybrid_transition_made):
+
                 self.root.after_cancel(self.timer_after)
                 # Switching modes popout
                 self.root.unbind("6")
                 self.root.unbind("<KeyRelease-6>")
                 self.reload_ordering_screen(self.save_obj)
                 SwitchingModesPopOut(self.root, self.center)
+
             else:
                 self.display_new_comparison()
 
