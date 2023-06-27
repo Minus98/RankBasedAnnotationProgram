@@ -6,7 +6,6 @@ import customtkinter as ctk
 
 from is_finished_pop_out import IsFinishedPopOut
 from ordering import OrderingScreen
-from utils import *
 
 
 class RatingScreen(OrderingScreen):

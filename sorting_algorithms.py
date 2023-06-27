@@ -18,7 +18,8 @@ class SortingAlgorithm (ABC):
         Args:
             user_id: the ID of the user that is to perform the comparison.
         Returns:
-            a list containing the keys of the elements that are to be compared.'''
+            a list containing the keys of the elements that are to be compared.
+        '''
 
         pass
 
@@ -26,12 +27,15 @@ class SortingAlgorithm (ABC):
     def inference(
             self, user_id: str, keys: list[str],
             diff_lvls: list[utils.DiffLevel]):
-        '''Updates the algorithms estimated ordering based on the results of a comparison.
+        '''Updates the algorithms estimated ordering based on the 
+        results of a comparison.
 
         Args:
             user_id: the ID of the user that has performed the comparison.
             keys: an ordered list of the keys which the user compared.
-            diff_lvls: a list containing the DiffLevels of adjacent elements in keys.'''
+            diff_lvls: a list containing the DiffLevels of adjacent 
+            elements in keys.
+        '''
         pass
 
     @abstractmethod
@@ -39,7 +43,8 @@ class SortingAlgorithm (ABC):
         '''Returns the current result of the sorting algorithm.
 
         Returns:
-            the result of the sorting algorithm.'''
+            the result of the sorting algorithm.
+        '''
         pass
 
     @abstractmethod
@@ -47,7 +52,9 @@ class SortingAlgorithm (ABC):
         '''Checks if the sorting algorithm has finished sorting.
 
         Returns:
-            a boolean value indicating whether the sorting algorithm has finished.'''
+            a boolean value indicating whether the sorting algorithm 
+            has finished.
+        '''
         pass
 
     @abstractmethod
@@ -58,23 +65,28 @@ class SortingAlgorithm (ABC):
             user_id: the ID of the user that is to perform the comparison.
 
         Returns:
-            a boolean value indicating whether a comparison is available.'''
+            a boolean value indicating whether a comparison is available.
+        '''
         pass
 
     @abstractmethod
     def get_comparison_count(self):
-        '''Returns the total number of comparisons performed by the sorting algorithm.
+        '''Returns the total number of comparisons performed by the 
+        sorting algorithm.
 
         Returns:
-            the number of comparisons performed.'''
+            the number of comparisons performed.
+        '''
         pass
 
     @abstractmethod
     def get_comparison_max(self):
-        '''Returns the maximum number of comparisons allowed by the sorting algorithm.
+        '''Returns the maximum number of comparisons allowed 
+        by the sorting algorithm.
 
         Returns:
-            the maximum number of comparisons allowed.'''
+            the maximum number of comparisons allowed.
+        '''
         pass
 
 
@@ -123,7 +135,9 @@ class MergeSort(SortingAlgorithm):
                 self.next_sorted = [[]]  # reset the next sorted layer
 
         else:
-            # if neither of the two sublists in the current layer are empty, add the smallest element to the current nested list of the next sorted layer
+            # if neither of the two sublists in the current layer are empty,
+            # add the smallest element to the current nested
+            # list of the next sorted layer
             self.next_sorted[-1].append(smallest)
             if diff_lvls[0].value == 0:
                 self.next_sorted[-1].append(equally_smallest)
@@ -132,11 +146,13 @@ class MergeSort(SortingAlgorithm):
 
     def get_result(self):
         if self.is_finished():
-            # return the first and only sublist of the current layer if the sorting is finished
+            # return the first and only sublist of the current layer if the
+            # sorting is finished
             return self.current_layer[0]
 
     def is_finished(self):
-        # check if the first sublist in the current layer has the same number of elements as the original data
+        # check if the first sublist in the current layer has the same
+        # number of elements as the original data
         return len(self.current_layer[0]) == len(self.data)
 
     def comparison_is_available(self, user_id):

@@ -52,7 +52,7 @@ class OrderingScreen():
         try:
             csv_df = pd.read_csv(get_full_path(
                 self.save_obj["path_to_save"] + '.csv'))
-        except:
+        except Exception:
             if type(self.sort_alg) == sa.Rating:
                 df = pd.DataFrame(
                     columns=['src', 'rating', 'time', 'session', 'user', 'undone'])
@@ -251,7 +251,6 @@ class OrderingScreen():
 
         self.timer_after = self.root.after(1000, self.update_time)
 
-    # perhaps use "<Button-4> defines the scroll up event on mice with wheel support and and <Button-5> the scroll down." for linux
     def on_image_scroll(self, event, idx):
         if event.delta < 0:
             self.images[idx][2] = max(self.images[idx][2]-1, 0)
