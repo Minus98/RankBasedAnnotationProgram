@@ -1,12 +1,16 @@
-import customtkinter as ctk
 import time
-from utils import *
+
+import customtkinter as ctk
+
 from ordering import OrderingScreen
+from utils import DiffLevel
 
 
 class MultiOrderingScreen(OrderingScreen):
 
-    def __init__(self, root, save_obj, menu_callback, center, user, reload_ordering_screen):
+    def __init__(
+            self, root, save_obj, menu_callback, center, user,
+            reload_ordering_screen):
 
         super().__init__(root, save_obj, menu_callback,
                          center, user, reload_ordering_screen, True)
@@ -15,7 +19,8 @@ class MultiOrderingScreen(OrderingScreen):
                                 for _ in range(self.comparison_size - 1)]
 
         self.submit_button = ctk.CTkButton(
-            master=self.root, text="Submit Ordering", width=280, height=60, command=self.submit, font=('Helvetica bold', 20))
+            master=self.root, text="Submit Ordering", width=280, height=60,
+            command=self.submit, font=('Helvetica bold', 20))
 
         self.motion_allowed = True
 
@@ -77,30 +82,44 @@ class MultiOrderingScreen(OrderingScreen):
             left_button_state = ctk.NORMAL if i != 0 else ctk.DISABLED
 
             move_left_button = ctk.CTkButton(
-                master=image_frame, text="<", width=120, height=36, font=('Helvetica bold', 20), command=lambda i=i: self.move_left(i), state=left_button_state)
+                master=image_frame, text="<", width=120, height=36,
+                font=('Helvetica bold', 20),
+                command=lambda i=i: self.move_left(i),
+                state=left_button_state)
             move_left_button.grid(row=1, column=0, padx=(5, 0), pady=(0, 10))
 
             right_button_state = ctk.NORMAL if i != self.comparison_size - 1 else ctk.DISABLED
 
             move_right_button = ctk.CTkButton(
-                master=image_frame, text=">", width=120, height=36, font=('Helvetica bold', 20), command=lambda i=i: self.move_right(i), state=right_button_state)
+                master=image_frame, text=">", width=120, height=36,
+                font=('Helvetica bold', 20),
+                command=lambda i=i: self.move_right(i),
+                state=right_button_state)
             move_right_button.grid(row=1, column=1, padx=(0, 5), pady=(0, 10))
 
-            image_frame.bind("<Button-1>", command=lambda event, image_frame=image_frame,
-                             i=i: self.on_drag_start(event, image_frame, i))
-            image_frame.bind("<B1-Motion>", command=lambda event, image_frame=image_frame,
-                             i=i: self.on_drag_motion(event, image_frame, i))
-            image_frame.bind("<ButtonRelease-1>", command=lambda event, image_frame=image_frame,
-                             i=i: self.on_drag_stop(event, image_frame, i))
+            image_frame.bind(
+                "<Button-1>", command=lambda event, image_frame=image_frame,
+                i=i: self.on_drag_start(event, image_frame, i))
+            image_frame.bind(
+                "<B1-Motion>", command=lambda event, image_frame=image_frame,
+                i=i: self.on_drag_motion(event, image_frame, i))
+            image_frame.bind(
+                "<ButtonRelease-1>", command=lambda event,
+                image_frame=image_frame, i=i: self.on_drag_stop(
+                    event, image_frame, i))
             image_frame.bind("<MouseWheel>", command=lambda event,
                              i=i: self.on_image_scroll(event, i))
 
-            displayed_image.bind("<Button-1>", command=lambda event,
-                                 image_frame=image_frame, i=i: self.on_drag_start(event, image_frame, i))
-            displayed_image.bind("<B1-Motion>", command=lambda event, image_frame=image_frame,
-                                 i=i: self.on_drag_motion(event, image_frame, i))
-            displayed_image.bind("<ButtonRelease-1>", command=lambda event, image_frame=image_frame,
-                                 i=i: self.on_drag_stop(event, image_frame, i))
+            displayed_image.bind(
+                "<Button-1>", command=lambda event, image_frame=image_frame,
+                i=i: self.on_drag_start(event, image_frame, i))
+            displayed_image.bind(
+                "<B1-Motion>", command=lambda event, image_frame=image_frame,
+                i=i: self.on_drag_motion(event, image_frame, i))
+            displayed_image.bind(
+                "<ButtonRelease-1>", command=lambda event,
+                image_frame=image_frame, i=i: self.on_drag_stop(
+                    event, image_frame, i))
             displayed_image.bind(
                 "<MouseWheel>", command=lambda event, i=i: self.on_image_scroll(event, i))
 
@@ -131,7 +150,10 @@ class MultiOrderingScreen(OrderingScreen):
         image_width = self.images[0][1][0]._size[0]
 
         diff_levels_frame.grid(
-            row=0, column=0, columnspan=self.comparison_size, padx=(30 + image_width // 2), pady=(10, 0), sticky="ew")
+            row=0, column=0, columnspan=self.comparison_size,
+            padx=(30 + image_width // 2),
+            pady=(10, 0),
+            sticky="ew")
 
         for i in range(len(self.int_diff_levels)):
             diff_levels_frame.columnconfigure(i, weight=1)
@@ -144,11 +166,14 @@ class MultiOrderingScreen(OrderingScreen):
             diff_level_frame.grid(row=0, column=i)
 
             r0 = ctk.CTkRadioButton(
-                master=diff_level_frame, variable=int_diff_level, value=0, width=22, text="")
+                master=diff_level_frame, variable=int_diff_level, value=0,
+                width=22, text="")
             r1 = ctk.CTkRadioButton(
-                master=diff_level_frame, variable=int_diff_level, value=1, width=22, text="")
+                master=diff_level_frame, variable=int_diff_level, value=1,
+                width=22, text="")
             r2 = ctk.CTkRadioButton(
-                master=diff_level_frame, variable=int_diff_level, value=2, width=22, text="")
+                master=diff_level_frame, variable=int_diff_level, value=2,
+                width=22, text="")
 
             r0.grid(row=1, column=0, padx=(12, 5), pady=2,
                     sticky="ew")
@@ -161,8 +186,10 @@ class MultiOrderingScreen(OrderingScreen):
                 text="", master=diff_level_frame, font=('Helvetica bold', 18))
             diff_level_label.grid(row=0, column=0, columnspan=3)
 
-            int_diff_level.trace('w', lambda var, index, mode, int_diff_level=int_diff_level,
-                                 label=diff_level_label: self.update_diff_labels(int_diff_level, label))
+            int_diff_level.trace(
+                'w', lambda var, index, mode, int_diff_level=int_diff_level,
+                label=diff_level_label: self.update_diff_labels(
+                    int_diff_level, label))
 
         diff_levels_frame.configure(
             fg_color=self.images_frame.cget("fg_color"))
@@ -192,11 +219,15 @@ class MultiOrderingScreen(OrderingScreen):
                              sticky="ew", padx=10, pady=10)
 
         move_left_button = ctk.CTkButton(
-            master=image_frame, text="<", width=120, height=36, font=('Helvetica bold', 20), state=ctk.DISABLED)
+            master=image_frame, text="<", width=120, height=36,
+            font=('Helvetica bold', 20),
+            state=ctk.DISABLED)
         move_left_button.grid(row=1, column=0, padx=(5, 0), pady=(0, 10))
 
         move_right_button = ctk.CTkButton(
-            master=image_frame, text=">", width=120, height=36, font=('Helvetica bold', 20), state=ctk.DISABLED)
+            master=image_frame, text=">", width=120, height=36,
+            font=('Helvetica bold', 20),
+            state=ctk.DISABLED)
         move_right_button.grid(row=1, column=1, padx=(0, 5), pady=(0, 10))
 
         return image_frame
@@ -259,8 +290,9 @@ class MultiOrderingScreen(OrderingScreen):
         if self.is_loading:
             return
 
-        self.black_frame = ctk.CTkFrame(master=self.images_frame, width=frame.winfo_width(
-        ), height=frame.winfo_height())
+        self.black_frame = ctk.CTkFrame(
+            master=self.images_frame, width=frame.winfo_width(),
+            height=frame.winfo_height())
 
         self.black_frame.place(x=frame.winfo_x(), y=frame.winfo_y())
 

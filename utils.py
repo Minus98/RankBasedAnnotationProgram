@@ -1,11 +1,13 @@
-import sys
 import os
+import sys
 from enum import Enum
+
 
 class DiffLevel(Enum):
     none = 0
     normal = 1
     major = 2
+
 
 def add_hover(widget):
 
@@ -14,10 +16,11 @@ def add_hover(widget):
 
 def add_hover_to_children(widget, child_widget):
 
-    child_widget.bind("<Enter>", lambda event,
-                      widget=widget, color=widget.cget("fg_color"): highlight(widget, color))
-    child_widget.bind("<Leave>", lambda event,
-                      widget=widget, color=widget.cget("fg_color"): remove_highlight(widget, color))
+    child_widget.bind("<Enter>", lambda event, widget=widget,
+                      color=widget.cget("fg_color"): highlight(widget, color))
+    child_widget.bind(
+        "<Leave>", lambda event, widget=widget,
+        color=widget.cget("fg_color"): remove_highlight(widget, color))
 
     for child in child_widget.winfo_children():
         add_hover_to_children(widget, child)

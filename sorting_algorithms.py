@@ -1,60 +1,88 @@
 import copy
 import random
+from abc import ABC, abstractmethod
 
 import numpy as np
-
-from abc import ABC, abstractmethod
 from trueskill import Rating, rate_1vs1
+
 import utils
 
 
 class SortingAlgorithm (ABC):
+    '''Abstract base class for sorting algorithms.'''
 
     @abstractmethod
     def get_comparison(self, user_id: str) -> list[str]:
         '''Fetches a new comparison based on the state of the sorting algorithm.
 
         Args:
-            user_id: the id of the user that is to perform the comparison.
+            user_id: the ID of the user that is to perform the comparison.
         Returns:
             a list containing the keys of the elements that are to be compared.'''
-        
+
         pass
 
     @abstractmethod
-    def inference(self, user_id: str, keys: list[str], diff_lvls: list[utils.DiffLevel]):
+    def inference(
+            self, user_id: str, keys: list[str],
+            diff_lvls: list[utils.DiffLevel]):
         '''Updates the algorithms estimated ordering based on the results of a comparison.
 
         Args:
-            user_id: the id of the user that has performed the comparison.
+            user_id: the ID of the user that has performed the comparison.
             keys: an ordered list of the keys which the user compared.
             diff_lvls: a list containing the DiffLevels of adjacent elements in keys.'''
         pass
 
     @abstractmethod
     def get_result(self):
+        '''Returns the current result of the sorting algorithm.
+
+        Returns:
+            the result of the sorting algorithm.'''
         pass
 
     @abstractmethod
     def is_finished(self):
+        '''Checks if the sorting algorithm has finished sorting.
+
+        Returns:
+            a boolean value indicating whether the sorting algorithm has finished.'''
         pass
 
     @abstractmethod
     def comparison_is_available(self, user_id):
+        '''Checks if a comparison is available for the given user.
+
+        Args:
+            user_id: the ID of the user that is to perform the comparison.
+
+        Returns:
+            a boolean value indicating whether a comparison is available.'''
         pass
 
     @abstractmethod
     def get_comparison_count(self):
+        '''Returns the total number of comparisons performed by the sorting algorithm.
+
+        Returns:
+            the number of comparisons performed.'''
         pass
 
     @abstractmethod
     def get_comparison_max(self):
+        '''Returns the maximum number of comparisons allowed by the sorting algorithm.
+
+        Returns:
+            the maximum number of comparisons allowed.'''
         pass
 
 
 class MergeSort(SortingAlgorithm):
+    '''Implementation of the Merge Sort algorithm'''
 
     def __init__(self, data):
+
         self.data = data
         self.comparison_size = 2
         self.current_layer = [[value] for value in data]
@@ -119,12 +147,15 @@ class MergeSort(SortingAlgorithm):
 
     def get_comparison_max(self):
         # Fix me pleeeez
-        return 0
+        n = len(self.data)
+        return int(n * np.log(n))
 
 
 class TrueSkill (SortingAlgorithm):
+    '''Implementation of the TrueSkill algorithm'''
 
-    def __init__(self, data, comparison_size=2, comparison_max=None, initial_mus=None, random_comparisons=False):
+    def __init__(self, data, comparison_size=2, comparison_max=None,
+                 initial_mus=None, random_comparisons=False):
 
         self.n = len(data)
         self.data = list(data)
@@ -141,7 +172,9 @@ class TrueSkill (SortingAlgorithm):
             self.ratings = {k: Rating() for k in data}
 
         self.overlap_matrix = np.full(
-            (self.n, self.n), self.intervals_overlap(self.data[0], self.data[1]))
+            (self.n, self.n),
+            self.intervals_overlap(self.data[0],
+                                   self.data[1]))
         np.fill_diagonal(self.overlap_matrix, 0)
 
         self.comparison_size = comparison_size
@@ -195,7 +228,8 @@ class TrueSkill (SortingAlgorithm):
                     indices = np.argpartition(
                         self.overlap_matrix[i], -self.comparison_size+1)[-self.comparison_size+1:]
                     indices = [
-                        ind for ind in indices if self.overlap_matrix[i][ind] > 0]
+                        ind for ind in indices
+                        if self.overlap_matrix[i][ind] > 0]
 
                     sum_i = sum(self.overlap_matrix[i][indices])
                     if max_sum < sum_i:
@@ -269,6 +303,7 @@ class TrueSkill (SortingAlgorithm):
 
 
 class RatingAlgorithm (SortingAlgorithm):
+    '''Implementation of the rating algorithm'''
 
     def __init__(self, data):
 
@@ -327,6 +362,7 @@ class RatingAlgorithm (SortingAlgorithm):
 
 
 class HybridTrueSkill (SortingAlgorithm):
+    '''Implementation of the rating and TrueSkill hybrid algorithm'''
 
     def __init__(self, data, comparison_size=2, comparison_max=None):
 
@@ -357,11 +393,14 @@ class HybridTrueSkill (SortingAlgorithm):
         return self.sort_alg.comparison_is_available("hybrid")
 
     def change_to_trueskill(self, user_id):
-        results = {k: self.rating_to_mu(
-            v) for k, v in self.sort_alg.get_user_result("hybrid").items() if v > 0}
+        results = {
+            k: self.rating_to_mu(v) for k,
+            v in self.sort_alg.get_user_result("hybrid").items() if v > 0}
 
-        self.sort_alg = TrueSkill(results.keys(), comparison_size=self.comparison_size,
-                                  comparison_max=len(results.keys())*4, initial_mus=results)
+        self.sort_alg = TrueSkill(
+            results.keys(),
+            comparison_size=self.comparison_size,
+            comparison_max=len(results.keys()) * 4, initial_mus=results)
         self.is_rating = False
 
     def rating_to_mu(self, rating):

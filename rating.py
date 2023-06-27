@@ -1,37 +1,63 @@
+import json
 import random
-import customtkinter as ctk
 import time
+
+import customtkinter as ctk
+
 from is_finished_pop_out import IsFinishedPopOut
-from utils import *
 from ordering import OrderingScreen
+from utils import *
 
 
 class RatingScreen(OrderingScreen):
 
-    def __init__(self, root, save_obj, menu_callback, center, user, reload_ordering_screen, hybrid_transition_made):
+    def __init__(self, root, save_obj, menu_callback, center, user,
+                 reload_ordering_screen, hybrid_transition_made):
 
         super().__init__(root, save_obj, menu_callback, center,
                          user, reload_ordering_screen, hybrid_transition_made)
 
         self.buttons_frame = ctk.CTkFrame(master=self.root)
 
+        with open('prompts.json', 'r') as file:
+            prompts = json.load(file)
+
+        rating_buttons = prompts['rating_buttons']
+
         self.question = ctk.CTkLabel(
-            master=self.root, text="The bronchial wall thickening in the image appears to be ... ", font=('Helvetica bold', 20))
+            master=self.root,
+            text=prompts['rating_prompt'],
+            font=('Helvetica bold', 20))
 
-        self.not_assessable_button = ctk.CTkButton(master=self.buttons_frame, text="Non-assessable (1)", width=160,
-                                                   height=40, command=lambda: self.submit(-1), font=('Helvetica bold', 20))
+        self.not_assessable_button = ctk.CTkButton(
+            master=self.buttons_frame, text=rating_buttons[0] + ' (1)',
+            width=160, height=40, command=lambda: self.submit(-1),
+            font=('Helvetica bold', 20))
 
-        self.absolute_none_button = ctk.CTkButton(master=self.buttons_frame, text="Clearly None (2)", width=160,
-                                                  height=40, command=lambda: self.submit(0), font=('Helvetica bold', 20))
+        self.absolute_none_button = ctk.CTkButton(
+            master=self.buttons_frame, text=rating_buttons[1] + ' (2)',
+            width=160, height=40, command=lambda: self.submit(0),
+            font=('Helvetica bold', 20))
 
-        self.none_button = ctk.CTkButton(master=self.buttons_frame, text="None (3)", width=160,
-                                         height=40, command=lambda: self.submit(1), font=('Helvetica bold', 20))
-        self.mild_button = ctk.CTkButton(master=self.buttons_frame, text="Mild (4)", width=160,
-                                         height=40, command=lambda: self.submit(2), font=('Helvetica bold', 20))
-        self.moderate_button = ctk.CTkButton(master=self.buttons_frame, text="Moderate (5)", width=160,
-                                             height=40, command=lambda: self.submit(3), font=('Helvetica bold', 20))
-        self.severe_button = ctk.CTkButton(master=self.buttons_frame, text="Severe (6)", width=160,
-                                           height=40, command=lambda: self.submit(4), font=('Helvetica bold', 20))
+        self.none_button = ctk.CTkButton(
+            master=self.buttons_frame, text=rating_buttons[2] + ' (3)',
+            width=160, height=40, command=lambda: self.submit(1),
+            font=('Helvetica bold', 20))
+
+        self.mild_button = ctk.CTkButton(
+            master=self.buttons_frame, text=rating_buttons[3] + ' (4)',
+            width=160, height=40, command=lambda: self.submit(2),
+            font=('Helvetica bold', 20))
+
+        self.moderate_button = ctk.CTkButton(
+            master=self.buttons_frame, text=rating_buttons[4] + ' (5)',
+            width=160, height=40, command=lambda: self.submit(3),
+            font=('Helvetica bold', 20))
+
+        self.severe_button = ctk.CTkButton(
+            master=self.buttons_frame, text=rating_buttons[5] + ' (6)',
+            width=160, height=40, command=lambda: self.submit(4),
+            font=('Helvetica bold', 20))
 
         self.tab_items = [self.not_assessable_button, self.absolute_none_button,
                           self.none_button, self.mild_button,
@@ -124,9 +150,11 @@ class RatingScreen(OrderingScreen):
                              sticky="ew", padx=10, pady=10)
 
         image_frame.bind(
-            "<MouseWheel>", command=lambda event: self.on_image_scroll(event, 0))
+            "<MouseWheel>", command=lambda event: self.on_image_scroll(
+                event, 0))
         displayed_image.bind(
-            "<MouseWheel>", command=lambda event: self.on_image_scroll(event, 0))
+            "<MouseWheel>", command=lambda event: self.on_image_scroll(
+                event, 0))
 
         image_frame.bind(
             "<Button-4>", command=lambda event: self.on_image_scroll_up(0))

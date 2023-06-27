@@ -1,10 +1,13 @@
 import sys
+
 import customtkinter as ctk
-from pairwiseordering import PairwiseOrderingScreen
-from rating import RatingScreen
-from sorting_algorithms import *
+
 from menu import MenuScreen
 from multiordering import MultiOrderingScreen
+from pairwiseordering import PairwiseOrderingScreen
+from rating import RatingScreen
+from sorting_algorithms import (HybridTrueSkill, MergeSort, RatingAlgorithm,
+                                TrueSkill)
 from user_selection_pop_out import UserSelectionPopOut
 
 
@@ -53,7 +56,8 @@ class AnnotationGui():
 
         self.clear_screen()
         self.menu_screen = MenuScreen(
-            self.root, self.display_menu, self.display_ordering_screen, self.center, self.open_user_selection)
+            self.root, self.display_menu, self.display_ordering_screen, self.
+            center, self.open_user_selection)
         if hasattr(self, 'selected_user'):
             self.menu_screen.display_user(self.selected_user)
         self.menu_screen.display()
@@ -68,13 +72,19 @@ class AnnotationGui():
 
             if type(sort_alg) == RatingAlgorithm:
                 ordering_screen = RatingScreen(
-                    self.root, save_obj, self.display_menu, self.center, self.selected_user, self.reload_ordering_screen, hybrid_transition_made)
+                    self.root, save_obj, self.display_menu, self.center, self.
+                    selected_user, self.reload_ordering_screen,
+                    hybrid_transition_made)
+
             elif sort_alg.comparison_size == 2:
                 ordering_screen = PairwiseOrderingScreen(
-                    self.root, save_obj, self.display_menu, self.center, self.selected_user, self.reload_ordering_screen)
+                    self.root, save_obj, self.display_menu, self.center, self.
+                    selected_user, self.reload_ordering_screen)
+
             else:
                 ordering_screen = MultiOrderingScreen(
-                    self.root, save_obj, self.display_menu, self.center, self.selected_user, self.reload_ordering_screen)
+                    self.root, save_obj, self.display_menu, self.center, self.
+                    selected_user, self.reload_ordering_screen)
 
             if ordering_screen.image_directory_located:
                 ordering_screen.display()

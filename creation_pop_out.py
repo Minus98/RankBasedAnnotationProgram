@@ -1,12 +1,15 @@
-import customtkinter as ctk
+import os
 import pickle
+import random
+import sys
 import time
 from pathlib import Path
-import random
+
+import customtkinter as ctk
 import pandas as pd
-from sorting_algorithms import *
-import os
-import sys
+
+from sorting_algorithms import (HybridTrueSkill, MergeSort, RatingAlgorithm,
+                                TrueSkill)
 
 
 class CreationPopOut():
@@ -39,14 +42,19 @@ class CreationPopOut():
 
         name = ctk.StringVar()
 
-        ctk.CTkEntry(master=pop_out, textvariable=name,
-                     placeholder_text="Enter the name of the annotation session", width=200, height=40, font=('Helvetica bold', 20)).grid(row=0, column=1, padx=10, pady=(10, 2), sticky="w")
+        ctk.CTkEntry(
+            master=pop_out, textvariable=name,
+            placeholder_text="Enter the name of the annotation session",
+            width=200, height=40, font=('Helvetica bold', 20)).grid(
+            row=0, column=1, padx=10, pady=(10, 2),
+            sticky="w")
 
-        ctk.CTkLabel(master=pop_out, text="Algorithm:", font=('Helvetica bold', 20)).grid(
-            row=1, column=0, padx=10, pady=2, sticky="e")
+        ctk.CTkLabel(master=pop_out, text="Algorithm:", font=(
+            'Helvetica bold', 20)).grid(row=1, column=0, padx=10, pady=2, sticky="e")
 
         comp_label = ctk.CTkLabel(
-            master=pop_out, text="Comparison Size:", font=('Helvetica bold', 20))
+            master=pop_out, text="Comparison Size:",
+            font=('Helvetica bold', 20))
 
         comp_label.grid(
             row=2, column=0, padx=10, pady=2, sticky="e")
@@ -59,8 +67,11 @@ class CreationPopOut():
         comparison_count_label = ctk.CTkLabel(master=slider_frame, font=(
             'Helvetica bold', 25))
 
-        slider = ctk.CTkSlider(master=slider_frame, from_=2,
-                               to=4, number_of_steps=2, command=lambda val, label=comparison_count_label: self.update_comparison_size(val, label))
+        slider = ctk.CTkSlider(
+            master=slider_frame, from_=2, to=4, number_of_steps=2,
+            command=lambda val,
+            label=comparison_count_label: self.update_comparison_size(
+                val, label))
 
         slider.set(2)
 
@@ -71,31 +82,49 @@ class CreationPopOut():
         comparison_count_label.grid(row=0, column=1, padx=5)
 
         algorithm_selection = ctk.CTkOptionMenu(
-            master=pop_out, values=["True Skill", "Merge Sort", "Rating", "Hybrid"], width=200, height=40, font=('Helvetica bold', 20), command=lambda value, pop_out=pop_out, slider=slider, slider_frame=slider_frame, label=comparison_count_label, comp_label=comp_label: self.algorithm_changed(value, pop_out, slider, slider_frame, label, comp_label))
+            master=pop_out,
+            values=["True Skill", "Merge Sort", "Rating", "Hybrid"],
+            width=200, height=40, font=('Helvetica bold', 20),
+            command=lambda value, pop_out=pop_out, slider=slider,
+            slider_frame=slider_frame, label=comparison_count_label,
+            comp_label=comp_label: self.algorithm_changed(
+                value, pop_out, slider, slider_frame, label, comp_label))
 
         algorithm_selection.grid(
             row=1, column=1, padx=10, pady=2, sticky="w")
 
-        ctk.CTkLabel(master=pop_out, text="Image Directory:", font=('Helvetica bold', 20)).grid(
-            row=3, column=0, padx=10, pady=(2, 10), sticky="e")
+        ctk.CTkLabel(
+            master=pop_out, text="Image Directory:",
+            font=('Helvetica bold', 20)).grid(
+            row=3, column=0, padx=10, pady=(2, 10),
+            sticky="e")
 
         image_directory = ctk.StringVar()
-        image_directory.set(str(Path("Images").resolve()))
+        image_directory.set(str(Path("data/Images").resolve()))
 
         directory_entry = ctk.CTkEntry(
-            master=pop_out, textvariable=image_directory, placeholder_text="select the directory which contains the files", width=400, height=40, font=('Helvetica bold', 16), state=ctk.DISABLED)
+            master=pop_out, textvariable=image_directory,
+            placeholder_text="select the directory which contains the files",
+            width=400, height=40, font=('Helvetica bold', 16),
+            state=ctk.DISABLED)
 
-        directory_entry.bind("<Button-1>", command=lambda event, pop_out = pop_out,
-                             image_directory=image_directory: self.select_directory(event, pop_out, image_directory))
+        directory_entry.bind(
+            "<Button-1>", command=lambda event, pop_out=pop_out,
+            image_directory=image_directory: self.select_directory(
+                event, pop_out, image_directory))
 
         directory_entry.grid(row=3, column=1, padx=10,
                              pady=(2, 10), sticky="w")
 
-        ctk.CTkLabel(master=pop_out, text="Enable Scrolling:", font=('Helvetica bold', 20)).grid(
+        ctk.CTkLabel(
+            master=pop_out, text="Enable Scrolling:",
+            font=('Helvetica bold', 20)).grid(
             row=4, column=0, padx=10, pady=2, sticky="e")
         scroll_enabled = ctk.BooleanVar()
         scroll_enabled_checkbox = ctk.CTkCheckBox(
-            master=pop_out, variable=scroll_enabled, text="", checkbox_width=30, checkbox_height=30, onvalue=True, offvalue=False)
+            master=pop_out, variable=scroll_enabled, text="",
+            checkbox_width=30, checkbox_height=30, onvalue=True,
+            offvalue=False)
         scroll_enabled_checkbox.grid(
             row=4, column=1, padx=10, pady=2, sticky="w")
 
@@ -105,9 +134,17 @@ class CreationPopOut():
                           sticky="ew", pady=(0, 10))
 
         create_button = ctk.CTkButton(
-            master=button_frame, text="Create Annotation", width=200, height=40, font=('Helvetica bold', 20), command=lambda name=name, algorithm_selection=algorithm_selection, slider=slider, image_directory=image_directory, pop_out=pop_out, scroll_enabled=scroll_enabled: self.create_save(name, algorithm_selection, slider, image_directory, pop_out, scroll_enabled))
+            master=button_frame, text="Create Annotation", width=200,
+            height=40, font=('Helvetica bold', 20),
+            command=lambda name=name, algorithm_selection=algorithm_selection,
+            slider=slider, image_directory=image_directory, pop_out=pop_out,
+            scroll_enabled=scroll_enabled: self.create_save(
+                name, algorithm_selection, slider, image_directory, pop_out,
+                scroll_enabled))
         delete_button = ctk.CTkButton(
-            master=button_frame, text="Cancel", width=200, height=40, font=('Helvetica bold', 20), command=pop_out.destroy)
+            master=button_frame, text="Cancel", width=200, height=40,
+            font=('Helvetica bold', 20),
+            command=pop_out.destroy)
 
         button_frame.columnconfigure(0, weight=1)
         button_frame.columnconfigure(1, weight=1)
@@ -118,13 +155,18 @@ class CreationPopOut():
         pop_out.grab_set()
         pop_out.attributes("-topmost", True)
 
-    def create_save(self, name, algorithm, comparison_size, image_directory, pop_out, scroll_enabled):
+    def create_save(
+            self, name, algorithm, comparison_size, image_directory, pop_out,
+            scroll_enabled):
 
         directory = os.path.relpath(image_directory.get())
         final_name = name.get()
 
-        img_paths = list(str(os.path.basename(p)) for p in Path(directory).glob(
-            "**/*") if p.suffix in {'.jpg', '.png', '.nii'} and 'sorted' not in str(p).lower())
+        img_paths = list(str(os.path.basename(p))
+                         for p in Path(directory).glob("**/*")
+                         if p.suffix
+                         in {'.jpg', '.png', '.nii'} and 'sorted'
+                         not in str(p).lower())
 
         random.shuffle(img_paths)
 
@@ -148,7 +190,7 @@ class CreationPopOut():
         elif __file__:
             application_path = os.path.dirname(__file__)
 
-        path = application_path + "/Saves"
+        path = application_path + "/saves"
 
         if not os.path.exists(path):
             os.makedirs(path)
@@ -156,14 +198,19 @@ class CreationPopOut():
         path_to_save = path + "/" + file_name
 
         df = pd.DataFrame(
-            columns=['result', 'diff_levels', 'time', 'session', 'user', 'undone', 'type'])
+            columns=['result', 'diff_levels', 'time', 'session', 'user',
+                     'undone', 'type'])
 
         df.to_csv(path_to_save + ".csv", index=False)
 
-        rel_path_to_save = "Saves/" + file_name
-        save_obj = {"sort_alg": sort_alg, "name": final_name,
-                    "image_directory": directory, "path_to_save": rel_path_to_save,
-                    "user_directory_dict": {} , "scroll_allowed": scroll_enabled.get()}
+        rel_path_to_save = "saves/" + file_name
+        save_obj = {
+            "sort_alg": sort_alg,
+            "name": final_name,
+            "image_directory": directory,
+            "path_to_save": rel_path_to_save,
+            "user_directory_dict": {},
+            "scroll_allowed": scroll_enabled.get()}
 
         f = open(path + "/" + file_name + ".pickle", "wb")
         pickle.dump(save_obj, f)
@@ -173,7 +220,8 @@ class CreationPopOut():
 
         self.creation_callback()
 
-    def algorithm_changed(self, value, pop_out, slider, slider_frame, label, comp_label):
+    def algorithm_changed(
+            self, value, pop_out, slider, slider_frame, label, comp_label):
 
         if value == "Merge Sort":
             self.change_slider_row_state(
@@ -182,9 +230,11 @@ class CreationPopOut():
             label.configure(text=2, state=ctk.DISABLED)
             comp_label.configure(state=ctk.DISABLED)
             slider.configure(state=ctk.DISABLED)
+
         elif value == "Rating":
             self.change_slider_row_state(
                 False, pop_out, slider_frame, comp_label)
+
         else:
             self.change_slider_row_state(
                 True, pop_out, slider_frame, comp_label)
@@ -192,11 +242,13 @@ class CreationPopOut():
             label.configure(state=ctk.NORMAL)
             comp_label.configure(state=ctk.NORMAL)
 
-    def change_slider_row_state(self, state, pop_out, slider_frame, comp_label):
+    def change_slider_row_state(
+            self, state, pop_out, slider_frame, comp_label):
         if state == True:
             comp_label.grid()
             slider_frame.grid()
             pop_out.rowconfigure(index=2, weight=1)
+
         else:
             comp_label.grid_remove()
             slider_frame.grid_remove()

@@ -1,42 +1,63 @@
+import json
 import random
-import customtkinter as ctk
 import time
+
+import customtkinter as ctk
 import pandas as pd
-from is_finished_pop_out import IsFinishedPopOut
+
 import sorting_algorithms as sa
-from utils import *
+from is_finished_pop_out import IsFinishedPopOut
 from ordering import OrderingScreen
+from utils import DiffLevel, get_full_path
 
 
 class PairwiseOrderingScreen(OrderingScreen):
 
-    def __init__(self, root, save_obj, menu_callback, center, user, reload_ordering_screen):
+    def __init__(
+            self, root, save_obj, menu_callback, center, user,
+            reload_ordering_screen):
 
         super().__init__(root, save_obj, menu_callback,
                          center, user, reload_ordering_screen, True)
 
         self.buttons_frame = ctk.CTkFrame(master=self.root)
 
-        self.alot_less_button = ctk.CTkButton(master=self.buttons_frame, text="A much more severe (1)", width=160,
-                                              height=40, command=lambda: self.submit(-2), font=('Helvetica bold', 20))
-        self.less_button = ctk.CTkButton(master=self.buttons_frame, text="A more severe (2)", width=160,
-                                         height=40, command=lambda: self.submit(-1), font=('Helvetica bold', 20))
-        self.same_button = ctk.CTkButton(master=self.buttons_frame, text="A & B equal (3)", width=160,
-                                         height=40, command=lambda: self.submit(0), font=('Helvetica bold', 20))
-        self.more_button = ctk.CTkButton(master=self.buttons_frame, text="B more severe (4)", width=160,
-                                         height=40, command=lambda: self.submit(1), font=('Helvetica bold', 20))
-        self.alot_more_button = ctk.CTkButton(master=self.buttons_frame, text="B much more severe (5)", width=160,
-                                              height=40, command=lambda: self.submit(2), font=('Helvetica bold', 20))
+        with open('prompts.json', 'r') as file:
+            prompts = json.load(file)
+
+        ranking_buttons = prompts['ranking_buttons']
+
+        self.alot_less_button = ctk.CTkButton(
+            master=self.buttons_frame, text=ranking_buttons[0] + ' (1)',
+            width=160, height=40, command=lambda: self.submit(-2),
+            font=('Helvetica bold', 20))
+        self.less_button = ctk.CTkButton(
+            master=self.buttons_frame, text=ranking_buttons[1] + ' (2)',
+            width=160, height=40, command=lambda: self.submit(-1),
+            font=('Helvetica bold', 20))
+        self.same_button = ctk.CTkButton(
+            master=self.buttons_frame, text=ranking_buttons[2] + ' (3)',
+            width=160, height=40, command=lambda: self.submit(0),
+            font=('Helvetica bold', 20))
+        self.more_button = ctk.CTkButton(
+            master=self.buttons_frame, text=ranking_buttons[3] + ' (4)',
+            width=160, height=40, command=lambda: self.submit(1),
+            font=('Helvetica bold', 20))
+        self.alot_more_button = ctk.CTkButton(
+            master=self.buttons_frame, text=ranking_buttons[4] + ' (5)',
+            width=160, height=40, command=lambda: self.submit(2),
+            font=('Helvetica bold', 20))
 
         self.tab_index = -1
 
         if not type(self.sort_alg) == sa.MergeSort:
-            self.tab_items = [self.alot_less_button, self.less_button,
-                              self.same_button, self.more_button, self.alot_more_button]
+            self.tab_items = [
+                self.alot_less_button, self.less_button, self.same_button,
+                self.more_button, self.alot_more_button]
         else:
             self.tab_items = [self.less_button, self.more_button]
-            self.less_button.configure(text="A more severe (1)")
-            self.more_button.configure(text="B more severe (2)")
+            self.less_button.configure(text=ranking_buttons[1] + ' (1)')
+            self.more_button.configure(text=ranking_buttons[3] + ' (2)')
 
         self.root.bind(
             "1", lambda event: self.on_shortcmd(0))
@@ -125,7 +146,9 @@ class PairwiseOrderingScreen(OrderingScreen):
             img_name = list(img_info.keys())[i]
 
             img_label = ctk.CTkLabel(
-                master=displayed_image, text=img_name, font=('Helvetica bold', 20), width=30, height=30, bg_color=image_frame.cget('fg_color'))
+                master=displayed_image, text=img_name,
+                font=('Helvetica bold', 20),
+                width=30, height=30, bg_color=image_frame.cget('fg_color'))
 
             self.displayed_images.append(displayed_image)
 
@@ -195,6 +218,7 @@ class PairwiseOrderingScreen(OrderingScreen):
 
         a_v_b = df_check.loc[(df_check['result'] == str(keys))
                              & (df_check['undone'] == False)]
+
         b_v_a = df_check.loc[(df_check['result'] == str(keys[::-1]))
                              & (df_check['undone'] == False)]
 

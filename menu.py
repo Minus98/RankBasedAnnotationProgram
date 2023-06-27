@@ -1,15 +1,18 @@
-import customtkinter as ctk
-from pathlib import Path
-from sorting_algorithms import *
-import os
+import json
 import pickle
+from pathlib import Path
+
+import customtkinter as ctk
+
 from creation_pop_out import CreationPopOut
-from utils import *
+from utils import add_hover, get_full_path
 
 
 class MenuScreen():
 
-    def __init__(self, root, creation_callback, ordering_callback, center, open_user_selection):
+    def __init__(
+            self, root, creation_callback, ordering_callback, center,
+            open_user_selection):
 
         self.root = root
 
@@ -18,26 +21,34 @@ class MenuScreen():
         self.center = center
         self.open_user_selection = open_user_selection
 
-        path = get_full_path("Saves")
+        with open('prompts.json', 'r') as file:
+            prompts = json.load(file)
+
+        path = get_full_path("saves")
 
         self.paths = list(Path(path).glob('*.pickle'))
 
         self.saves = [pickle.load(open(path, 'rb')) for path in self.paths]
 
         self.header = ctk.CTkLabel(
-            master=self.root, text="Rank-Based Annotation", font=('Helvetica bold', 40))
+            master=self.root, text="Rank-Based Annotation",
+            font=('Helvetica bold', 40))
 
         self.menu_frame = ctk.CTkFrame(master=self.root)
 
         self.instructions_frame = ctk.CTkFrame(master=self.root)
 
         self.new_button = ctk.CTkButton(
-            master=self.menu_frame, text="New Annotation", width=250, height=45, font=('Helvetica bold', 20), command=self.new_annotation)
+            master=self.menu_frame, text="New Annotation", width=250,
+            height=45, font=('Helvetica bold', 20),
+            command=self.new_annotation)
         self.delete_button = ctk.CTkButton(
-            master=self.menu_frame, text="Delete Annotation", width=250, height=45, font=('Helvetica bold', 20))
+            master=self.menu_frame, text="Delete Annotation", width=250,
+            height=45, font=('Helvetica bold', 20))
 
         self.saved_annotations_header = ctk.CTkFrame(
-            master=self.menu_frame, corner_radius=0, fg_color=self.menu_frame.cget("fg_color"))
+            master=self.menu_frame, corner_radius=0,
+            fg_color=self.menu_frame.cget("fg_color"))
 
         self.saved_annotations_header.grid_columnconfigure(
             0, weight=1, uniform="header")
@@ -51,26 +62,30 @@ class MenuScreen():
             0, weight=1, uniform="header")
 
         self.header_name_label = ctk.CTkLabel(
-            master=self.saved_annotations_header, text="Name:", font=('Helvetica bold', 20))
+            master=self.saved_annotations_header, text="Name:",
+            font=('Helvetica bold', 20))
 
         self.user_label = ctk.CTkLabel(
             master=self.root, text="", font=('Helvetica bold', 24))
 
-        self.user_label.bind(
-            "<Enter>", lambda event, og_color=self.user_label.cget('text_color'): self.highlight_label(self.user_label, og_color))
-        self.user_label.bind(
-            "<Leave>", lambda event, og_color=self.user_label.cget('text_color'): self.remove_highlight_label(self.user_label, og_color))
+        self.user_label.bind("<Enter>", lambda event, og_color=self.user_label.cget(
+            'text_color'): self.highlight_label(self.user_label, og_color))
+        self.user_label.bind("<Leave>", lambda event, og_color=self.user_label.cget(
+            'text_color'): self.remove_highlight_label(self.user_label, og_color))
         self.user_label.bind(
             "<Button-1>", lambda event: self.open_user_selection())
 
         self.header_algorithm_label = ctk.CTkLabel(
-            master=self.saved_annotations_header, text="Algorithm:", font=('Helvetica bold', 20))
+            master=self.saved_annotations_header, text="Algorithm:",
+            font=('Helvetica bold', 20))
 
         self.header_images_label = ctk.CTkLabel(
-            master=self.saved_annotations_header, text="Images:", font=('Helvetica bold', 20))
+            master=self.saved_annotations_header, text="Images:",
+            font=('Helvetica bold', 20))
 
         self.header_count_label = ctk.CTkLabel(
-            master=self.saved_annotations_header, text="Total annotations made:", font=('Helvetica bold', 20))
+            master=self.saved_annotations_header,
+            text="Total annotations made:", font=('Helvetica bold', 20))
 
         self.saved_annotations_frame = ctk.CTkScrollableFrame(
             master=self.menu_frame, height=400)
@@ -78,19 +93,16 @@ class MenuScreen():
         self.saved_annotations_frame.columnconfigure(0, weight=1)
 
         self.text_header = ctk.CTkLabel(
-            master=self.instructions_frame, text="Welcome to the Rank-Based Annotation program", font=('Helvetica bold', 24), wraplength=400)
+            master=self.instructions_frame,
+            text="Welcome to the Rank-Based Annotation program",
+            font=('Helvetica bold', 24),
+            wraplength=400)
 
-        self.text = ctk.CTkLabel(master=self.instructions_frame, text="Every annotation is saved immediately, and you can quit the program at any time and pick up where you left off. \n \n" +
-                                 "Make sure you have read and understood the instructions before you begin. \n \n" +
-                                 "Reach out to us if you have any questions, or if you were to encounter a bug.", font=('Helvetica bold', 18), wraplength=400, anchor="w", justify=ctk.LEFT)
-        # self.text = ctk.CTkLabel(master=self.instructions_frame, text="Every annotation is saved immediately, and you can quit the program at any time and pick up where you left off. \n \n" +
-        #                         "2 images per comparison: \n \n" +
-        #                         "2 or more buttons available, pick the option that best describes the relation of the image on the right to the image on the left. \n \n" +
-        #                         "You can also use keys 1-5 on your keyboard. \n \n" +
-        #                         "3 or more per comparison: \n \n" +
-        #                         "Order the images youngest to oldest, left to right. \n \n" +
-        #                         "You can use the arrow buttons, or drag and drop the images. \n \n" +
-        #                         "Specify the difference between two images using the radio buttons.", font=('Helvetica bold', 18), wraplength=400, anchor="w", justify=ctk.LEFT)
+        self.text = ctk.CTkLabel(
+            master=self.instructions_frame,
+            text=prompts['instruction_prompt'],
+            font=('Helvetica bold', 18),
+            wraplength=400, anchor="w", justify=ctk.LEFT)
 
         self.text.bind(
             '<Configure>', lambda event: self.update_wraplength(self.text))
@@ -127,7 +139,8 @@ class MenuScreen():
         #    10, 20), pady=10)
 
         self.saved_annotations_header.grid(
-            row=0, column=0, columnspan=2, sticky="sew", padx=(10, 20), pady=(20, 0))
+            row=0, column=0, columnspan=2, sticky="sew", padx=(10, 20),
+            pady=(20, 0))
 
         self.header_name_label.grid(
             row=0, column=0, sticky="w", padx=10, pady=4)
@@ -171,27 +184,31 @@ class MenuScreen():
         saved_annotations_row.grid_rowconfigure(0, weight=1, uniform="row")
 
         save_name_label = ctk.CTkLabel(
-            master=saved_annotations_row, text=save["name"], font=('Helvetica bold', 20))
+            master=saved_annotations_row, text=save["name"],
+            font=('Helvetica bold', 20))
         save_name_label.grid(row=0, column=0, padx=10, pady=4, sticky="w")
 
         sort_alg = save["sort_alg"]
 
         algorithm_label = ctk.CTkLabel(
-            master=saved_annotations_row, text=type(sort_alg).__name__, font=('Helvetica bold', 20))
+            master=saved_annotations_row, text=type(sort_alg).__name__,
+            font=('Helvetica bold', 20))
 
         algorithm_label.grid(row=0, column=1, padx=10, pady=4, sticky="w")
 
         total_images = len(sort_alg.data)
 
         total_images_label = ctk.CTkLabel(
-            master=saved_annotations_row, text=total_images, font=('Helvetica bold', 20))
+            master=saved_annotations_row, text=total_images,
+            font=('Helvetica bold', 20))
 
         total_images_label.grid(row=0, column=2, padx=10, pady=4, sticky="w")
 
         comp_count = sort_alg.get_comparison_count()
 
         count_label = ctk.CTkLabel(
-            master=saved_annotations_row, text=comp_count, font=('Helvetica bold', 20))
+            master=saved_annotations_row, text=comp_count,
+            font=('Helvetica bold', 20))
 
         count_label.grid(row=0, column=3, padx=10, pady=4, sticky="w")
 

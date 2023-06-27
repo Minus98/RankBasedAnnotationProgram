@@ -1,7 +1,9 @@
-import customtkinter as ctk
-from utils import *
 import pickle
 from pathlib import Path
+
+import customtkinter as ctk
+
+from utils import add_hover, get_full_path
 
 
 class UserSelectionPopOut():
@@ -32,8 +34,10 @@ class UserSelectionPopOut():
         else:
             self.saved_users = []
 
-        label = ctk.CTkLabel(text="Who will be annotating this session?",
-                             master=self.pop_out, font=('Helvetica bold', 30), wraplength=400)
+        label = ctk.CTkLabel(
+            text="Who will be annotating this session?", master=self.pop_out,
+            font=('Helvetica bold', 30),
+            wraplength=400)
         label.grid(row=0, column=0, sticky='sew', columnspan=2, pady=10)
 
         self.saved_users_frame = ctk.CTkScrollableFrame(
@@ -49,13 +53,17 @@ class UserSelectionPopOut():
 
         self.new_name_var.trace_add("write", self.name_changed)
 
-        self.user_entry = ctk.CTkEntry(self.pop_out, placeholder_text="Enter a new user", width=200, height=45, font=(
-            'Helvetica bold', 18), textvariable=self.new_name_var)
+        self.user_entry = ctk.CTkEntry(
+            self.pop_out, placeholder_text="Enter a new user", width=200,
+            height=45, font=('Helvetica bold', 18),
+            textvariable=self.new_name_var)
         self.user_entry.grid(column=0, row=2, sticky="ne", padx=(0, 5))
         self.user_entry.bind("<Return>", lambda event: self.on_return())
 
-        self.new_button = ctk.CTkButton(master=self.pop_out, text="+", width=45, height=45, font=(
-            'Helvetica bold', 20), command=self.new_user, state=ctk.DISABLED)
+        self.new_button = ctk.CTkButton(
+            master=self.pop_out, text="+", width=45, height=45,
+            font=('Helvetica bold', 20),
+            command=self.new_user, state=ctk.DISABLED)
         self.new_button.grid(column=1, row=2, sticky="nw")
 
         self.pop_out.grab_set()
@@ -69,7 +77,8 @@ class UserSelectionPopOut():
     def append_user_row(self, i, user):
 
         saved_users_row = ctk.CTkFrame(
-            master=self.saved_users_frame, fg_color=self.pop_out.cget("fg_color"))
+            master=self.saved_users_frame, fg_color=self.pop_out.cget(
+                "fg_color"))
 
         saved_users_row.bind(
             "<Button-1>", command=lambda event: self.select_user(user))
@@ -89,12 +98,15 @@ class UserSelectionPopOut():
         add_hover(saved_users_row)
 
         delete_button = ctk.CTkLabel(
-            master=saved_users_row, text="X", text_color="#C00000", font=('Helvetica bold', 20))
+            master=saved_users_row, text="X", text_color="#C00000",
+            font=('Helvetica bold', 20))
         delete_button.grid(row=0, column=1, padx=10, pady=4, sticky="e")
         delete_button.bind("<Enter>", lambda event,
-                           widget=delete_button: widget.configure(text_color="#F00000"))
+                           widget=delete_button: widget.configure(
+                               text_color="#F00000"))
         delete_button.bind("<Leave>", lambda event,
-                           widget=delete_button: widget.configure(text_color="#C00000"))
+                           widget=delete_button: widget.configure(
+                               text_color="#C00000"))
 
         delete_button.bind("<Button-1>", lambda event,
                            i=i: self.delete_user(i))
@@ -137,7 +149,8 @@ class UserSelectionPopOut():
             self.new_button.configure(state=ctk.DISABLED)
 
     def is_valid_name(self, name):
-        return name and name.lower() not in [user.lower() for user in self.saved_users]
+        return name and name.lower() not in [
+            user.lower() for user in self.saved_users]
 
     def on_return(self):
         if self.is_valid_name(self.new_name_var.get()):

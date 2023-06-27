@@ -1,24 +1,27 @@
 import copy
-import customtkinter as ctk
-from uuid import uuid4
-from utils import *
-from PIL import Image
-import nibabel as nib
-import time
-import numpy as np
+import os
 import pickle
+import shutil
+import time
+from uuid import uuid4
+
+import customtkinter as ctk
+import nibabel as nib
+import numpy as np
+import pandas as pd
+from PIL import Image
+
+import sorting_algorithms as sa
+from image_directory_pop_out import ImageDirectoryPopOut
 from is_finished_pop_out import IsFinishedPopOut
 from switching_modes_pop_out import SwitchingModesPopOut
-from image_directory_pop_out import ImageDirectoryPopOut
-import shutil
-import pandas as pd
-from pathlib import Path
-import sorting_algorithms as sa
+from utils import get_full_path
 
 
 class OrderingScreen():
 
-    def __init__(self, root, save_obj, menu_callback, center, user, reload_ordering_screen, hybrid_transition_made):
+    def __init__(self, root, save_obj, menu_callback, center, user,
+                 reload_ordering_screen, hybrid_transition_made):
 
         self.image_directory_located = False
 
@@ -40,7 +43,8 @@ class OrderingScreen():
         self.init_image_frames()
 
         self.header = ctk.CTkLabel(
-            master=self.root, text="Rank-Based Annotation", font=('Helvetica bold', 40))
+            master=self.root, text="Rank-Based Annotation",
+            font=('Helvetica bold', 40))
 
         self.session_duration_label = ctk.CTkLabel(
             master=self.root, text="0:00", font=('Helvetica bold', 30))
@@ -54,7 +58,8 @@ class OrderingScreen():
                     columns=['src', 'rating', 'time', 'session', 'user', 'undone'])
             else:
                 df = pd.DataFrame(
-                    columns=['result', 'diff_levels', 'time', 'session', 'user', 'undone'])
+                    columns=['result', 'diff_levels', 'time', 'session',
+                             'user', 'undone'])
 
             df.to_csv(self.save_obj["path_to_save"] + ".csv", index=False)
             csv_df = pd.read_csv(get_full_path(
@@ -62,28 +67,35 @@ class OrderingScreen():
 
         if type(self.sort_alg) == sa.HybridTrueSkill and self.hybrid_transition_made:
             current_user_count = len(
-                csv_df.loc[(csv_df['undone'] == False) & (csv_df['type'] == "Ranking")])
+                csv_df.loc
+                [(csv_df['undone'] == False) & (csv_df['type'] == "Ranking")])
         elif type(self.sort_alg) == sa.HybridTrueSkill:
             current_user_count = len(
                 csv_df.loc[(csv_df['undone'] == False)])
         else:
             current_user_count = len(
-                csv_df.loc[(csv_df['user'] == self.user) & (csv_df['undone'] == False)])
+                csv_df.loc
+                [(csv_df['user'] == self.user) & (csv_df['undone'] == False)])
 
         self.comp_count = 0 + current_user_count
         if not type(self.sort_alg) == sa.RatingAlgorithm:
             self.comp_count_label = ctk.CTkLabel(
-                master=self.root, text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}", font=('Helvetica bold', 30))
+                master=self.root,
+                text=f"Comparison count: {self.comp_count}/{self.sort_alg.get_comparison_max()}",
+                font=('Helvetica bold', 30))
         else:
             self.comp_count_label = ctk.CTkLabel(
-                master=self.root, text=f"Rating count: {self.comp_count}/{self.sort_alg.get_comparison_max()}", font=('Helvetica bold', 30))
+                master=self.root,
+                text=f"Rating count: {self.comp_count}/{self.sort_alg.get_comparison_max()}",
+                font=('Helvetica bold', 30))
 
         self.comparison_bar = ctk.CTkProgressBar(
             self.root, width=400, height=20)
         self.update_comparison_bar()
 
         self.back_button = ctk.CTkButton(
-            master=self.root, text="Back To Menu", width=200, height=40, command=self.back_to_menu, font=('Helvetica bold', 18))
+            master=self.root, text="Back To Menu", width=200, height=40,
+            command=self.back_to_menu, font=('Helvetica bold', 18))
 
         self.session_id = uuid4()
 
@@ -101,12 +113,15 @@ class OrderingScreen():
         self.progress_bar.set(0)
 
         self.undo_label = ctk.CTkLabel(
-            master=self.root, text="Undo Last Annotation", font=('Helvetica bold', 20), text_color="#777777")
+            master=self.root, text="Undo Last Annotation",
+            font=('Helvetica bold', 20),
+            text_color="#777777")
 
         self.undo_label.bind(
             "<Enter>", lambda event: self.highlight_label(self.undo_label))
         self.undo_label.bind(
-            "<Leave>", lambda event: self.remove_highlight_label(self.undo_label))
+            "<Leave>", lambda event: self.remove_highlight_label(
+                self.undo_label))
         self.undo_label.bind(
             "<Button-1>", lambda event: self.undo_annotation())
 
@@ -116,7 +131,9 @@ class OrderingScreen():
 
         directory_dict = self.save_obj['user_directory_dict']
 
-        if self.user in directory_dict and all([os.path.isfile(directory_dict[self.user] + "/" + k) for k in self.sort_alg.data]):
+        if self.user in directory_dict and all(
+            [os.path.isfile(directory_dict[self.user] + "/" + k)
+             for k in self.sort_alg.data]):
             self.image_directory = directory_dict[self.user]
             self.image_directory_located = True
         elif all([os.path.isfile(self.save_obj['image_directory'] + "/" + k) for k in self.sort_alg.data]):
@@ -142,12 +159,17 @@ class OrderingScreen():
                 resize_factor = (
                     self.root.winfo_screenheight()/2) / img.shape[1]
                 new_shape = (
-                    int(img.shape[0] * resize_factor), int(img.shape[1] * resize_factor))
-                ctk_imgs.append(ctk.CTkImage(
-                    Image.fromarray(np.rot90(img)).resize(new_shape, resample=2), size=(new_shape)))
+                    int(img.shape[0] * resize_factor),
+                    int(img.shape[1] * resize_factor))
+                ctk_imgs.append(
+                    ctk.CTkImage(
+                        Image.fromarray(np.rot90(img)).resize(
+                            new_shape, resample=2),
+                        size=(new_shape)))
                 self.progress_bar_progress += 1
                 self.progress_bar.set(
-                    self.progress_bar_progress / (self.comparison_size * nib_imgs.shape[2]))
+                    self.progress_bar_progress /
+                    (self.comparison_size * nib_imgs.shape[2]))
                 self.root.update()
 
             return ctk_imgs
@@ -277,7 +299,7 @@ class OrderingScreen():
 
     def is_finished_check(self):
         if self.sort_alg.is_finished():
-            #self.save_sorted_images()
+            # self.save_sorted_images()
             IsFinishedPopOut(self.root, self.center, self.back_to_menu)
             return True
         return False
