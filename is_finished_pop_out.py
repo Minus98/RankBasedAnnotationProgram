@@ -1,9 +1,27 @@
+from typing import Callable
+
 import customtkinter as ctk
 
 
 class IsFinishedPopOut():
+    """
+    Pop-out window for indicating the annotation status in the Rank-Based 
+    Annotation application.
+    """
 
-    def __init__(self, root, center, back_to_menu, state='finished'):
+    def __init__(
+            self, root: ctk.CTk, center: Callable, back_to_menu: Callable,
+            state: str = 'finished'):
+        """
+        Initializes the IsFinishedPopOut object.
+
+        Args:
+            root (CTk): The root cutom tkinter object.
+            center (function): A function to center the pop-out window.
+            back_to_menu (function): A function to go back to the main menu.
+            state (str): The state of the annotation, either 'finished' or 
+                         'not finished'.
+        """
 
         self.root = root
         self.center = center

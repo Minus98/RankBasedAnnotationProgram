@@ -1,6 +1,7 @@
 import json
 import pickle
 from pathlib import Path
+from typing import Callable, List
 
 import customtkinter as ctk
 
@@ -9,10 +10,25 @@ from utils import add_hover, get_full_path
 
 
 class MenuScreen():
+    """
+    Represents the menu screen of the Rank-Based Annotation application.
+    """
 
-    def __init__(
-            self, root, creation_callback, ordering_callback, center,
-            open_user_selection):
+    def __init__(self, root: ctk.CTk, creation_callback: Callable,
+                 ordering_callback: Callable, center: Callable,
+                 open_user_selection: Callable):
+        """
+        Initializes the MenuScreen instance.
+
+        Args:
+            root (CTk): The root window of the application.
+            creation_callback (function): The callback function for creating a 
+                                          new annotation.
+            ordering_callback (function): The callback function for loading a 
+                                          saved annotation.
+            center (function): The function to center the window.
+            open_user_selection (function): The function to open user selection.
+        """
 
         self.root = root
 
@@ -109,6 +125,7 @@ class MenuScreen():
         self.old_size = self.text.winfo_width()
 
     def display(self):
+        """Displays the menu screen."""
 
         self.root.grid_rowconfigure(0, weight=1, uniform="header")
         self.root.grid_rowconfigure(1, weight=8, uniform="header")
@@ -135,8 +152,6 @@ class MenuScreen():
 
         self.new_button.grid(row=2, column=0, columnspan=2, padx=(
             20, 10), pady=10)
-        # self.delete_button.grid(row=2, column=1, padx=(
-        #    10, 20), pady=10)
 
         self.saved_annotations_header.grid(
             row=0, column=0, columnspan=2, sticky="sew", padx=(10, 20),
@@ -159,15 +174,31 @@ class MenuScreen():
         self.text_header.grid(row=0, column=0, padx=10, pady=10, sticky="new")
         self.text.grid(row=1, column=0, padx=20, pady=10, sticky="new")
 
-    def display_user(self, user):
+    def display_user(self, user: str):
+        """
+        Displays the user label with the provided username.
+
+        Args:
+            user (str): The username to display.
+        """
         self.user_label.configure(text=user)
 
     def display_saves(self):
+        """
+        Displays the saved annotations in the menu.
+        """
 
         for i, save in enumerate(self.saves):
             self.append_row(i, save)
 
-    def append_row(self, index, save):
+    def append_row(self, index: int, save: dict):
+        """
+        Appends a row with save information to the saved annotations frame.
+
+        Args:
+            index (int): The index of the save.
+            save (dict): The save object.
+        """
 
         saved_annotations_row = ctk.CTkFrame(
             master=self.saved_annotations_frame)
@@ -219,31 +250,60 @@ class MenuScreen():
         add_hover(saved_annotations_row)
 
     def new_annotation(self):
+        """
+        Callback function for the new annotation button.
+        """
+
         CreationPopOut(self.creation_callback, self.center)
 
     def load_save(self, index):
-        '''Loads the save object associated with the index
-        '''
+        """
+        Loads the save object associated with the index
+
+        Args:
+            index (int): The index of the save.
+
+        """
         file = open(self.paths[index], 'rb')
-
         save_obj = pickle.load(file)
-
         self.ordering_callback(save_obj)
 
-    def update_wraplength(self, label):
+    def update_wraplength(self, label: ctk.CTkLabel):
+        """
+        Updates the wraplength of the label based on its width.
+
+        Args:
+            label (CTkLabel): The label to update.
+        """
 
         if abs(label.winfo_width() - self.old_size) > 20:
             self.old_size = label.winfo_width()
             label.configure(wraplength=label.winfo_width() - 10)
 
-    def highlight_label(self, widget, color):
+    def highlight_label(self, label: ctk.CTkLabel, og_color: List[str]):
+        """
+        Highlights the label on mouse hover.
 
-        gray_color = int(color[1][-2:]) + 10
+        Args:
+            label (ctk.CTkLabel): The label to be highlighted.
+            og_color (List[str]): The original color of the label as a list of 
+                                  strings representing the color code.
+        """
+        gray_color = int(og_color[1][-2:]) + 10
 
         if gray_color > 100:
             gray_color = 100
 
-        widget.configure(text_color='gray' + str((gray_color)))
+        label.configure(text_color='gray' + str((gray_color)))
 
-    def remove_highlight_label(self, widget, original_color):
-        widget.configure(text_color=original_color)
+    def remove_highlight_label(self, label: ctk.CTkLabel, og_color: List[str]):
+        """
+        Removes the highlight from the specified label by restoring its original
+        text color.
+
+        Args:
+            label (ctk.CTkLabel): The label from which to remove the highlight.
+            og_color (List[str]): The original color of the label as a list of 
+                                  strings representing the color code.
+        """
+        label.configure(text_color=og_color)
