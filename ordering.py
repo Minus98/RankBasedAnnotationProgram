@@ -93,7 +93,7 @@ class OrderingScreen():
         else:
             self.comp_count_label = ctk.CTkLabel(
                 master=self.root,
-                text='Rating count: ' + + str(self.comp_count) +
+                text='Rating count: ' + str(self.comp_count) +
                 '/' + str(self.sort_alg.get_comparison_max()),
                 font=('Helvetica bold', 30))
 
