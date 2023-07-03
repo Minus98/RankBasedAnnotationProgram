@@ -3,6 +3,8 @@ import os
 import pickle
 import shutil
 import time
+from tkinter import Event
+from typing import Callable, List, Union
 from uuid import uuid4
 
 import customtkinter as ctk
@@ -19,9 +21,26 @@ from utils import get_full_path
 
 
 class OrderingScreen():
+    """Class representing the ordering screen for ranking and rating images."""
 
-    def __init__(self, root, save_obj, menu_callback, center, user,
-                 reload_ordering_screen, hybrid_transition_made):
+    def __init__(
+            self, root: ctk.CTk, save_obj: dict, menu_callback: Callable,
+            center: Callable, user: str, reload_ordering_screen: Callable,
+            hybrid_transition_made: bool):
+        """
+        Initialize the OrderingScreen.
+
+        Args:
+            root (CTk): The root cutom tkinter object.
+            save_obj (dict): The save object containing various parameters.
+            menu_callback (function): The callback function for the menu.
+            center (function): The function for centering the window.
+            user (str): The user currently annotating.
+            reload_ordering_screen (function): Callback function to reload the 
+                                               ordering screen.
+            hybrid_transition_made (bool): Flag indicating whether hybrid 
+                                           transition was made.
+        """
 
         self.image_directory_located = False
 
@@ -158,7 +177,19 @@ class OrderingScreen():
                 self.root, self.center, self.save_obj,
                 self.submit_path, self.back_to_menu)
 
-    def file_2_CTkImage(self, img_src):
+    def file_2_CTkImage(self, img_src: str) -> List[ctk.CTkImage]:
+        """
+        Convert an image file to a list of CTkImage objects.
+
+        Args:
+            img_src (str): The path to the image file.
+
+        Returns:
+            List[CTkImage]: The list of CTkImage objects.
+
+        Raises:
+            FileNotFoundError: If the image file is not found.
+        """
 
         img_src = os.path.relpath(self.image_directory + "/" + img_src)
 
@@ -190,21 +221,44 @@ class OrderingScreen():
         else:
             return [ctk.CTkImage(Image.open(img_src), size=(250, 250))]
 
-    def highlight_label(self, widget):
+    def highlight_label(self, label: ctk.CTkLabel):
+        """
+        Highlight the label by adjusting its text color.
 
-        hex = widget.cget("text_color")
+        Args:
+            label (CTkLabel): The widget containing the label to be highlighted.
+        """
+
+        hex = label.cget("text_color")
 
         rgb = [int(hex[i:i+2], 16) for i in (1, 3, 5)]
         for i in range(len(rgb)):
             rgb[i] = min(rgb[i]+50, 255)
 
         new_hex = '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
-        widget.configure(text_color=new_hex)
+        label.configure(text_color=new_hex)
 
-    def remove_highlight_label(self, widget):
-        widget.configure(text_color="#777777")
+    def remove_highlight_label(self, label: ctk.CTkLabel):
+        """
+        Remove the highlight from the label by setting its text color to a 
+        default value.
 
-    def load_initial_image(self, img_src):
+        Args:
+            label (CTkLabel): The label from which to remove the highlight.
+        """
+
+        label.configure(text_color="#777777")
+
+    def load_initial_image(self, img_src: str) -> List[ctk.CTkImage]:
+        """
+        Load the initial image for display.
+
+        Args:
+            img_src (str): The source of the image file to load.
+
+        Returns:
+            A list of CTkImage objects representing the loaded image.
+        """
 
         img_src = os.path.relpath(self.image_directory + "/" + img_src)
 
@@ -226,12 +280,18 @@ class OrderingScreen():
             return [ctk.CTkImage(Image.open(img_src), size=(250, 250))]
 
     def update_images(self):
+        """
+        Update the displayed images on the screen.
+        """
 
         for i, img_info in enumerate(self.images):
             self.displayed_images[i].configure(
                 image=img_info[1][img_info[2]])
 
     def update_time(self):
+        """
+        Update the displayed session duration time.
+        """
 
         current_time = time.time()
 
@@ -251,7 +311,14 @@ class OrderingScreen():
 
         self.timer_after = self.root.after(1000, self.update_time)
 
-    def on_image_scroll(self, event, idx):
+    def on_image_scroll(self, event: Event, idx: int):
+        """
+        Handle the image scroll event.
+
+        Args:
+            event (Event): The tkinter scroll event.
+            idx (int): The index of the image.
+        """
         if event.delta < 0:
             self.images[idx][2] = max(self.images[idx][2]-1, 0)
 
@@ -261,28 +328,56 @@ class OrderingScreen():
 
         self.update_images()
 
-    def on_image_scroll_up(self, idx):
+    def on_image_scroll_up(self, idx: int):
+        """
+        Handle the upward image scroll event.
+
+        Args:
+            idx (int): The index of the image.
+        """
+
         self.images[idx][2] = min(
             self.images[idx][2]+1, len(self.images[idx][1])-1)
 
         self.update_images()
 
-    def on_image_scroll_down(self, idx):
+    def on_image_scroll_down(self, idx: int):
+        """
+        Handle the downward image scroll event.
+
+        Args:
+            idx (int): The index of the image.
+        """
         self.images[idx][2] = max(self.images[idx][2]-1, 0)
 
         self.update_images()
 
-    def on_image_key_scroll(self, dir):
+    def on_image_key_scroll(self, dir: str):
+        """
+        Handle the image scroll event triggered by a key press.
+
+        Args:
+            dir (str): The direction of the scroll ('up' or 'down').
+        """
         if self.image_hover_idx >= 0:
             if dir == 'up':
                 self.on_image_scroll_up(self.image_hover_idx)
             elif dir == 'down':
                 self.on_image_scroll_down(self.image_hover_idx)
 
-    def set_image_hover_idx(self, idx):
+    def set_image_hover_idx(self, idx: int):
+        """
+        Set the index of the image being hovered.
+
+        Args:
+            idx (int): The index of the image.
+        """
         self.image_hover_idx = idx
 
     def undo_annotation(self):
+        """
+        Undo the previous annotation and update the display.
+        """
         if self.prev_sort_alg is not None:
 
             self.sort_alg = self.prev_sort_alg
@@ -302,23 +397,37 @@ class OrderingScreen():
             self.update_comparison_bar()
 
     def update_comparison_bar(self):
+        """
+        Update the comparison bar value based on the current comparison count.
+        """
         self.comparison_bar.set(
             self.comp_count / self.sort_alg.get_comparison_max())
 
     def save_algorithm(self):
+        """
+        Save the current state of the algorithm to a pickle file.
+        """
         f = open(get_full_path(
             self.save_obj["path_to_save"] + ".pickle"), "wb")
         pickle.dump(self.save_obj, f)
         f.close()
 
-    def is_finished_check(self):
+    def is_finished_check(self) -> bool:
+        """
+        Check if the sorting algorithm is finished.
+
+        Returns:
+            bool: True if the sorting algorithm is finished, False otherwise.
+        """
         if self.sort_alg.is_finished():
-            # self.save_sorted_images()
             IsFinishedPopOut(self.root, self.center, self.back_to_menu)
             return True
         return False
 
     def save_sorted_images(self):
+        """
+        Save the sorted images to the appropriate directory.
+        """
         res = self.sort_alg.get_result()
         for i, src in enumerate(res):
             _, extension = os.path.splitext(src)
@@ -327,8 +436,19 @@ class OrderingScreen():
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             shutil.copy(os.path.relpath(self.image_directory + "/" + src), dst)
 
-    def submit_comparison(self, keys, lvl, df_annotatation=False):
+    def submit_comparison(
+            self, keys: Union[str, List[str]],
+            lvl: int, df_annotatation: bool = False):
+        """
+        Submit a comparison of images with their associated level.
 
+        Args:
+            keys (Union[str, List[str]]): The key or keys representing the 
+                                          images being compared.
+            lvl (int): The level associated with the comparison.
+            df_annotatation (bool, optional): Whether it is a dataframe 
+                                              annotation. Defaults to False.
+        """
         if self.submission_timeout:
             return
 
@@ -384,9 +504,25 @@ class OrderingScreen():
         self.root.after(500, self.remove_submission_timeout)
 
     def remove_submission_timeout(self):
+        """
+        Remove the submission timeout flag.
+        """
         self.submission_timeout = False
 
-    def save_to_csv_file(self, res, lvls, df_annotatation=False):
+    def save_to_csv_file(
+            self, res: Union[str, List[str]],
+            lvls: Union[str, List[str]],
+            df_annotatation: bool = False):
+        """
+        Save the result and level of the comparison to a CSV file.
+
+        Args:
+            res (Union[str, List[str]]): The result of the comparison.
+            lvls (Union[str, List[str]]): The level associated with the 
+                                          comparison.
+            df_annotatation (bool, optional): Whether it is a dataframe 
+                                              annotation. Defaults to False.
+        """
 
         user = 'DF' if df_annotatation else self.user
 
@@ -412,18 +548,34 @@ class OrderingScreen():
                   header=not os.path.exists(output_path), index=False)
 
     def undo_csv_file(self):
+        """
+        Undo the last entry in the CSV file by marking it as undone.
+        """
         path = get_full_path(self.save_obj["path_to_save"] + '.csv')
         copy_df = pd.read_csv(path)
         copy_df.iloc[-1, copy_df.columns.get_loc('undone')] = True
         copy_df.to_csv(path, index=False)
 
-    def back_to_menu(self, remove_after=True):
+    def back_to_menu(self, remove_after: bool = True):
+        """
+        Return to the main menu.
+
+        Args:
+            remove_after (bool, optional): Whether to remove the timer. 
+                                           Defaults to True.
+        """
         if remove_after:
             self.root.after_cancel(self.timer_after)
         self.root.unbind("<Return>")
         self.menu_callback()
 
-    def submit_path(self, path):
+    def submit_path(self, path: str):
+        """
+        Submit the image directory path and update the display.
+
+        Args:
+            path (str): The path to the image directory.
+        """
         self.image_directory = path
         self.image_directory_located = True
         directory_dict = self.save_obj['user_directory_dict']

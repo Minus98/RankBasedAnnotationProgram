@@ -1,4 +1,6 @@
 import time
+from tkinter import Event
+from typing import Callable
 
 import customtkinter as ctk
 
@@ -7,10 +9,23 @@ from utils import DiffLevel
 
 
 class MultiOrderingScreen(OrderingScreen):
+    """A screen for multi-ordering."""
 
     def __init__(
-            self, root, save_obj, menu_callback, center, user,
-            reload_ordering_screen):
+            self, root: ctk.CTkFrame, save_obj: dict, menu_callback: Callable,
+            center: Callable, user: str, reload_ordering_screen: Callable):
+        """
+        Initialize the MultiOrderingScreen.
+
+        Args:
+            root (CTkFrame): The root frame for the screen.
+            save_obj (dict): The save object.
+            menu_callback (function): The callback function for the menu.
+            center (function): The function for centering the window.
+            user (str): The user name.
+            reload_ordering_screen (function): The function to reload the 
+                                               ordering screen.
+        """
 
         super().__init__(root, save_obj, menu_callback,
                          center, user, reload_ordering_screen, True)
@@ -25,6 +40,9 @@ class MultiOrderingScreen(OrderingScreen):
         self.motion_allowed = True
 
     def display(self):
+        """
+        Display the multi-ordering screen.
+        """
 
         self.session_start_time = time.time()
         self.session_elapsed_time_prev = 0
@@ -59,6 +77,9 @@ class MultiOrderingScreen(OrderingScreen):
         self.is_loading = False
 
     def init_image_frames(self):
+        """
+        Initialize the image frames.
+        """
 
         self.displayed_images = []
         self.image_frames = []
@@ -101,11 +122,13 @@ class MultiOrderingScreen(OrderingScreen):
             move_right_button.grid(row=1, column=1, padx=(0, 5), pady=(0, 10))
 
             image_frame.bind(
-                "<Button-1>", command=lambda event, image_frame=image_frame,
-                i=i: self.on_drag_start(event, image_frame, i))
+                "<Button-1>", command=lambda event,
+                image_frame=image_frame, i=i: self.on_drag_start(
+                    event, image_frame, i))
             image_frame.bind(
-                "<B1-Motion>", command=lambda event, image_frame=image_frame,
-                i=i: self.on_drag_motion(event, image_frame, i))
+                "<B1-Motion>", command=lambda event,
+                image_frame=image_frame: self.on_drag_motion(
+                    event, image_frame))
             image_frame.bind(
                 "<ButtonRelease-1>", command=lambda event,
                 image_frame=image_frame, i=i: self.on_drag_stop(
@@ -114,12 +137,14 @@ class MultiOrderingScreen(OrderingScreen):
                              i=i: self.on_image_scroll(event, i))
 
             displayed_image.bind(
-                "<Button-1>", command=lambda event, image_frame=image_frame,
-                i=i: self.on_drag_start(event, image_frame, i))
+                "<Button-1>", command=lambda event,
+                image_frame=image_frame, i=i: self.on_drag_start(
+                    event, image_frame, i))
 
             displayed_image.bind(
-                "<B1-Motion>", command=lambda event, image_frame=image_frame,
-                i=i: self.on_drag_motion(event, image_frame, i))
+                "<B1-Motion>", command=lambda event,
+                image_frame=image_frame: self.on_drag_motion(
+                    event, image_frame))
 
             displayed_image.bind(
                 "<ButtonRelease-1>", command=lambda event,
@@ -150,6 +175,9 @@ class MultiOrderingScreen(OrderingScreen):
                 "<Leave>", command=lambda event: self.set_image_hover_idx(-1))
 
     def init_diff_level_buttons(self):
+        """
+        Initialize the difference level buttons.
+        """
 
         diff_levels_frame = ctk.CTkFrame(
             master=self.images_frame)
@@ -202,10 +230,23 @@ class MultiOrderingScreen(OrderingScreen):
             fg_color=self.images_frame.cget("fg_color"))
 
     def reset_diff_levels(self):
+        """
+        Reset the difference levels to their default values.
+        """
         for int_diff_lvl in self.int_diff_levels:
             int_diff_lvl.set(1)
 
-    def update_diff_labels(self, int_diff_level, label):
+    def update_diff_labels(
+            self, int_diff_level: ctk.IntVar, label: ctk.CTkLabel):
+        """
+        Update the labels for the difference levels.
+
+        Args:
+            int_diff_level (IntVar): The difficulty level as an integer 
+                                     variable.
+            label (CTkLabel): The label to update with the difficulty 
+                              level text.
+        """
         if int_diff_level.get() == 0:
             label.configure(text="no difference")
         elif int_diff_level.get() == 2:
@@ -213,7 +254,16 @@ class MultiOrderingScreen(OrderingScreen):
         else:
             label.configure(text="")
 
-    def create_image_widget(self, image_idx):
+    def create_image_widget(self, image_idx: int) -> ctk.CTkFrame:
+        """
+        Create a widget for displaying an image.
+
+        Args:
+            image_idx (int): The index of the image.
+
+        Returns:
+            CTkFrame: The created image widget.
+        """
         image_frame = ctk.CTkFrame(
             master=self.root)
 
@@ -240,6 +290,9 @@ class MultiOrderingScreen(OrderingScreen):
         return image_frame
 
     def display_new_comparison(self):
+        """
+        Display a new comparison of images.
+        """
         self.reset_diff_levels()
 
         keys = self.sort_alg.get_comparison(self.user)
@@ -256,6 +309,7 @@ class MultiOrderingScreen(OrderingScreen):
         if self.scroll_allowed:
             self.progress_bar.grid(
                 row=2, column=0, columnspan=2, sticky="N", pady=5)
+
             self.images = [[img, self.file_2_CTkImage(img), 0]
                            for img in keys]
 
@@ -266,7 +320,13 @@ class MultiOrderingScreen(OrderingScreen):
         if self.prev_sort_alg is not None:
             self.undo_label.place(x=20, y=70)
 
-    def move_left(self, index):
+    def move_left(self, index: int):
+        """
+        Move an image to the left in the comparison.
+
+        Args:
+            index (int): The index of the image to move.
+        """
 
         if self.is_loading:
             return
@@ -279,7 +339,13 @@ class MultiOrderingScreen(OrderingScreen):
 
         self.reset_diff_levels()
 
-    def move_right(self, index):
+    def move_right(self, index: int):
+        """
+        Move an image to the right in the comparison.
+
+        Args:
+            index (int): The index of the image to move.
+        """
 
         if self.is_loading:
             return
@@ -292,8 +358,15 @@ class MultiOrderingScreen(OrderingScreen):
 
         self.reset_diff_levels()
 
-    def on_drag_start(self, event, frame, idx):
+    def on_drag_start(self, event: Event, frame: ctk.CTkFrame, idx: int):
+        """
+        Event handler for when dragging starts.
 
+        Args:
+            event (Event): The Tkinter event object.
+            frame (CTkFrame): The frame where the event occurred.
+            idx (int): The index of the image being dragged.
+        """
         if self.is_loading:
             return
 
@@ -315,9 +388,19 @@ class MultiOrderingScreen(OrderingScreen):
         self.drag_frame = frame_clone
 
     def allow_motion(self):
+        """
+        Allows motion after a delay.
+        """
         self.motion_allowed = True
 
-    def on_drag_motion(self, event, frame, idx):
+    def on_drag_motion(self, event: Event, frame: ctk.CTkFrame):
+        """
+        Event handler for when dragging is in motion.
+
+        Args:
+            event (Event): The Tkinter event object.
+            frame (CTkFrame): The frame where the event occurred.
+        """
 
         if not self.motion_allowed or self.is_loading:
             return
@@ -335,7 +418,15 @@ class MultiOrderingScreen(OrderingScreen):
 
         self.root.update_idletasks()
 
-    def on_drag_stop(self, event, frame, idx):
+    def on_drag_stop(self, event: Event, frame: ctk.CTkFrame, idx: int):
+        """
+        Event handler for when dragging stops.
+
+        Args:
+            event (Event): The Tkinter event object.
+            frame (CTkFrame): The frame where the event occurred.
+            idx (int): The index of the image being dragged.
+        """
 
         if self.is_loading:
             return
@@ -377,6 +468,9 @@ class MultiOrderingScreen(OrderingScreen):
         self.reset_diff_levels()
 
     def submit(self):
+        """
+        Submits the comparison.
+        """
 
         keys = [key for key, _, _ in self.images]
 

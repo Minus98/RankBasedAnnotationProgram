@@ -1,6 +1,7 @@
 import json
 import random
 import time
+from typing import Callable
 
 import customtkinter as ctk
 
@@ -9,9 +10,26 @@ from ordering import OrderingScreen
 
 
 class RatingScreen(OrderingScreen):
+    """A screen for rating."""
 
-    def __init__(self, root, save_obj, menu_callback, center, user,
-                 reload_ordering_screen, hybrid_transition_made):
+    def __init__(
+            self, root: ctk.CTk, save_obj: dict, menu_callback: Callable,
+            center: Callable, user: str, reload_ordering_screen: Callable,
+            hybrid_transition_made: bool):
+        """
+        Initialize the RatingScreen.
+
+        Args:
+            root (CTk): The root cutom tkinter object.
+            save_obj (dict): The save object containing various parameters.
+            menu_callback (function): The callback function for the menu.
+            center (function): The function for centering the window.
+            user (str): The user currently annotating.
+            reload_ordering_screen (function): Callback function to reload the 
+                                               ordering screen.
+            hybrid_transition_made (bool): Flag indicating whether hybrid 
+                                           transition was made.
+        """
 
         super().__init__(root, save_obj, menu_callback, center,
                          user, reload_ordering_screen, hybrid_transition_made)
@@ -90,6 +108,9 @@ class RatingScreen(OrderingScreen):
             "<Tab>", lambda event: self.on_tab())
 
     def display(self):
+        """
+        Display the rating screen.
+        """
 
         self.session_start_time = time.time()
         self.session_elapsed_time_prev = 0
@@ -130,6 +151,9 @@ class RatingScreen(OrderingScreen):
             self.display_new_comparison()
 
     def init_image_frames(self):
+        """
+        Initialize the image frames.
+        """
 
         self.displayed_images = []
         self.image_frames = []
@@ -172,6 +196,9 @@ class RatingScreen(OrderingScreen):
             "<Leave>", command=lambda event: self.set_image_hover_idx(-1))
 
     def display_new_comparison(self):
+        """
+        Display a new comparison.
+        """
 
         self.reset_tab()
         key = self.sort_alg.get_comparison(self.user)
@@ -198,6 +225,9 @@ class RatingScreen(OrderingScreen):
                              self.back_to_menu, 'no annotations')
 
     def on_tab(self):
+        """
+        Handle the tab key event.
+        """
 
         if self.tab_index >= 0:
             self.remove_highlight(self.tab_items[self.tab_index])
@@ -209,11 +239,17 @@ class RatingScreen(OrderingScreen):
         self.highlight(self.tab_items[self.tab_index])
 
     def reset_tab(self):
+        """
+        Reset the tab index and remove the highlight.
+        """
         if self.tab_index != -1:
             self.remove_highlight(self.tab_items[self.tab_index])
             self.tab_index = -1
 
     def on_shortcmd_up(self, index):
+        """
+        Handle the key release event for a rating button.
+        """
 
         if index >= len(self.tab_items):
             return
@@ -223,16 +259,28 @@ class RatingScreen(OrderingScreen):
         self.tab_items[index].invoke()
 
     def highlight(self, widget):
+        """
+        Highlight a button widget.
+        """
         widget.configure(fg_color=widget.cget("hover_color"))
 
     def remove_highlight(self, widget):
+        """
+        Remove the highlight from a button widget.
+        """
         widget.configure(fg_color=['#3a7ebf', '#1f538d'])
 
     def on_enter(self):
+        """
+        Handle the Enter key event.
+        """
         if self.tab_index >= 0:
             self.tab_items[self.tab_index].invoke()
 
     def on_shortcmd(self, index):
+        """
+        Handle the key press event for a rating button.
+        """
 
         if index >= len(self.tab_items):
             return
@@ -240,6 +288,9 @@ class RatingScreen(OrderingScreen):
         self.highlight(self.tab_items[index])
 
     def submit(self, lvl):
+        """
+        Submit the rating for a comparison.
+        """
 
         if self.is_loading:
             return

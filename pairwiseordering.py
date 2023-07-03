@@ -1,6 +1,7 @@
 import json
 import random
 import time
+from typing import Callable, List, Optional
 
 import customtkinter as ctk
 import pandas as pd
@@ -12,10 +13,23 @@ from utils import DiffLevel, get_full_path
 
 
 class PairwiseOrderingScreen(OrderingScreen):
+    """A screen for pairwise image ordering."""
 
     def __init__(
-            self, root, save_obj, menu_callback, center, user,
-            reload_ordering_screen):
+            self, root: ctk.CTk, save_obj: dict, menu_callback: Callable,
+            center: Callable, user: str, reload_ordering_screen: Callable):
+        """
+        Initialize the PairwiseOrderingScreen.
+
+        Args:
+            root (CTk): The root cutom tkinter object.
+            save_obj (dict): The save object containing various parameters.
+            menu_callback (function): The callback function for the menu.
+            center (function): The function for centering the window.
+            user (str): The user currently annotating.
+            reload_ordering_screen (function): Callback function to reload the 
+                                               ordering screen.
+        """
 
         super().__init__(root, save_obj, menu_callback,
                          center, user, reload_ordering_screen, True)
@@ -126,6 +140,9 @@ class PairwiseOrderingScreen(OrderingScreen):
             self.display_new_comparison()
 
     def init_image_frames(self):
+        """
+        Display the pairwise ordering screen.
+        """
 
         self.displayed_images = []
         self.image_frames = []
@@ -182,6 +199,9 @@ class PairwiseOrderingScreen(OrderingScreen):
                 "<Leave>", command=lambda event: self.set_image_hover_idx(-1))
 
     def display_new_comparison(self):
+        """
+        Display a new comparison in the pairwise ordering screen.
+        """
 
         self.reset_tab()
 
@@ -213,8 +233,22 @@ class PairwiseOrderingScreen(OrderingScreen):
             IsFinishedPopOut(self.root, self.center,
                              self.back_to_menu, 'no annotations')
 
-    def check_df_for_comp(self, keys):
+    def check_df_for_comp(self, keys: List[str]) -> Optional[int]:
+        """
+        Check the data frame for previous comparisons and if they are 
+        enough and sufficient. 
 
+        Args:
+            keys (List[str]): The keys representing the current comparison.
+
+        Returns:
+            Optional[int]: The result of the comparison where 70% of users 
+                           assess the same difference level 
+                           0 - if consensus is no difference
+                           1 or -1 - if consensus is that there is some order 
+                                     of the keys
+                           or None if not enough previous comparison are found.
+        """
         df_check = pd.read_csv(get_full_path(
             self.save_obj["path_to_save"] + '.csv'))
 
@@ -242,6 +276,9 @@ class PairwiseOrderingScreen(OrderingScreen):
         return None
 
     def on_tab(self):
+        """
+        Perform an action when the tab key is pressed.
+        """
 
         if self.tab_index >= 0:
             self.remove_highlight(self.tab_items[self.tab_index])
@@ -253,28 +290,58 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.highlight(self.tab_items[self.tab_index])
 
     def reset_tab(self):
+        """
+        Reset the tab index and remove the highlight from the current tab item.
+        """
         if self.tab_index != -1:
             self.remove_highlight(self.tab_items[self.tab_index])
             self.tab_index = -1
 
     def highlight(self, widget):
+        """
+        Highlight the specified widget.
+
+        Args:
+            widget: The widget to highlight.
+        """
         widget.configure(fg_color=widget.cget("hover_color"))
 
     def remove_highlight(self, widget):
+        """
+        Remove the highlight from the specified widget.
+
+        Args:
+            widget: The widget to remove the highlight from.
+        """
         widget.configure(fg_color=['#3a7ebf', '#1f538d'])
 
     def on_enter(self):
+        """
+        Perform an action when the enter key is pressed.
+        """
         if self.tab_index >= 0:
             self.tab_items[self.tab_index].invoke()
 
-    def on_shortcmd(self, index):
+    def on_shortcmd(self, index: int):
+        """
+        Perform an action when a short command key is pressed.
+
+        Args:
+            index (int): The index of the short command key.
+        """
 
         if index >= len(self.tab_items):
             return
 
         self.highlight(self.tab_items[index])
 
-    def on_shortcmd_up(self, index):
+    def on_shortcmd_up(self, index: int):
+        """
+        Perform an action when a short command key is released.
+
+        Args:
+            index (int): The index of the short command key.
+        """
 
         if index >= len(self.tab_items):
             return
@@ -283,7 +350,16 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.root.update()
         self.tab_items[index].invoke()
 
-    def submit(self, difflevel, df_annotatation=False):
+    def submit(self, difflevel: int, df_annotatation: bool = False):
+        """
+        Submit a comparison.
+
+        Args:
+            difflevel (int): The difference level of the comparison.
+            df_annotatation (bool, optional): Whether to annotate the comparison
+                                              in the data frame. Defaults to 
+                                              False.
+        """
 
         if self.is_loading:
             return
