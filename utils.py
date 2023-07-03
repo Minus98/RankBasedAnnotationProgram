@@ -60,7 +60,8 @@ def highlight(widget: ctk.CTkWidget, og_color: List[str]):
 
 def remove_highlight(widget: ctk.CTkWidget, og_color: List[str]):
     """
-    Remove highlight effect from the ctk widget by restoring its original foreground color.
+    Remove highlight effect from the ctk widget by restoring its original 
+    foreground color.
 
     Args:
         widget: The ctk widget to remove the highlight effect from.
