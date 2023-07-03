@@ -1,5 +1,6 @@
 import pickle
 from pathlib import Path
+from typing import Any, Callable
 
 import customtkinter as ctk
 
@@ -7,8 +8,19 @@ from utils import add_hover, get_full_path
 
 
 class UserSelectionPopOut():
+    """Class representing a pop-out window for user selection"""
 
-    def __init__(self, root, center, select_user_callback):
+    def __init__(self, root: ctk.CTk, center: Callable,
+                 select_user_callback: Callable):
+        """
+        Initialize the UserSelectionPopOut.
+
+        Args:
+            root (CTk): The root window.
+            center (function): A function to center the pop-out window.
+            select_user_callback (function): The callback function to select 
+                                             a user.
+        """
 
         self.root = root
         self.center = center
@@ -70,11 +82,21 @@ class UserSelectionPopOut():
         self.pop_out.attributes("-topmost", True)
 
     def display_users(self):
+        """
+        Display the saved users in the pop-out window.
+        """
 
         for i, user in enumerate(self.saved_users):
             self.append_user_row(i, user)
 
-    def append_user_row(self, i, user):
+    def append_user_row(self, i: int, user: str):
+        """
+        Append a user row to the saved users frame.
+
+        Args:
+            i (int): The row index.
+            user (str): The user name.
+        """
 
         saved_users_row = ctk.CTkFrame(
             master=self.saved_users_frame, fg_color=self.pop_out.cget(
@@ -111,7 +133,13 @@ class UserSelectionPopOut():
         delete_button.bind("<Button-1>", lambda event,
                            i=i: self.delete_user(i))
 
-    def delete_user(self, i):
+    def delete_user(self, i: int):
+        """
+        Delete a user from the saved users list.
+
+        Args:
+            i (int): The index of the user to delete.
+        """
         self.saved_users.pop(i)
 
         f = open(get_full_path("users.pickle"), "wb")
@@ -123,11 +151,20 @@ class UserSelectionPopOut():
 
         self.display_users()
 
-    def select_user(self, user):
+    def select_user(self, user: str):
+        """
+        Select a user and call the callback function.
+
+        Args:
+            user: The selected user.
+        """
         self.select_user_callback(user)
         self.pop_out.destroy()
 
     def new_user(self):
+        """
+        Create a new user and update the saved users list.
+        """
 
         name = self.new_name_var.get()
 
@@ -141,17 +178,38 @@ class UserSelectionPopOut():
 
         self.new_name_var.set("")
 
-    def name_changed(self, a, b, c):
+    def name_changed(self, *args: Any):
+        """
+        Callback function for name changes. Enables or disables the new button 
+        based on the validity of the name.
+
+        Args:
+            *args: Variable number of arguments.
+        """
 
         if self.is_valid_name(self.new_name_var.get()):
             self.new_button.configure(state=ctk.NORMAL)
         else:
             self.new_button.configure(state=ctk.DISABLED)
 
-    def is_valid_name(self, name):
+    def is_valid_name(self, name: str) -> bool:
+        """
+        Check if the provided name is valid, i.e., not empty and not already 
+        in the list of saved users.
+
+        Args:
+            name: The name to check.
+
+        Returns:
+            bool: True if the name is valid, False otherwise.
+        """
         return name and name.lower() not in [
             user.lower() for user in self.saved_users]
 
     def on_return(self):
+        """
+        Callback function triggered when the Return key is pressed. 
+        If the entered name is valid, it adds the new user.
+        """
         if self.is_valid_name(self.new_name_var.get()):
             self.new_user()

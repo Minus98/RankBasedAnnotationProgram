@@ -1,14 +1,32 @@
 import json
 import os
 from pathlib import Path
+from typing import Callable
 
 import customtkinter as ctk
 
 
 class ImageDirectoryPopOut():
+    """
+    Pop-out window for selecting the image directory in the Rank-Based 
+    Annotation application.
+    """
 
-    def __init__(self, root, center, save_obj, submit_path, back_to_menu):
+    def __init__(
+            self, root: ctk.CTk, center: Callable, save_obj: dict,
+            submit_path: Callable, back_to_menu: Callable):
+        """
+        Initializes the ImageDirectoryPopOut object.
 
+        Args:
+            root (CTk): The root cutom tkinter object.
+            center (function): A function to center the pop-out window.
+            save_obj (dict): The save object containing the sort algorithm and 
+            other parameters.
+            submit_path (function): A function to submit the selected image 
+            directory path.
+            back_to_menu (function): A function to go back to the main menu.
+        """
         self.root = root
         self.center = center
         self.save_obj = save_obj
@@ -73,18 +91,35 @@ class ImageDirectoryPopOut():
         pop_out.grab_set()
         pop_out.attributes("-topmost", True)
 
-    def image_directory_callback(self, image_directory):
+    def image_directory_callback(self, image_directory: ctk.StringVar):
+        """
+        Callback function for the image directory variable.
+
+        Args:
+            image_directory (StringVar): The image directory.
+        """
         if all([os.path.isfile(image_directory.get() + "/" + k)
                 for k in self.save_obj["sort_alg"].data]):
             self.submit_button.configure(state=ctk.NORMAL)
 
-    def select_directory(self, event, root, directory_var):
+    def select_directory(self, event, root: ctk.CTk,
+                         directory_var: ctk.StringVar):
+        """
+        Selects a directory using a file dialog.
+
+        Args:
+            event: The event that triggered the callback.
+            root (CTk): The root Tk object.
+            directory_var (StringVar): The directory.
+        """
         directory = ctk.filedialog.askdirectory(parent=root)
         directory_var.set(directory)
 
     def submit(self):
+        """Submits the selected image directory path."""
         self.submit_path(self.image_directory.get())
         self.pop_out.destroy()
 
     def on_closing(self):
+        """Event handler for the pop-out window closing."""
         self.back_to_menu(False)

@@ -4,17 +4,29 @@ import random
 import sys
 import time
 from pathlib import Path
+from typing import Callable
 
 import customtkinter as ctk
 import pandas as pd
 
 from sorting_algorithms import (HybridTrueSkill, MergeSort, RatingAlgorithm,
-                                TrueSkill)
+                                SortingAlgorithm, TrueSkill)
 
 
 class CreationPopOut():
+    """
+    Class representing a pop-up window for creating an annotation session.
+    """
 
-    def __init__(self, creation_callback, center):
+    def __init__(self, creation_callback: Callable, center: Callable):
+        """
+        Initializes the CreationPopOut instance.
+
+        Args:
+            creation_callback (function): Callback function to be executed after 
+            creating the annotation.
+            center (function): Function to center the pop-up window.
+        """
 
         self.creation_callback = creation_callback
         self.center = center
@@ -26,8 +38,10 @@ class CreationPopOut():
         x, y = self.center(w, h)
 
         pop_out.geometry('%dx%d+%d+%d' % (w, h, x, y))
+
         pop_out.columnconfigure(index=0, weight=1)
         pop_out.columnconfigure(index=1, weight=2)
+
         pop_out.rowconfigure(index=0, weight=1)
         pop_out.rowconfigure(index=1, weight=1)
         pop_out.rowconfigure(index=2, weight=1)
@@ -111,7 +125,7 @@ class CreationPopOut():
         directory_entry.bind(
             "<Button-1>", command=lambda event, pop_out=pop_out,
             image_directory=image_directory: self.select_directory(
-                event, pop_out, image_directory))
+                pop_out, image_directory))
 
         directory_entry.grid(row=3, column=1, padx=10,
                              pady=(2, 10), sticky="w")
@@ -156,8 +170,24 @@ class CreationPopOut():
         pop_out.attributes("-topmost", True)
 
     def create_save(
-            self, name, algorithm, comparison_size, image_directory, pop_out,
-            scroll_enabled):
+            self, name: ctk.StringVar, algorithm: SortingAlgorithm,
+            comparison_size: ctk.CTkSlider, image_directory: ctk.StringVar,
+            pop_out: ctk.CTkToplevel, scroll_enabled: ctk.BooleanVar):
+        """
+        Creates and saves the annotation item.
+
+        Args:
+            name (StringVar): Name of the annotation item.
+            algorithm (SortingAlgorithm): Selected algorithm for sorting 
+            the images.
+            comparison_size (CTkSlider): Slider holding the size of the 
+            comparison.
+            image_directory (StringVar): Directory path containing the 
+            image files.
+            pop_out (CTkToplevel): The pop-out window.
+            scroll_enabled (BooleanVar): A checkbox with a boolean indicating 
+            whether scrolling is enabled.
+        """
 
         directory = os.path.relpath(image_directory.get())
         final_name = name.get()
@@ -221,7 +251,20 @@ class CreationPopOut():
         self.creation_callback()
 
     def algorithm_changed(
-            self, value, pop_out, slider, slider_frame, label, comp_label):
+            self, value: str, pop_out: ctk.CTkToplevel, slider: ctk.CTkSlider,
+            slider_frame: ctk.CTkFrame, label: ctk.CTkLabel,
+            comp_label: ctk.CTkLabel):
+        """
+        Handles the change event of the algorithm selection option menu.
+
+        Args:
+            value (str): The selected algorithm.
+            pop_out (CTkToplevel): The pop-out window.
+            slider (CTkSlider): The slider widget.
+            slider_frame (CTkFrame): The frame containing the slider.
+            label (CTkLabel): The label displaying the comparison size.
+            comp_label (CTkLabel): The label for comparison size.
+        """
 
         if value == "Merge Sort":
             self.change_slider_row_state(
@@ -243,7 +286,18 @@ class CreationPopOut():
             comp_label.configure(state=ctk.NORMAL)
 
     def change_slider_row_state(
-            self, state, pop_out, slider_frame, comp_label):
+            self, state: bool, pop_out: ctk.CTkToplevel,
+            slider_frame: ctk.CTkFrame, comp_label: ctk.CTkLabel):
+        """
+        Changes the state of the slider row.
+
+        Args:
+            state (bool): Boolean indicating whether the slider row should be 
+            enabled or disabled.
+            pop_out (CTkToplevel): The pop-out window.
+            slider_frame (CTkFrame): The frame containing the slider.
+            comp_label (CTkLabel): The label for comparison size.
+        """
         if state:
             comp_label.grid()
             slider_frame.grid()
@@ -254,9 +308,25 @@ class CreationPopOut():
             slider_frame.grid_remove()
             pop_out.rowconfigure(index=2, weight=0)
 
-    def update_comparison_size(self, val, label):
+    def update_comparison_size(self, val: int, label: ctk.CTkLabel):
+        """
+        Updates the comparison size label based on the slider value.
+
+        Args:
+            value (int): The current slider value.
+            label (CTkLabel): The label to be updated.
+        """
         label.configure(text=int(val))
 
-    def select_directory(self, event, root, directory_var):
+    def select_directory(self, root: ctk.CTkToplevel,
+                         directory_var: ctk.StringVar):
+        """
+        Callback function to select a directory using a file dialog.
+
+        Args:
+            root (CTkToplevel): The root window or parent widget.
+            directory_var (StringVar): The element to store the selected 
+            directory.
+        """
         directory = ctk.filedialog.askdirectory(parent=root)
         directory_var.set(directory)
