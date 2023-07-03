@@ -182,7 +182,8 @@ class MergeSort(SortingAlgorithm):
         Get the sorted result if the sorting process is finished.
 
         Returns:
-            The sorted result as a list of values, or None if the sorting is not finished.
+            The sorted result as a list of values, or 
+            None if the sorting is not finished.
         """
 
         if self.is_finished():

@@ -242,7 +242,8 @@ class PairwiseOrderingScreen(OrderingScreen):
             keys (List[str]): The keys representing the current comparison.
 
         Returns:
-            Optional[int]: The result of the comparison where 70% of users assess the same difference level 
+            Optional[int]: The result of the comparison where 70% of users 
+                           assess the same difference level 
                            0 - if consensus is no difference
                            1 or -1 - if consensus is that there is some order 
                                      of the keys

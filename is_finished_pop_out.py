@@ -19,7 +19,8 @@ class IsFinishedPopOut():
             root (CTk): The root cutom tkinter object.
             center (function): A function to center the pop-out window.
             back_to_menu (function): A function to go back to the main menu.
-            state (str): The state of the annotation, either 'finished' or 'not finished'.
+            state (str): The state of the annotation, either 'finished' or 
+                         'not finished'.
         """
 
         self.root = root
