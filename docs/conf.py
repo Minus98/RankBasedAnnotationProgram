@@ -15,10 +15,13 @@ project = 'Rank-Based Annotation Program'
 copyright = '2023, Herman Bergström, Hanna Tärnåsen'
 author = 'Herman Bergström, Hanna Tärnåsen'
 
+autodoc_mock_imports = ["customtkinter"]
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.viewcode", "sphinx.ext.napoleon"]
+extensions = ["sphinx.ext.autodoc",
+              "sphinx.ext.viewcode", "sphinx.ext.napoleon"]
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
