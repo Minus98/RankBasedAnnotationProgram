@@ -9,6 +9,7 @@ from typing import Callable
 import customtkinter as ctk
 import pandas as pd
 
+import utils
 from sorting_algorithms import (HybridTrueSkill, MergeSort, RatingAlgorithm,
                                 SortingAlgorithm, TrueSkill)
 
@@ -18,7 +19,8 @@ class CreationPopOut():
     Class representing a pop-up window for creating an annotation session.
     """
 
-    def __init__(self, creation_callback: Callable, center: Callable):
+    def __init__(self, creation_callback: Callable, center: Callable, 
+                 advanced_settings_callback: Callable):
         """
         Initializes the CreationPopOut instance.
 
@@ -26,6 +28,8 @@ class CreationPopOut():
             creation_callback (function): Callback function to be executed after 
             creating the annotation.
             center (function): Function to center the pop-up window.
+            advanced_settings_callback (function): Calback function to bring up the
+            advanced settings menu.
         """
 
         self.creation_callback = creation_callback
@@ -165,6 +169,21 @@ class CreationPopOut():
 
         create_button.grid(row=0, column=0, padx=(10, 5), pady=10)
         delete_button.grid(row=0, column=1, padx=(5, 10), pady=10)
+
+        self.advanced_label = ctk.CTkLabel(
+            master=pop_out, text="Advanced Settings",
+            font=('Helvetica bold', 20),
+            text_color="#777777")
+
+        self.advanced_label.bind(
+            "<Enter>", lambda event: utils.highlight_label(self.advanced_label))
+        self.advanced_label.bind(
+            "<Leave>", lambda event: utils.remove_highlight_label(
+                self.advanced_label))
+        self.advanced_label.bind(
+            "<Button-1>", lambda event: advanced_settings_callback())
+
+        self.advanced_label.place(relx=0.98, rely=0.02, anchor = "ne")
 
         pop_out.grab_set()
         pop_out.attributes("-topmost", True)
