@@ -246,8 +246,8 @@ class PairwiseOrderingScreen(OrderingScreen):
                            assess the same difference level 
                            0 - if consensus is no difference
                            1 or -1 - if consensus is that there is some order 
-                                     of the keys
-                           or None if not enough previous comparison are found.
+                           of the keys or None if not enough previous comparison are 
+                           found.
         """
         df_check = pd.read_csv(get_full_path(
             self.save_obj["path_to_save"] + '.csv'))
