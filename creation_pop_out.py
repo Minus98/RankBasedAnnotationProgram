@@ -19,7 +19,7 @@ class CreationPopOut():
     Class representing a pop-up window for creating an annotation session.
     """
 
-    def __init__(self, creation_callback: Callable, center: Callable, 
+    def __init__(self, creation_callback: Callable, center: Callable,
                  advanced_settings_callback: Callable):
         """
         Initializes the CreationPopOut instance.
@@ -82,29 +82,29 @@ class CreationPopOut():
         slider_frame.grid(
             row=2, column=1, padx=10, pady=2, sticky="w")
 
-        comparison_count_label = ctk.CTkLabel(master=slider_frame, font=(
+        comparison_size_label = ctk.CTkLabel(master=slider_frame, font=(
             'Helvetica bold', 25))
 
         slider = ctk.CTkSlider(
             master=slider_frame, from_=2, to=4, number_of_steps=2,
             command=lambda val,
-            label=comparison_count_label: self.update_comparison_size(
+            label=comparison_size_label: self.update_comparison_size(
                 val, label))
 
         slider.set(2)
 
         slider.grid(row=0, column=0)
 
-        comparison_count_label.configure(text=int(slider.get()))
+        comparison_size_label.configure(text=int(slider.get()))
 
-        comparison_count_label.grid(row=0, column=1, padx=5)
+        comparison_size_label.grid(row=0, column=1, padx=5)
 
         algorithm_selection = ctk.CTkOptionMenu(
             master=pop_out,
             values=["True Skill", "Merge Sort", "Rating", "Hybrid"],
             width=200, height=40, font=('Helvetica bold', 20),
             command=lambda value, pop_out=pop_out, slider=slider,
-            slider_frame=slider_frame, label=comparison_count_label,
+            slider_frame=slider_frame, label=comparison_size_label,
             comp_label=comp_label: self.algorithm_changed(
                 value, pop_out, slider, slider_frame, label, comp_label))
 
@@ -176,14 +176,15 @@ class CreationPopOut():
             text_color="#777777")
 
         self.advanced_label.bind(
-            "<Enter>", lambda event: utils.highlight_label(self.advanced_label))
+            "<Enter>", lambda event: utils.highlight_label(
+                self.advanced_label))
         self.advanced_label.bind(
             "<Leave>", lambda event: utils.remove_highlight_label(
                 self.advanced_label))
         self.advanced_label.bind(
             "<Button-1>", lambda event: advanced_settings_callback())
 
-        self.advanced_label.place(relx=0.98, rely=0.02, anchor = "ne")
+        self.advanced_label.place(relx=0.98, rely=0.02, anchor="ne")
 
         pop_out.grab_set()
         pop_out.attributes("-topmost", True)

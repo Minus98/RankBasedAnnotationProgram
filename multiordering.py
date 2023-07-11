@@ -332,8 +332,9 @@ class MultiOrderingScreen(OrderingScreen):
             return
 
         if index > 0:
+            temp = self.images[index]
             self.images[index] = self.images[index - 1]
-            self.images[index - 1] = self.images[index]
+            self.images[index - 1] = temp
 
         self.update_images()
 
@@ -351,8 +352,9 @@ class MultiOrderingScreen(OrderingScreen):
             return
 
         if index < len(self.images) - 1:
+            temp = self.images[index]
             self.images[index] = self.images[index + 1]
-            self.images[index + 1] = self.images[index]
+            self.images[index + 1] = temp
 
         self.update_images()
 

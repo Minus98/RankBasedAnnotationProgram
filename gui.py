@@ -83,11 +83,13 @@ class AnnotationGui():
         """
         Displays the advanced creation menu.
         """
-        
+
         self.clear_screen()
 
-        self.advanced_creation_menu = AdvancedCreationMenu(self.root, 
-                                                           self.display_ordering_screen)
+        self.advanced_creation_menu = AdvancedCreationMenu(
+            self.root, self.display_ordering_screen, self.display_menu)
+
+        self.advanced_creation_menu.display()
 
     def display_ordering_screen(self, save_obj: dict,
                                 hybrid_transition_made: bool = False):
