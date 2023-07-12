@@ -105,27 +105,49 @@ class AdvancedCreationMenu():
 
         # Advanced settings
 
-        self.prompt_label = ctk.CTkLabel(
-            master=self.advanced_settings_frame, text="Annotation prompt:",
-            font=('Helvetica bold', 20))
-
-        self.prompt = ctk.StringVar()
-
-        self.prompt_entry = ctk.CTkEntry(
-            master=self.advanced_settings_frame, textvariable=self.prompt,
-            placeholder_text="Enter the text prompt for annotations",
-            width=300, height=40, font=('Helvetica bold', 16))
-
         self.rating_list_frame = ctk.CTkFrame(
             self.advanced_settings_frame,
             fg_color=self.advanced_settings_frame.cget("fg_color"))
 
+        self.rating_prompt_label = ctk.CTkLabel(
+            master=self.rating_list_frame, text="Rating prompt:",
+            font=('Helvetica bold', 20))
+
+        self.rating_prompt = ctk.StringVar()
+
+        self.rating_prompt_entry = ctk.CTkEntry(
+            master=self.rating_list_frame, textvariable=self.rating_prompt,
+            placeholder_text="Enter the text prompt for annotations",
+            width=300, height=40, font=('Helvetica bold', 16))
+
         self.ratings_list_label = ctk.CTkLabel(
             master=self.rating_list_frame, text="Rating Options",
-            font=('Helvetica bold', 20))
+            font=('Helvetica bold', 24))
 
         self.ratings_list = ctk.CTkScrollableFrame(
             master=self.rating_list_frame, height=120)
+
+        self.ranking_list_frame = ctk.CTkFrame(
+            self.advanced_settings_frame,
+            fg_color=self.advanced_settings_frame.cget("fg_color"))
+
+        self.ranking_list_label = ctk.CTkLabel(
+            master=self.ranking_list_frame, text="Ranking Options",
+            font=('Helvetica bold', 24))
+
+        self.ranking_list = ctk.CTkFrame(
+            master=self.ranking_list_frame, height=120)
+
+        self.ranking_prompt_label = ctk.CTkLabel(
+            master=self.ranking_list_frame, text="Ranking prompt:",
+            font=('Helvetica bold', 20))
+
+        self.ranking_prompt = ctk.StringVar()
+
+        self.ranking_prompt_entry = ctk.CTkEntry(
+            master=self.ranking_list_frame, textvariable=self.ranking_prompt,
+            placeholder_text="Enter the text prompt for annotations",
+            width=300, height=40, font=('Helvetica bold', 16))
 
         self.create_button = ctk.CTkButton(
             master=self.root, text="Create Annotation", width=200, height=40,
@@ -206,12 +228,6 @@ class AdvancedCreationMenu():
         self.advanced_settings_frame.grid_columnconfigure(0, weight=1)
         self.advanced_settings_frame.grid_columnconfigure(1, weight=1)
 
-        self.prompt_label.grid(
-            row=0, column=0, padx=10, pady=(10, 2), sticky="e")
-
-        self.prompt_entry.grid(row=0, column=1, padx=10,
-                               pady=(10, 2), sticky="w")
-
         self.edit_index = -1
 
         self.advanced_settings_frame.grid(
@@ -222,21 +238,50 @@ class AdvancedCreationMenu():
         self.cancel_button.grid(row=2, column=0)
         self.create_button.grid(row=2, column=1)
 
-        self.ratings_list_label.grid(row=0, column=0)
+        self.ratings_list_label.grid(row=0, column=0, columnspan=2, pady=10)
+
+        self.rating_prompt_label.grid(
+            row=1, column=0, padx=10, pady=10, sticky="e")
+
+        self.rating_prompt_entry.grid(row=1, column=1, padx=10,
+                                      pady=10, sticky="w")
+
         self.ratings_list.grid(
-            row=1, column=0, sticky="ew", padx=10, pady=5)
+            row=2, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
 
         self.ratings_list.grid_columnconfigure(0, weight=1)
         self.rating_list_frame.grid_columnconfigure(0, weight=1)
+        self.rating_list_frame.grid_columnconfigure(1, weight=1)
+
+        self.ranking_list_frame.grid_columnconfigure(0, weight=1)
+        self.ranking_list_frame.grid_columnconfigure(1, weight=1)
+
+        self.ranking_list_label.grid(row=0, column=0, columnspan=2, pady=10)
+
+        self.ranking_prompt_label.grid(
+            row=1, column=0, padx=10, pady=10, sticky="e")
+
+        self.ranking_prompt_entry.grid(row=1, column=1, padx=10,
+                                       pady=10, sticky="w")
+
+        self.ranking_list.grid(
+            row=2, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
 
         if self.should_show_rating_options():
             self.show_rating_options()
+
+        if self.should_show_ranking_options():
+            self.show_ranking_options()
 
         self.directory_entry.grid(row=3, column=1, padx=10,
                                   pady=(2, 10), sticky="w")
 
         self.name_entry.grid(row=0, column=1, padx=10,
                              pady=(10, 2), sticky="w")
+
+    def show_ranking_options(self):
+        self.ranking_list_frame.grid(
+            row=2, column=0, columnspan=2, sticky="ew")
 
     def show_rating_options(self):
 
@@ -248,6 +293,10 @@ class AdvancedCreationMenu():
     def hide_rating_options(self):
 
         self.rating_list_frame.grid_remove()
+
+    def hide_ranking_options(self):
+
+        self.ranking_list_frame.grid_remove()
 
     def algorithm_changed(
             self, value: str, parent: ctk.CTkToplevel, slider: ctk.CTkSlider,
@@ -288,6 +337,11 @@ class AdvancedCreationMenu():
             self.show_rating_options()
         else:
             self.hide_rating_options()
+
+        if self.should_show_ranking_options():
+            self.show_ranking_options()
+        else:
+            self.hide_ranking_options()
 
     def change_slider_row_state(
             self, state: bool, parent: ctk.CTkToplevel,
@@ -474,6 +528,14 @@ class AdvancedCreationMenu():
 
         return show_rating
 
+    def should_show_ranking_options(self):
+
+        show_ranking = self.algorithm_selection.get(
+        ) == "True Skill" or self.algorithm_selection.get(
+        ) == "Merge Sort" or self.algorithm_selection.get() == "Hybrid"
+
+        return show_ranking
+
     def create_save(
             self, name: ctk.StringVar, algorithm: sa.SortingAlgorithm,
             comparison_size: ctk.CTkSlider, image_directory: ctk.StringVar,
@@ -552,8 +614,8 @@ class AdvancedCreationMenu():
             if self.rating_buttons:
                 save_obj["custom_ratings"] = self.rating_buttons
 
-            if self.prompt.get():
-                save_obj["custom_rating_prompt"] = self.prompt.get()
+            if self.rating_prompt.get():
+                save_obj["custom_rating_prompt"] = self.rating_prompt.get()
 
         f = open(path + "/" + file_name + ".pickle", "wb")
         pickle.dump(save_obj, f)
