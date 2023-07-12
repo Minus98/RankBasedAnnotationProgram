@@ -87,7 +87,7 @@ class AnnotationGui():
         self.clear_screen()
 
         self.advanced_creation_menu = AdvancedCreationMenu(
-            self.root, self.display_ordering_screen, self.display_menu)
+            self.root, self.display_menu)
 
         self.advanced_creation_menu.display()
 

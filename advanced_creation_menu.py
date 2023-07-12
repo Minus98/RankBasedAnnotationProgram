@@ -1,23 +1,29 @@
 
+import os
+import pickle
+import random
+import sys
+import time
 from pathlib import Path
 from typing import Callable
 
 import customtkinter as ctk
+import pandas as pd
 from PIL import Image
+
+import sorting_algorithms as sa
 
 
 class AdvancedCreationMenu():
 
     def __init__(
-            self, root: ctk.CTk, creation_callback: Callable,
-            menu_callback: Callable):
+            self, root: ctk.CTk, menu_callback: Callable):
 
         self.root = root
 
-        self.rating_buttons = [("Rating 1", 1), ("Rating 2", 2)]
-
+        self.rating_buttons = ["Rating 1", "Rating 2"]
         self.basic_settings_frame = ctk.CTkFrame(self.root)
-
+        self.menu_callback = menu_callback
         self.advanced_settings_frame = ctk.CTkFrame(self.root)
 
         # Basic settings
@@ -110,12 +116,16 @@ class AdvancedCreationMenu():
             placeholder_text="Enter the text prompt for annotations",
             width=300, height=40, font=('Helvetica bold', 16))
 
+        self.rating_list_frame = ctk.CTkFrame(
+            self.advanced_settings_frame,
+            fg_color=self.advanced_settings_frame.cget("fg_color"))
+
         self.ratings_list_label = ctk.CTkLabel(
-            master=self.advanced_settings_frame, text="Rating Options",
+            master=self.rating_list_frame, text="Rating Options",
             font=('Helvetica bold', 20))
 
         self.ratings_list = ctk.CTkScrollableFrame(
-            master=self.advanced_settings_frame, height=120)
+            master=self.rating_list_frame, height=120)
 
         self.create_button = ctk.CTkButton(
             master=self.root, text="Create Annotation", width=200, height=40,
@@ -152,9 +162,6 @@ class AdvancedCreationMenu():
         self.name_label.grid(
             row=0, column=0, padx=10, pady=(10, 2), sticky="e")
 
-        self.name_entry.grid(row=0, column=1, padx=10,
-                             pady=(10, 2), sticky="w")
-
         self.algorithm_label.grid(row=1, column=0, padx=10, pady=2, sticky="e")
 
         self.comp_label.grid(
@@ -173,9 +180,6 @@ class AdvancedCreationMenu():
         self.image_dir_label.grid(
             row=3, column=0, padx=10, pady=(2, 10),
             sticky="e")
-
-        self.directory_entry.grid(row=3, column=1, padx=10,
-                                  pady=(2, 10), sticky="w")
 
         self.enable_scrolling_label.grid(
             row=4, column=0, padx=10, pady=2, sticky="e")
@@ -208,12 +212,7 @@ class AdvancedCreationMenu():
         self.prompt_entry.grid(row=0, column=1, padx=10,
                                pady=(10, 2), sticky="w")
 
-        self.ratings_list_label.grid(row=1, column=0, columnspan=2)
-
-        self.ratings_list.grid(
-            row=2, column=0, columnspan=2, sticky="ew", padx=10, pady=5)
-
-        self.ratings_list.grid_columnconfigure(0, weight=1)
+        self.edit_index = -1
 
         self.advanced_settings_frame.grid(
             row=1, column=1, padx=(10, 20), pady=20, sticky="nesw")
@@ -223,7 +222,32 @@ class AdvancedCreationMenu():
         self.cancel_button.grid(row=2, column=0)
         self.create_button.grid(row=2, column=1)
 
+        self.ratings_list_label.grid(row=0, column=0)
+        self.ratings_list.grid(
+            row=1, column=0, sticky="ew", padx=10, pady=5)
+
+        self.ratings_list.grid_columnconfigure(0, weight=1)
+        self.rating_list_frame.grid_columnconfigure(0, weight=1)
+
+        if self.should_show_rating_options():
+            self.show_rating_options()
+
+        self.directory_entry.grid(row=3, column=1, padx=10,
+                                  pady=(2, 10), sticky="w")
+
+        self.name_entry.grid(row=0, column=1, padx=10,
+                             pady=(10, 2), sticky="w")
+
+    def show_rating_options(self):
+
+        self.rating_list_frame.grid(
+            row=1, column=0, columnspan=2, sticky="ew")
+
         self.refresh_rating_buttons()
+
+    def hide_rating_options(self):
+
+        self.rating_list_frame.grid_remove()
 
     def algorithm_changed(
             self, value: str, parent: ctk.CTkToplevel, slider: ctk.CTkSlider,
@@ -259,6 +283,11 @@ class AdvancedCreationMenu():
             slider.configure(state=ctk.NORMAL)
             label.configure(state=ctk.NORMAL)
             comp_label.configure(state=ctk.NORMAL)
+
+        if self.should_show_rating_options():
+            self.show_rating_options()
+        else:
+            self.hide_rating_options()
 
     def change_slider_row_state(
             self, state: bool, parent: ctk.CTkToplevel,
@@ -314,48 +343,77 @@ class AdvancedCreationMenu():
         for index, button in enumerate(self.rating_buttons):
             self.append_row(index, button)
 
+        add_button = ctk.CTkButton(
+            self.ratings_list, text="Add Rating", command=self.add_option)
+        add_button.grid(row=len(self.rating_buttons), column=0, pady=3)
+
     def append_row(self, index, button):
 
         row = ctk.CTkFrame(self.ratings_list)
 
-        button_text = ctk.CTkLabel(
-            row, text="Text: " + button[0],
-            font=('Helvetica bold', 20))
+        row.grid_columnconfigure(0, weight=1, uniform="row")
+        row.grid_columnconfigure(1, weight=1, uniform="row")
+        row.grid_columnconfigure(2, weight=1, uniform="row")
+
         button_value = ctk.CTkLabel(
             row, text="Value: " + str(index),
             font=('Helvetica bold', 20))
 
-        button_up_state = ctk.NORMAL
-        button_down_state = ctk.NORMAL
+        button_frame = ctk.CTkFrame(row)
 
-        if index <= 0:
-            button_up_state = ctk.DISABLED
+        if self.edit_index == index:
 
-        if index >= len(self.rating_buttons) - 1:
-            button_down_state = ctk.DISABLED
+            text_var = ctk.StringVar(value=button)
 
-        button_up = ctk.CTkButton(
-            row, text="▲", state=button_up_state, width=28,
-            command=lambda i=index: self.move_up(i))
-        button_down = ctk.CTkButton(
-            row, text="▼", state=button_down_state, width=28,
-            command=lambda i=index: self.move_down(i))
-        delete_button = ctk.CTkButton(
-            row, text="X", width=28, command=lambda i=index: self.delete_rating(i))
+            text_entry = ctk.CTkEntry(
+                row, textvariable=text_var, font=('Helvetica bold', 16))
+            text_entry.grid(row=0, column=1, sticky="w")
 
-        row.grid(row=index, column=0, sticky="ew", pady=3)
+            ok_button = ctk.CTkButton(
+                button_frame, text="Ok", width=56, command=lambda i=index,
+                text_var=text_var: self.update_rating(i, text_var))
+            cancel_button = ctk.CTkButton(
+                button_frame, text="Cancel", width=56, command=self.cancel_edit)
 
-        row.grid_columnconfigure(0, weight=2, uniform="row")
-        row.grid_columnconfigure(1, weight=2, uniform="row")
-        row.grid_columnconfigure(2, weight=1, uniform="row")
-        row.grid_columnconfigure(3, weight=1, uniform="row")
-        row.grid_columnconfigure(4, weight=1, uniform="row")
+            ok_button.grid(row=0, column=0, sticky="e", padx=5, pady=3)
+            cancel_button.grid(row=0, column=1, sticky="e", padx=5, pady=3)
+        else:
+            button_text = ctk.CTkLabel(
+                row, text=button,
+                font=('Helvetica bold', 20))
+
+            button_up_state = ctk.NORMAL
+            button_down_state = ctk.NORMAL
+
+            if index <= 0:
+                button_up_state = ctk.DISABLED
+
+            if index >= len(self.rating_buttons) - 1:
+                button_down_state = ctk.DISABLED
+
+            button_up = ctk.CTkButton(
+                button_frame, text="▲", state=button_up_state, width=28,
+                command=lambda i=index: self.move_up(i))
+            button_down = ctk.CTkButton(
+                button_frame, text="▼", state=button_down_state, width=28,
+                command=lambda i=index: self.move_down(i))
+            edit_button = ctk.CTkButton(
+                button_frame, text="Edit", width=56,
+                command=lambda i=index: self.edit(i))
+            delete_button = ctk.CTkButton(
+                button_frame, text="X", width=28, fg_color="#ed022a",
+                hover_color="#bf0021",
+                command=lambda i=index: self.delete_rating(i))
+
+            button_text.grid(row=0, column=1, sticky="w", padx=5, pady=3)
+            button_up.grid(row=0, column=0, sticky="e", padx=5, pady=3)
+            button_down.grid(row=0, column=1, sticky="e", padx=5, pady=3)
+            edit_button.grid(row=0, column=2, sticky="e", padx=5, pady=3)
+            delete_button.grid(row=0, column=3, sticky="e", padx=5, pady=3)
 
         button_value.grid(row=0, column=0, sticky="w", padx=5, pady=3)
-        button_text.grid(row=0, column=1, sticky="w", padx=5, pady=3)
-        button_up.grid(row=0, column=2, sticky="e", padx=5, pady=3)
-        button_down.grid(row=0, column=3, sticky="e", padx=5, pady=3)
-        delete_button.grid(row=0, column=4, sticky="e", padx=5, pady=3)
+        button_frame.grid(row=0, column=2, sticky="e", padx=5, pady=3)
+        row.grid(row=index, column=0, sticky="ew", pady=3)
 
     def delete_rating(self, index: int):
 
@@ -379,3 +437,126 @@ class AdvancedCreationMenu():
             self.rating_buttons[index + 1] = temp
 
         self.refresh_rating_buttons()
+
+    def cancel_edit(self):
+
+        self.edit_index = -1
+        self.refresh_rating_buttons()
+
+    def update_rating(self, index, value):
+
+        # make some checks perhaps...
+        new_value = value.get()
+
+        self.rating_buttons[index] = new_value
+
+        self.edit_index = -1
+
+        self.refresh_rating_buttons()
+
+    def edit(self, index):
+
+        self.edit_index = index
+
+        self.refresh_rating_buttons()
+
+    def add_option(self):
+
+        self.rating_buttons.append("")
+        self.edit_index = len(self.rating_buttons) - 1
+
+        self.refresh_rating_buttons()
+
+    def should_show_rating_options(self):
+
+        show_rating = self.algorithm_selection.get(
+        ) == "Rating" or self.algorithm_selection.get() == "Hybrid"
+
+        return show_rating
+
+    def create_save(
+            self, name: ctk.StringVar, algorithm: sa.SortingAlgorithm,
+            comparison_size: ctk.CTkSlider, image_directory: ctk.StringVar,
+            scroll_enabled: ctk.BooleanVar):
+        """
+        Creates and saves the annotation item.
+
+        Args:
+            name (StringVar): Name of the annotation item.
+            algorithm (SortingAlgorithm): Selected algorithm for sorting 
+            the images.
+            comparison_size (CTkSlider): Slider holding the size of the 
+            comparison.
+            image_directory (StringVar): Directory path containing the 
+            image files.
+            pop_out (CTkToplevel): The pop-out window.
+            scroll_enabled (BooleanVar): A checkbox with a boolean indicating 
+            whether scrolling is enabled.
+        """
+
+        directory = os.path.relpath(image_directory.get())
+        final_name = name.get()
+
+        img_paths = list(str(os.path.basename(p))
+                         for p in Path(directory).glob("**/*")
+                         if p.suffix
+                         in {'.jpg', '.png', '.nii'} and 'sorted'
+                         not in str(p).lower())
+
+        random.shuffle(img_paths)
+
+        alg = algorithm.get()
+
+        if alg == "Merge Sort":
+            sort_alg = sa.MergeSort(data=img_paths)
+        elif alg == "Rating":
+            sort_alg = sa.RatingAlgorithm(data=img_paths)
+        elif alg == "Hybrid":
+            sort_alg = sa.HybridTrueSkill(
+                data=img_paths, comparison_size=int(comparison_size.get()))
+        else:
+            sort_alg = sa.TrueSkill(
+                data=img_paths, comparison_size=int(comparison_size.get()))
+
+        file_name = str(int(time.time()))
+
+        if getattr(sys, 'frozen', False):
+            application_path = os.path.dirname(sys.executable)
+        elif __file__:
+            application_path = os.path.dirname(__file__)
+
+        path = application_path + "/saves"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        path_to_save = path + "/" + file_name
+
+        df = pd.DataFrame(
+            columns=['result', 'diff_levels', 'time', 'session', 'user',
+                     'undone', 'type'])
+
+        df.to_csv(path_to_save + ".csv", index=False)
+
+        rel_path_to_save = "saves/" + file_name
+        save_obj = {
+            "sort_alg": sort_alg,
+            "name": final_name,
+            "image_directory": directory,
+            "path_to_save": rel_path_to_save,
+            "user_directory_dict": {},
+            "scroll_allowed": scroll_enabled.get()}
+
+        if self.should_show_rating_options():
+
+            if self.rating_buttons:
+                save_obj["custom_ratings"] = self.rating_buttons
+
+            if self.prompt.get():
+                save_obj["custom_rating_prompt"] = self.prompt.get()
+
+        f = open(path + "/" + file_name + ".pickle", "wb")
+        pickle.dump(save_obj, f)
+        f.close()
+
+        self.menu_callback()

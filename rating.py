@@ -41,65 +41,35 @@ class RatingScreen(OrderingScreen):
 
         rating_buttons = prompts['rating_buttons']
 
+        if "custom_ratings" in save_obj:
+            rating_buttons = save_obj["custom_ratings"]
+
+        prompt = prompts['rating_prompt']
+
+        if "custom_rating_prompt" in save_obj:
+            prompt = save_obj['custom_rating_prompt']
+
         self.question = ctk.CTkLabel(
             master=self.root,
-            text=prompts['rating_prompt'],
+            text=prompt,
             font=('Helvetica bold', 20))
 
-        self.not_assessable_button = ctk.CTkButton(
-            master=self.buttons_frame, text=rating_buttons[0] + ' (1)',
-            width=160, height=40, command=lambda: self.submit(-1),
-            font=('Helvetica bold', 20))
-
-        self.absolute_none_button = ctk.CTkButton(
-            master=self.buttons_frame, text=rating_buttons[1] + ' (2)',
-            width=160, height=40, command=lambda: self.submit(0),
-            font=('Helvetica bold', 20))
-
-        self.none_button = ctk.CTkButton(
-            master=self.buttons_frame, text=rating_buttons[2] + ' (3)',
-            width=160, height=40, command=lambda: self.submit(1),
-            font=('Helvetica bold', 20))
-
-        self.mild_button = ctk.CTkButton(
-            master=self.buttons_frame, text=rating_buttons[3] + ' (4)',
-            width=160, height=40, command=lambda: self.submit(2),
-            font=('Helvetica bold', 20))
-
-        self.moderate_button = ctk.CTkButton(
-            master=self.buttons_frame, text=rating_buttons[4] + ' (5)',
-            width=160, height=40, command=lambda: self.submit(3),
-            font=('Helvetica bold', 20))
-
-        self.severe_button = ctk.CTkButton(
-            master=self.buttons_frame, text=rating_buttons[5] + ' (6)',
-            width=160, height=40, command=lambda: self.submit(4),
-            font=('Helvetica bold', 20))
-
-        self.tab_items = [self.not_assessable_button, self.absolute_none_button,
-                          self.none_button, self.mild_button,
-                          self.moderate_button, self.severe_button]
+        self.tab_items = []
         self.tab_index = -1
 
-        self.root.bind(
-            "1", lambda event: self.on_shortcmd(0))
-        self.root.bind(
-            "2", lambda event: self.on_shortcmd(1))
-        self.root.bind(
-            "3", lambda event: self.on_shortcmd(2))
-        self.root.bind(
-            "4", lambda event: self.on_shortcmd(3))
-        self.root.bind(
-            "5", lambda event: self.on_shortcmd(4))
-        self.root.bind(
-            "6", lambda event: self.on_shortcmd(5))
+        for index, button in enumerate(rating_buttons):
+            ctk_button = ctk.CTkButton(
+                master=self.buttons_frame, text=button + ' (' + str(index + 1) + ')',
+                width=160, height=40, command=lambda index=index: self.submit(index),
+                font=('Helvetica bold', 20))
 
-        self.root.bind("<KeyRelease-1>", lambda event: self.on_shortcmd_up(0))
-        self.root.bind("<KeyRelease-2>", lambda event: self.on_shortcmd_up(1))
-        self.root.bind("<KeyRelease-3>", lambda event: self.on_shortcmd_up(2))
-        self.root.bind("<KeyRelease-4>", lambda event: self.on_shortcmd_up(3))
-        self.root.bind("<KeyRelease-5>", lambda event: self.on_shortcmd_up(4))
-        self.root.bind("<KeyRelease-6>", lambda event: self.on_shortcmd_up(5))
+            self.tab_items.append(ctk_button)
+
+            self.root.bind(str(index + 1), lambda event,
+                           index=index: self.on_shortcmd(index))
+            self.root.bind(
+                "<KeyRelease-" + str(index + 1) + ">", lambda event,
+                index=index: self.on_shortcmd_up(index))
 
         self.root.bind(
             "<Return>", lambda event: self.on_enter())
@@ -132,12 +102,16 @@ class RatingScreen(OrderingScreen):
 
         self.buttons_frame.grid(row=5, column=0, columnspan=2, sticky="N")
 
-        self.not_assessable_button.grid(row=0, column=0, padx=(10, 5), pady=10)
-        self.absolute_none_button.grid(row=0, column=1, padx=5, pady=10)
-        self.none_button.grid(row=0, column=2, padx=5, pady=10)
-        self.mild_button.grid(row=0, column=3, padx=5, pady=10)
-        self.moderate_button.grid(row=0, column=4, padx=5, pady=10)
-        self.severe_button.grid(row=0, column=5, padx=(5, 10), pady=10)
+        for index, button in enumerate(self.tab_items):
+
+            if index <= 0:
+                padx = (10, 5)
+            elif index >= len(self.tab_items) - 1:
+                padx = (5, 10)
+            else:
+                padx = 10
+
+            button.grid(row=0, column=index, pady=10, padx=padx)
 
         self.session_duration_label.place(relx=0.98, y=20, anchor="ne")
 
