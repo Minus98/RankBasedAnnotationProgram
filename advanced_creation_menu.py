@@ -28,7 +28,11 @@ class AdvancedCreationMenu():
         self.menu_callback = menu_callback
         self.advanced_settings_frame = ctk.CTkFrame(self.root)
 
-        # Basic settings
+        # General settings
+
+        self.general_settings_label = ctk.CTkLabel(
+            master=self.basic_settings_frame, text="General Settings",
+            font=('Helvetica bold', 24))
 
         self.name_label = ctk.CTkLabel(
             master=self.basic_settings_frame, text="Name:",
@@ -105,6 +109,13 @@ class AdvancedCreationMenu():
             text="", checkbox_width=30, checkbox_height=30, onvalue=True,
             offvalue=False)
 
+        vcmd = (self.root.register(self.validate), '%P')
+
+        self.comparison_count_entry = ctk.CTkEntry(
+            master=self.basic_settings_frame, validate='key',
+            validatecommand=vcmd, width=200, height=40,
+            font=('Helvetica bold', 20))
+
         # Advanced settings
 
         self.rating_list_frame = ctk.CTkFrame(
@@ -177,15 +188,16 @@ class AdvancedCreationMenu():
             command=menu_callback)
 
     def display(self):
-
+        """self.basic_settings_frame.grid_rowconfigure(
+            0, weight=1)
         self.basic_settings_frame.grid_rowconfigure(
-            0, weight=2, uniform="ordering")
+            1, weight=1)
         self.basic_settings_frame.grid_rowconfigure(
-            1, weight=2, uniform="ordering")
+            2, weight=1)
         self.basic_settings_frame.grid_rowconfigure(
-            2, weight=1, uniform="ordering")
+            3, weight=1)
         self.basic_settings_frame.grid_rowconfigure(
-            3, weight=2, uniform="ordering")
+            4, weight=1)"""
         self.basic_settings_frame.grid_columnconfigure(0, weight=1)
         self.basic_settings_frame.grid_columnconfigure(1, weight=1)
 
@@ -193,33 +205,47 @@ class AdvancedCreationMenu():
         self.root.grid_rowconfigure(1, weight=16, uniform="header")
         self.root.grid_rowconfigure(2, weight=2, uniform="header")
 
-        self.name_label.grid(
-            row=0, column=0, padx=10, pady=(10, 2), sticky="e")
+        self.general_settings_label.grid(
+            row=0, column=0, columnspan=2, padx=10, pady=10)
 
-        self.algorithm_label.grid(row=1, column=0, padx=10, pady=2, sticky="e")
+        self.name_label.grid(
+            row=1, column=0, padx=10, pady=10, sticky="e")
+
+        self.name_entry.grid(row=1, column=1, padx=10,
+                             pady=(10, 2), sticky="w")
+
+        self.algorithm_label.grid(
+            row=2, column=0, padx=10, pady=10, sticky="e")
 
         self.comp_label.grid(
-            row=2, column=0, padx=10, pady=2, sticky="e")
+            row=3, column=0, padx=10, pady=10, sticky="e")
 
         self.slider_frame.grid(
-            row=2, column=1, padx=10, pady=2, sticky="w")
+            row=3, column=1, padx=10, pady=10, sticky="w")
 
         self.slider.grid(row=0, column=0)
 
         self.comparison_size_label.grid(row=0, column=1, padx=5)
 
         self.algorithm_selection.grid(
-            row=1, column=1, padx=10, pady=2, sticky="w")
+            row=2, column=1, padx=10, pady=10, sticky="w")
 
         self.image_dir_label.grid(
-            row=3, column=0, padx=10, pady=(2, 10),
+            row=4, column=0, padx=10, pady=10,
             sticky="e")
 
+        self.directory_entry.grid(row=4, column=1, padx=10,
+                                  pady=(2, 10), sticky="w")
+
         self.enable_scrolling_label.grid(
-            row=4, column=0, padx=10, pady=2, sticky="e")
+            row=5, column=0, padx=10, pady=10, sticky="e")
 
         self.scroll_enabled_checkbox.grid(
-            row=4, column=1, padx=10, pady=2, sticky="w")
+            row=5, column=1, padx=10, pady=10, sticky="w")
+
+        self.comparison_count_entry.grid(
+            row=6, column=1, padx=10, pady=10, sticky="w"
+        )
 
         self.root.grid_columnconfigure(
             0, weight=1, uniform="advanced_settings")
@@ -297,12 +323,6 @@ class AdvancedCreationMenu():
 
         if self.should_show_ranking_options():
             self.show_ranking_options()
-
-        self.directory_entry.grid(row=3, column=1, padx=10,
-                                  pady=(2, 10), sticky="w")
-
-        self.name_entry.grid(row=0, column=1, padx=10,
-                             pady=(10, 2), sticky="w")
 
     def show_ranking_options(self):
 
@@ -481,12 +501,10 @@ class AdvancedCreationMenu():
         if state:
             comp_label.grid()
             slider_frame.grid()
-            parent.rowconfigure(index=2, weight=1)
 
         else:
             comp_label.grid_remove()
             slider_frame.grid_remove()
-            parent.rowconfigure(index=2, weight=0)
 
     def update_comparison_size(self, val: int, label: ctk.CTkLabel):
         """
@@ -772,3 +790,9 @@ class AdvancedCreationMenu():
         f.close()
 
         self.menu_callback()
+
+    def validate(self, value):
+        return value.isnumeric() or not value
+
+    def on_invalid(self):
+        print("Hold it right there!")
