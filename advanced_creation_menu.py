@@ -158,8 +158,8 @@ class AdvancedCreationMenu():
             command=self.refresh_ranking_buttons)
 
         self.ranking_much_greater_switch = ctk.CTkSwitch(
-            self.switch_frame, text=">>", font=('Helvetica bold', 18), width=70,
-            command=self.refresh_ranking_buttons)
+            self.switch_frame, text=">>", font=('Helvetica bold', 18),
+            width=70, command=self.refresh_ranking_buttons)
 
         self.create_button = ctk.CTkButton(
             master=self.root, text="Create Annotation", width=200, height=40,
@@ -347,7 +347,9 @@ class AdvancedCreationMenu():
 
         if self.ranking_equals_switch.get():
 
-            equals_frame = ctk.CTkFrame(master=self.ranking_list)
+            equals_frame = ctk.CTkFrame(
+                master=self.ranking_list, fg_color=self.ranking_list.cget(
+                    "fg_color"))
 
             self.populate_rank_entry_frame(equals_frame, "A == B:", 2)
 
@@ -357,7 +359,9 @@ class AdvancedCreationMenu():
 
         # A > B
 
-        A_greater_frame = ctk.CTkFrame(master=self.ranking_list)
+        A_greater_frame = ctk.CTkFrame(
+            master=self.ranking_list, fg_color=self.ranking_list.cget(
+                "fg_color"))
 
         self.populate_rank_entry_frame(A_greater_frame, "A > B:", 1)
 
@@ -365,7 +369,9 @@ class AdvancedCreationMenu():
 
         # A < B
 
-        B_greater_frame = ctk.CTkFrame(master=self.ranking_list)
+        B_greater_frame = ctk.CTkFrame(
+            master=self.ranking_list, fg_color=self.ranking_list.cget(
+                "fg_color"))
 
         self.populate_rank_entry_frame(B_greater_frame, "A < B:", 3)
 
@@ -377,7 +383,9 @@ class AdvancedCreationMenu():
 
             # A >> B
 
-            A_much_greater_frame = ctk.CTkFrame(master=self.ranking_list)
+            A_much_greater_frame = ctk.CTkFrame(
+                master=self.ranking_list, fg_color=self.ranking_list.cget(
+                    "fg_color"))
 
             self.populate_rank_entry_frame(A_much_greater_frame, "A >> B:", 0)
 
@@ -385,7 +393,9 @@ class AdvancedCreationMenu():
 
             # A << B
 
-            B_much_greater_frame = ctk.CTkFrame(master=self.ranking_list)
+            B_much_greater_frame = ctk.CTkFrame(
+                master=self.ranking_list, fg_color=self.ranking_list.cget(
+                    "fg_color"))
 
             self.populate_rank_entry_frame(B_much_greater_frame, "A << B:", 4)
 
@@ -393,11 +403,12 @@ class AdvancedCreationMenu():
 
             current_row += 1
 
-    def populate_rank_entry_frame(self, frame: ctk.CTkFrame, text: str, var_index: int):
+    def populate_rank_entry_frame(
+            self, frame: ctk.CTkFrame, text: str, var_index: int):
 
         label = ctk.CTkLabel(
             master=frame, text=text,
-            font=('Helvetica bold', 18))
+            font=('Helvetica bold', 18), width=60, anchor="e")
 
         entry = ctk.CTkEntry(master=frame, width=200,
                              font=('Helvetica bold', 16),
@@ -536,7 +547,8 @@ class AdvancedCreationMenu():
             text_var = ctk.StringVar(value=button)
 
             text_entry = ctk.CTkEntry(
-                row, textvariable=text_var, width=200, font=('Helvetica bold', 16))
+                row, textvariable=text_var, width=200,
+                font=('Helvetica bold', 16))
             text_entry.grid(row=0, column=1, sticky="w")
 
             ok_button = ctk.CTkButton(
@@ -648,8 +660,8 @@ class AdvancedCreationMenu():
 
         compatible_algorithm = self.algorithm_selection.get(
         ) == "True Skill" or self.algorithm_selection.get(
-        ) == "Merge Sort" or self.algorithm_selection.get() == "Hybrid" 
-        
+        ) == "Merge Sort" or self.algorithm_selection.get() == "Hybrid"
+
         return compatible_algorithm and self.slider.get() == 2
 
     def should_show_switches(self):
