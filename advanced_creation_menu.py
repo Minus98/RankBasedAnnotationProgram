@@ -9,7 +9,6 @@ from typing import Callable
 
 import customtkinter as ctk
 import pandas as pd
-from PIL import Image
 
 import sorting_algorithms as sa
 
@@ -22,6 +21,9 @@ class AdvancedCreationMenu():
         self.root = root
 
         self.rating_buttons = ["Rating 1", "Rating 2"]
+
+        self.ranking_buttons = [ctk.StringVar(value="") for _ in range(5)]
+
         self.basic_settings_frame = ctk.CTkFrame(self.root)
         self.menu_callback = menu_callback
         self.advanced_settings_frame = ctk.CTkFrame(self.root)
@@ -149,6 +151,16 @@ class AdvancedCreationMenu():
             placeholder_text="Enter the text prompt for annotations",
             width=300, height=40, font=('Helvetica bold', 16))
 
+        self.switch_frame = ctk.CTkFrame(self.ranking_list_frame)
+
+        self.ranking_equals_switch = ctk.CTkSwitch(
+            self.switch_frame, text="=", font=('Helvetica bold', 18), width=70,
+            command=self.refresh_ranking_buttons)
+
+        self.ranking_much_greater_switch = ctk.CTkSwitch(
+            self.switch_frame, text=">>", font=('Helvetica bold', 18), width=70,
+            command=self.refresh_ranking_buttons)
+
         self.create_button = ctk.CTkButton(
             master=self.root, text="Create Annotation", width=200, height=40,
             font=('Helvetica bold', 20),
@@ -178,8 +190,8 @@ class AdvancedCreationMenu():
         self.basic_settings_frame.grid_columnconfigure(1, weight=1)
 
         self.root.grid_rowconfigure(0, weight=1, uniform="header")
-        self.root.grid_rowconfigure(1, weight=8, uniform="header")
-        self.root.grid_rowconfigure(2, weight=1, uniform="header")
+        self.root.grid_rowconfigure(1, weight=16, uniform="header")
+        self.root.grid_rowconfigure(2, weight=2, uniform="header")
 
         self.name_label.grid(
             row=0, column=0, padx=10, pady=(10, 2), sticky="e")
@@ -255,6 +267,8 @@ class AdvancedCreationMenu():
 
         self.ranking_list_frame.grid_columnconfigure(0, weight=1)
         self.ranking_list_frame.grid_columnconfigure(1, weight=1)
+        self.ranking_list.grid_columnconfigure(0, weight=1)
+        self.ranking_list.grid_columnconfigure(1, weight=1)
 
         self.ranking_list_label.grid(row=0, column=0, columnspan=2, pady=10)
 
@@ -264,8 +278,19 @@ class AdvancedCreationMenu():
         self.ranking_prompt_entry.grid(row=1, column=1, padx=10,
                                        pady=10, sticky="w")
 
+        self.switch_frame.grid(
+            row=2, column=1, sticky="e", padx=10, pady=(10, 0))
+
+        self.switch_frame.columnconfigure(0, weight=1)
+        self.switch_frame.columnconfigure(1, weight=1)
+
+        self.ranking_equals_switch.grid(
+            row=0, column=0, sticky="e", padx=(10, 5), pady=5)
+        self.ranking_much_greater_switch.grid(
+            row=0, column=1, sticky="e", padx=(5, 10), pady=5)
+
         self.ranking_list.grid(
-            row=2, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
+            row=3, column=0, columnspan=2, sticky="ew", padx=10, pady=(0, 10))
 
         if self.should_show_rating_options():
             self.show_rating_options()
@@ -280,8 +305,11 @@ class AdvancedCreationMenu():
                              pady=(10, 2), sticky="w")
 
     def show_ranking_options(self):
+
         self.ranking_list_frame.grid(
             row=2, column=0, columnspan=2, sticky="ew")
+
+        self.refresh_ranking_buttons()
 
     def show_rating_options(self):
 
@@ -297,6 +325,77 @@ class AdvancedCreationMenu():
     def hide_ranking_options(self):
 
         self.ranking_list_frame.grid_remove()
+
+    def refresh_ranking_buttons(self):
+
+        for child in self.ranking_list.winfo_children():
+            child.destroy()
+
+        current_row = 0
+
+        if self.ranking_equals_switch.get():
+
+            equals_frame = ctk.CTkFrame(master=self.ranking_list)
+
+            self.populate_rank_entry_frame(equals_frame, "A == B:", 2)
+
+            equals_frame.grid(row=current_row, column=0, pady=5, columnspan=2)
+
+            current_row += 1
+
+        # A > B
+
+        A_greater_frame = ctk.CTkFrame(master=self.ranking_list)
+
+        self.populate_rank_entry_frame(A_greater_frame, "A > B:", 1)
+
+        A_greater_frame.grid(row=current_row, column=0, pady=5)
+
+        # A < B
+
+        B_greater_frame = ctk.CTkFrame(master=self.ranking_list)
+
+        self.populate_rank_entry_frame(B_greater_frame, "A < B:", 3)
+
+        B_greater_frame.grid(row=current_row, column=1, pady=5)
+
+        current_row += 1
+
+        if self.ranking_much_greater_switch.get():
+
+            # A >> B
+
+            A_much_greater_frame = ctk.CTkFrame(master=self.ranking_list)
+
+            self.populate_rank_entry_frame(A_much_greater_frame, "A >> B:", 0)
+
+            A_much_greater_frame.grid(row=current_row, column=0, pady=5)
+
+            # A << B
+
+            B_much_greater_frame = ctk.CTkFrame(master=self.ranking_list)
+
+            self.populate_rank_entry_frame(B_much_greater_frame, "A << B:", 4)
+
+            B_much_greater_frame.grid(row=current_row, column=1, pady=5)
+
+            current_row += 1
+
+    def populate_rank_entry_frame(self, frame: ctk.CTkFrame, text: str, var_index: int):
+
+        label = ctk.CTkLabel(
+            master=frame, text=text,
+            font=('Helvetica bold', 18))
+
+        entry = ctk.CTkEntry(master=frame, width=200,
+                             font=('Helvetica bold', 16),
+                             textvariable=self.ranking_buttons[var_index])
+
+        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=1)
+
+        label.grid(row=0, column=0, sticky="e", pady=5, padx=5)
+        entry.grid(row=0, column=1, sticky="w", pady=5, padx=5)
 
     def algorithm_changed(
             self, value: str, parent: ctk.CTkToplevel, slider: ctk.CTkSlider,
@@ -420,7 +519,7 @@ class AdvancedCreationMenu():
             text_var = ctk.StringVar(value=button)
 
             text_entry = ctk.CTkEntry(
-                row, textvariable=text_var, font=('Helvetica bold', 16))
+                row, textvariable=text_var, width=200, font=('Helvetica bold', 16))
             text_entry.grid(row=0, column=1, sticky="w")
 
             ok_button = ctk.CTkButton(
@@ -616,6 +715,25 @@ class AdvancedCreationMenu():
 
             if self.rating_prompt.get():
                 save_obj["custom_rating_prompt"] = self.rating_prompt.get()
+
+        if self.should_show_ranking_options():
+
+            custom_rankings = []
+
+            if self.ranking_equals_switch.get():
+                custom_rankings.append(self.ranking_buttons[2].get())
+
+            custom_rankings = [self.ranking_buttons[1].get(
+            )] + custom_rankings + [self.ranking_buttons[3].get()]
+
+            if self.ranking_much_greater_switch.get():
+                custom_rankings = [self.ranking_buttons[0].get(
+                )] + custom_rankings + [self.ranking_buttons[4].get()]
+
+            save_obj["custom_rankings"] = custom_rankings
+
+            if self.ranking_prompt.get():
+                save_obj["custom_ranking_prompt"] = self.ranking_prompt.get()
 
         f = open(path + "/" + file_name + ".pickle", "wb")
         pickle.dump(save_obj, f)
