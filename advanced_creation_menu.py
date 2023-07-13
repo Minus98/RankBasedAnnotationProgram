@@ -333,6 +333,18 @@ class AdvancedCreationMenu():
 
         current_row = 0
 
+        if not self.should_show_switches():
+
+            self.ranking_equals_switch.deselect()
+            self.ranking_equals_switch.configure(state=ctk.DISABLED)
+
+            self.ranking_much_greater_switch.deselect()
+            self.ranking_much_greater_switch.configure(state=ctk.DISABLED)
+        else:
+
+            self.ranking_equals_switch.configure(state=ctk.NORMAL)
+            self.ranking_much_greater_switch.configure(state=ctk.NORMAL)
+
         if self.ranking_equals_switch.get():
 
             equals_frame = ctk.CTkFrame(master=self.ranking_list)
@@ -474,6 +486,11 @@ class AdvancedCreationMenu():
             label (CTkLabel): The label to be updated.
         """
         label.configure(text=int(val))
+
+        if self.should_show_ranking_options():
+            self.show_ranking_options()
+        else:
+            self.hide_ranking_options()
 
     def select_directory(self, root: ctk.CTkToplevel,
                          directory_var: ctk.StringVar):
@@ -629,11 +646,14 @@ class AdvancedCreationMenu():
 
     def should_show_ranking_options(self):
 
-        show_ranking = self.algorithm_selection.get(
+        compatible_algorithm = self.algorithm_selection.get(
         ) == "True Skill" or self.algorithm_selection.get(
-        ) == "Merge Sort" or self.algorithm_selection.get() == "Hybrid"
+        ) == "Merge Sort" or self.algorithm_selection.get() == "Hybrid" 
+        
+        return compatible_algorithm and self.slider.get() == 2
 
-        return show_ranking
+    def should_show_switches(self):
+        return self.algorithm_selection.get() != "Merge Sort"
 
     def create_save(
             self, name: ctk.StringVar, algorithm: sa.SortingAlgorithm,
