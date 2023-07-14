@@ -13,7 +13,7 @@ class SortingAlgorithm (ABC):
     """Abstract base class for sorting algorithms."""
 
     @abstractmethod
-    def get_comparison(self, user_id: str) -> list[str]:
+    def get_comparison(self, user_id: str) -> List[str]:
         """
         Fetches a new comparison based on the state of the sorting algorithm.
 
@@ -27,8 +27,8 @@ class SortingAlgorithm (ABC):
 
     @abstractmethod
     def inference(
-            self, user_id: str, keys: list[str],
-            diff_lvls: list[utils.DiffLevel]):
+            self, user_id: str, keys: List[str],
+            diff_lvls: List[utils.DiffLevel]):
         """
         Updates the algorithms estimated ordering based on the 
         results of a comparison.

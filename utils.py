@@ -12,7 +12,7 @@ class DiffLevel(Enum):
     major = 2
 
 
-def add_hover(widget: ctk.CTkWidget):
+def add_hover(widget: ctk.CTkBaseClass):
     """
     Add hover effect to the widget and its children.
 
@@ -23,7 +23,7 @@ def add_hover(widget: ctk.CTkWidget):
     add_hover_to_children(widget, widget)
 
 
-def add_hover_to_children(widget: ctk.CTkWidget, child_widget: ctk.CTkWidget):
+def add_hover_to_children(widget: ctk.CTkBaseClass, child_widget: ctk.CTkBaseClass):
     """
     Add hover effect to the child ctk widget and its children.
 
@@ -42,7 +42,7 @@ def add_hover_to_children(widget: ctk.CTkWidget, child_widget: ctk.CTkWidget):
         add_hover_to_children(widget, child)
 
 
-def highlight(widget: ctk.CTkWidget, og_color: List[str]):
+def highlight(widget: ctk.CTkBaseClass, og_color: List[str]):
     """
     Add highlight effect to the ctk widget by changing its foreground color.
 
@@ -58,7 +58,7 @@ def highlight(widget: ctk.CTkWidget, og_color: List[str]):
     widget.configure(fg_color='gray' + str((gray_color)))
 
 
-def remove_highlight(widget: ctk.CTkWidget, og_color: List[str]):
+def remove_highlight(widget: ctk.CTkBaseClass, og_color: List[str]):
     """
     Remove highlight effect from the ctk widget by restoring its original 
     foreground color.
