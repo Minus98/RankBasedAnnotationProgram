@@ -109,9 +109,24 @@ class AdvancedCreationMenu():
             text="", checkbox_width=30, checkbox_height=30, onvalue=True,
             offvalue=False)
 
+        self.comparison_count_label = ctk.CTkLabel(
+            master=self.basic_settings_frame, text="Max Total Comparisons:",
+            font=('Helvetica bold', 20)
+        )
+
         vcmd = (self.root.register(self.validate), '%P')
 
         self.comparison_count_entry = ctk.CTkEntry(
+            master=self.basic_settings_frame, validate='key',
+            validatecommand=vcmd, width=200, height=40,
+            font=('Helvetica bold', 20))
+
+        self.user_comparison_count_label = ctk.CTkLabel(
+            master=self.basic_settings_frame, text="Max User Comparisons:",
+            font=('Helvetica bold', 20)
+        )
+
+        self.user_comparison_count_entry = ctk.CTkEntry(
             master=self.basic_settings_frame, validate='key',
             validatecommand=vcmd, width=200, height=40,
             font=('Helvetica bold', 20))
@@ -243,8 +258,20 @@ class AdvancedCreationMenu():
         self.scroll_enabled_checkbox.grid(
             row=5, column=1, padx=10, pady=10, sticky="w")
 
+        self.comparison_count_label.grid(
+            row=6, column=0, padx=10, pady=10, sticky="e"
+        )
+
         self.comparison_count_entry.grid(
             row=6, column=1, padx=10, pady=10, sticky="w"
+        )
+
+        self.user_comparison_count_label.grid(
+            row=7, column=0, padx=10, pady=10, sticky="e"
+        )
+
+        self.user_comparison_count_entry.grid(
+            row=7, column=1, padx=10, pady=10, sticky="w"
         )
 
         self.root.grid_columnconfigure(
@@ -718,16 +745,22 @@ class AdvancedCreationMenu():
 
         alg = algorithm.get()
 
+        comp_max = None
+
+        if self.comparison_count_entry.get().isnumeric():
+            comp_max = int(self.comparison_count_entry.get())
+
         if alg == "Merge Sort":
             sort_alg = sa.MergeSort(data=img_paths)
         elif alg == "Rating":
             sort_alg = sa.RatingAlgorithm(data=img_paths)
         elif alg == "Hybrid":
             sort_alg = sa.HybridTrueSkill(
-                data=img_paths, comparison_size=int(comparison_size.get()))
+                data=img_paths, comparison_size=int(comparison_size.get()),
+                comparison_max=comp_max)
         else:
-            sort_alg = sa.TrueSkill(
-                data=img_paths, comparison_size=int(comparison_size.get()))
+            sort_alg = sa.TrueSkill(data=img_paths, comparison_size=int(
+                comparison_size.get()), comparison_max=comp_max)
 
         file_name = str(int(time.time()))
 
