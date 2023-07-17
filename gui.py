@@ -79,7 +79,7 @@ class AnnotationGui():
             self.menu_screen.display_user(self.selected_user)
         self.menu_screen.display()
 
-    def display_advanced_creation_menu(self):
+    def display_advanced_creation_menu(self, initial_settings=None):
         """
         Displays the advanced creation menu.
         """
@@ -87,7 +87,7 @@ class AnnotationGui():
         self.clear_screen()
 
         self.advanced_creation_menu = AdvancedCreationMenu(
-            self.root, self.display_menu)
+            self.root, self.display_menu, initial_settings)
 
         self.advanced_creation_menu.display()
 

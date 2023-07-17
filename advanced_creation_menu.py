@@ -16,7 +16,8 @@ import sorting_algorithms as sa
 class AdvancedCreationMenu():
 
     def __init__(
-            self, root: ctk.CTk, menu_callback: Callable):
+            self, root: ctk.CTk, menu_callback: Callable,
+            initial_settings=None):
 
         self.root = root
 
@@ -68,17 +69,11 @@ class AdvancedCreationMenu():
 
         self.slider.set(2)
 
-        self.comparison_size_label.configure(text=int(self.slider.get()))
-
         self.algorithm_selection = ctk.CTkOptionMenu(
             master=self.basic_settings_frame,
             values=["True Skill", "Merge Sort", "Rating", "Hybrid"],
             width=200, height=40, font=('Helvetica bold', 20),
-            command=lambda value, parent=self.basic_settings_frame,
-            slider=self.slider, slider_frame=self.slider_frame,
-            label=self.comparison_size_label,
-            comp_label=self.comp_label: self.algorithm_changed(
-                value, parent, slider, slider_frame, label, comp_label))
+            command=lambda value: self.algorithm_changed())
 
         self.image_dir_label = ctk.CTkLabel(
             master=self.basic_settings_frame, text="Image Directory:",
@@ -155,6 +150,8 @@ class AdvancedCreationMenu():
         self.ratings_list = ctk.CTkScrollableFrame(
             master=self.rating_list_frame, height=120)
 
+        self.edit_index = -1
+
         self.ranking_list_frame = ctk.CTkFrame(
             self.advanced_settings_frame,
             fg_color=self.advanced_settings_frame.cget("fg_color"))
@@ -201,6 +198,36 @@ class AdvancedCreationMenu():
             master=self.root, text="Cancel", width=200, height=40,
             font=('Helvetica bold', 20),
             command=menu_callback)
+
+        if initial_settings:
+            self.set_initial_settings(initial_settings)
+
+        self.comparison_size_label.configure(text=int(self.slider.get()))
+
+        # ToDo display being called after algorithm changed, slider showing when not
+        # supposed to...
+
+    def set_initial_settings(self, initial_settings):
+
+        if 'name' in initial_settings:
+            self.name.set(initial_settings['name'])
+            # current_field_values['name'] = self.name.get(
+            # )
+
+        if 'algorithm_selection' in initial_settings:
+            self.algorithm_selection.set(
+                initial_settings['algorithm_selection'])
+
+        if 'image_directory' in initial_settings:
+            self.image_directory.set(initial_settings['image_directory'])
+
+        if 'slider' in initial_settings:
+            self.slider.set(initial_settings['slider'])
+
+        if 'scroll_enabled' in initial_settings:
+            self.scroll_enabled.set(initial_settings['scroll_enabled'])
+
+        self.algorithm_changed()
 
     def display(self):
         """self.basic_settings_frame.grid_rowconfigure(
@@ -292,8 +319,6 @@ class AdvancedCreationMenu():
             3, weight=2, uniform="advanced_frame")"""
         self.advanced_settings_frame.grid_columnconfigure(0, weight=1)
         self.advanced_settings_frame.grid_columnconfigure(1, weight=1)
-
-        self.edit_index = -1
 
         self.advanced_settings_frame.grid(
             row=1, column=1, padx=(10, 20), pady=20, sticky="nesw")
@@ -468,9 +493,7 @@ class AdvancedCreationMenu():
         entry.grid(row=0, column=1, sticky="w", pady=5, padx=5)
 
     def algorithm_changed(
-            self, value: str, parent: ctk.CTkToplevel, slider: ctk.CTkSlider,
-            slider_frame: ctk.CTkFrame, label: ctk.CTkLabel,
-            comp_label: ctk.CTkLabel):
+            self):
         """
         Handles the change event of the algorithm selection option menu.
 
@@ -483,24 +506,25 @@ class AdvancedCreationMenu():
             comp_label (CTkLabel): The label for comparison size.
         """
 
+        value = self.algorithm_selection.get()
         if value == "Merge Sort":
             self.change_slider_row_state(
-                True, parent, slider_frame, comp_label)
-            slider.set(2)
-            label.configure(text=2, state=ctk.DISABLED)
-            comp_label.configure(state=ctk.DISABLED)
-            slider.configure(state=ctk.DISABLED)
+                True, self.basic_settings_frame, self.slider_frame, self.comp_label)
+            self.slider.set(2)
+            self.comparison_size_label.configure(text=2, state=ctk.DISABLED)
+            self.comp_label.configure(state=ctk.DISABLED)
+            self.slider.configure(state=ctk.DISABLED)
 
         elif value == "Rating":
             self.change_slider_row_state(
-                False, parent, slider_frame, comp_label)
+                False, self.basic_settings_frame, self.slider_frame, self.comp_label)
 
         else:
             self.change_slider_row_state(
-                True, parent, slider_frame, comp_label)
-            slider.configure(state=ctk.NORMAL)
-            label.configure(state=ctk.NORMAL)
-            comp_label.configure(state=ctk.NORMAL)
+                True, self.basic_settings_frame, self.slider_frame, self.comp_label)
+            self.slider.configure(state=ctk.NORMAL)
+            self.comparison_size_label.configure(state=ctk.NORMAL)
+            self.comp_label.configure(state=ctk.NORMAL)
 
         if self.should_show_rating_options():
             self.show_rating_options()
@@ -528,7 +552,6 @@ class AdvancedCreationMenu():
         if state:
             comp_label.grid()
             slider_frame.grid()
-
         else:
             comp_label.grid_remove()
             slider_frame.grid_remove()
