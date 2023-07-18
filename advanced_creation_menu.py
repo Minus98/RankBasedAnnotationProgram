@@ -31,6 +31,8 @@ class AdvancedCreationMenu():
 
         # General settings
 
+        self.basic_settings_pady = 15
+
         self.general_settings_label = ctk.CTkLabel(
             master=self.basic_settings_frame, text="General Settings",
             font=('Helvetica bold', 24))
@@ -240,6 +242,7 @@ class AdvancedCreationMenu():
             3, weight=1)
         self.basic_settings_frame.grid_rowconfigure(
             4, weight=1)"""
+
         self.basic_settings_frame.grid_columnconfigure(0, weight=1)
         self.basic_settings_frame.grid_columnconfigure(1, weight=1)
 
@@ -250,56 +253,63 @@ class AdvancedCreationMenu():
         self.general_settings_label.grid(
             row=0, column=0, columnspan=2, padx=10, pady=10)
 
-        self.name_label.grid(
-            row=1, column=0, padx=10, pady=10, sticky="e")
+        self.name_label.grid(row=1, column=0, padx=10,
+                             pady=self.basic_settings_pady, sticky="e")
 
         self.name_entry.grid(row=1, column=1, padx=10,
-                             pady=(10, 2), sticky="w")
+                             pady=self.basic_settings_pady, sticky="w")
 
         self.algorithm_label.grid(
-            row=2, column=0, padx=10, pady=10, sticky="e")
+            row=2, column=0, padx=10, pady=self.basic_settings_pady,
+            sticky="e")
 
-        self.comp_label.grid(
-            row=3, column=0, padx=10, pady=10, sticky="e")
+        if self.should_show_ranking_options():
+            self.comp_label.grid(row=3, column=0, padx=10,
+                                 pady=self.basic_settings_pady, sticky="e")
 
-        self.slider_frame.grid(
-            row=3, column=1, padx=10, pady=10, sticky="w")
+            self.slider_frame.grid(
+                row=3, column=1, padx=10, pady=self.basic_settings_pady,
+                sticky="w")
+
+            self.comparison_count_label.grid(
+                row=6, column=0, padx=10, pady=self.basic_settings_pady,
+                sticky="e")
+
+            self.comparison_count_entry.grid(
+                row=6, column=1, padx=10, pady=self.basic_settings_pady,
+                sticky="w")
 
         self.slider.grid(row=0, column=0)
 
         self.comparison_size_label.grid(row=0, column=1, padx=5)
 
         self.algorithm_selection.grid(
-            row=2, column=1, padx=10, pady=10, sticky="w")
+            row=2, column=1, padx=10, pady=self.basic_settings_pady,
+            sticky="w")
 
         self.image_dir_label.grid(
-            row=4, column=0, padx=10, pady=10,
+            row=4, column=0, padx=10, pady=self.basic_settings_pady,
             sticky="e")
 
         self.directory_entry.grid(row=4, column=1, padx=10,
-                                  pady=(2, 10), sticky="w")
+                                  pady=self.basic_settings_pady, sticky="w")
 
         self.enable_scrolling_label.grid(
-            row=5, column=0, padx=10, pady=10, sticky="e")
+            row=5, column=0, padx=10, pady=self.basic_settings_pady,
+            sticky="e")
 
         self.scroll_enabled_checkbox.grid(
-            row=5, column=1, padx=10, pady=10, sticky="w")
+            row=5, column=1, padx=10, pady=self.basic_settings_pady,
+            sticky="w")
 
-        self.comparison_count_label.grid(
-            row=6, column=0, padx=10, pady=10, sticky="e"
-        )
-
-        self.comparison_count_entry.grid(
-            row=6, column=1, padx=10, pady=10, sticky="w"
-        )
-
+        """
         self.user_comparison_count_label.grid(
-            row=7, column=0, padx=10, pady=10, sticky="e"
+            row=7, column=0, padx=10, pady=self.basic_settings_pady, sticky="e"
         )
 
         self.user_comparison_count_entry.grid(
-            row=7, column=1, padx=10, pady=10, sticky="w"
-        )
+            row=7, column=1, padx=10, pady=self.basic_settings_pady, sticky="w"
+        )"""
 
         self.root.grid_columnconfigure(
             0, weight=1, uniform="advanced_settings")
@@ -390,6 +400,15 @@ class AdvancedCreationMenu():
 
         self.refresh_rating_buttons()
 
+    def show_comparison_count(self):
+        self.comparison_count_label.grid(
+            row=6, column=0, padx=10, pady=self.basic_settings_pady,
+            sticky="e")
+
+        self.comparison_count_entry.grid(
+            row=6, column=1, padx=10, pady=self.basic_settings_pady,
+            sticky="w")
+
     def hide_rating_options(self):
 
         self.rating_list_frame.grid_remove()
@@ -397,6 +416,11 @@ class AdvancedCreationMenu():
     def hide_ranking_options(self):
 
         self.ranking_list_frame.grid_remove()
+
+    def hide_comparison_count(self):
+
+        self.comparison_count_label.grid_remove()
+        self.comparison_count_entry.grid_remove()
 
     def refresh_ranking_buttons(self):
 
@@ -514,17 +538,24 @@ class AdvancedCreationMenu():
             self.comparison_size_label.configure(text=2, state=ctk.DISABLED)
             self.comp_label.configure(state=ctk.DISABLED)
             self.slider.configure(state=ctk.DISABLED)
+            self.show_comparison_count()
+            self.comparison_count_entry.delete(0, ctk.END)
+            self.comparison_count_entry.configure(state=ctk.DISABLED)
+            self.comparison_count_label.configure(state=ctk.DISABLED)
 
         elif value == "Rating":
             self.change_slider_row_state(
                 False, self.basic_settings_frame, self.slider_frame, self.comp_label)
-
+            self.hide_comparison_count()
         else:
             self.change_slider_row_state(
                 True, self.basic_settings_frame, self.slider_frame, self.comp_label)
             self.slider.configure(state=ctk.NORMAL)
             self.comparison_size_label.configure(state=ctk.NORMAL)
             self.comp_label.configure(state=ctk.NORMAL)
+            self.comparison_count_entry.configure(state=ctk.NORMAL)
+            self.comparison_count_label.configure(state=ctk.NORMAL)
+            self.show_comparison_count()
 
         if self.should_show_rating_options():
             self.show_rating_options()
@@ -550,8 +581,8 @@ class AdvancedCreationMenu():
             comp_label (CTkLabel): The label for comparison size.
         """
         if state:
-            comp_label.grid()
-            slider_frame.grid()
+            comp_label.grid(row=3, column=0, padx=10, pady=10, sticky="e")
+            slider_frame.grid(row=3, column=1, padx=10, pady=10, sticky="w")
         else:
             comp_label.grid_remove()
             slider_frame.grid_remove()
