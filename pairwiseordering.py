@@ -6,7 +6,6 @@ from typing import Callable, List, Optional
 import customtkinter as ctk
 import pandas as pd
 
-import sorting_algorithms as sa
 from is_finished_pop_out import IsFinishedPopOut
 from ordering import OrderingScreen
 from utils import DiffLevel, get_full_path
@@ -44,7 +43,6 @@ class PairwiseOrderingScreen(OrderingScreen):
         if "custom_rankings" in save_obj:
             ranking_buttons = save_obj["custom_rankings"]
 
-        
         self.tab_items = []
 
         self.tab_index = -1
@@ -57,15 +55,16 @@ class PairwiseOrderingScreen(OrderingScreen):
             self.tab_items.append(ctk.CTkButton(
                 master=self.buttons_frame, text=button +
                 ' (' + str(index + 1) + ')',
-                width=160, height=40, 
-                command=lambda value = submission_value: self.submit(value),
+                width=160, height=40,
+                command=lambda value=submission_value: self.submit(value),
                 font=('Helvetica bold', 20)))
-            
+
+            self.root.bind(str(index + 1), lambda event,
+                           index=index: self.on_shortcmd(index))
+
             self.root.bind(
-                str(index + 1), lambda event, index = index: self.on_shortcmd(index))
-            
-            self.root.bind("<KeyRelease-" + str(index + 1) + ">", 
-                           lambda event, index = index: self.on_shortcmd_up(index))
+                "<KeyRelease-" + str(index + 1) + ">", lambda event,
+                index=index: self.on_shortcmd_up(index))
 
         self.root.bind(
             "<Return>", lambda event: self.on_enter())

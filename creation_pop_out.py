@@ -1,17 +1,10 @@
-import os
-import pickle
-import random
-import sys
-import time
 from pathlib import Path
 from typing import Callable
 
 import customtkinter as ctk
-import pandas as pd
 
 import utils
-from sorting_algorithms import (HybridTrueSkill, MergeSort, RatingAlgorithm,
-                                SortingAlgorithm, TrueSkill)
+from sorting_algorithms import SortingAlgorithm
 
 
 class CreationPopOut():

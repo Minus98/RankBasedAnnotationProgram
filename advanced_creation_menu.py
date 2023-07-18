@@ -1,14 +1,7 @@
-
-import os
-import pickle
-import random
-import sys
-import time
 from pathlib import Path
 from typing import Callable, Optional
 
 import customtkinter as ctk
-import pandas as pd
 
 import sorting_algorithms as sa
 import utils
