@@ -4,6 +4,7 @@ RankBasedAnnotationProgram
 .. toctree::
    :maxdepth: 4
 
+   advanced_creation_menu
    creation_pop_out
    gui
    image_directory_pop_out

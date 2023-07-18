@@ -5,19 +5,32 @@ import random
 import sys
 import time
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Optional
 
 import customtkinter as ctk
 import pandas as pd
 
 import sorting_algorithms as sa
+import utils
 
 
 class AdvancedCreationMenu():
+    """
+    Class representing the more advanced creation menu which allows the user to 
+    customize ranking and rating buttons and prompts and more.
+    """
 
     def __init__(
             self, root: ctk.CTk, menu_callback: Callable,
-            initial_settings=None):
+            initial_settings: Optional[dict] = None):
+        """
+        Initializes the AdvancedCreationMenu instance.
+
+        Args:
+            root (CTk): The root cutom tkinter object.
+            menu_callback (function): Callback function to return to the main menu.
+
+        """
 
         self.root = root
 
@@ -206,15 +219,17 @@ class AdvancedCreationMenu():
 
         self.comparison_size_label.configure(text=int(self.slider.get()))
 
-        # ToDo display being called after algorithm changed, slider showing when not
-        # supposed to...
+    def set_initial_settings(self, initial_settings: dict):
+        """
+        Updates the values of the relevant fields with the initial settings provided.
 
-    def set_initial_settings(self, initial_settings):
+        Args:
+            initial_settings (dict): The dictionary containing the fields and their
+                                     corresponding initial values.
+        """
 
         if 'name' in initial_settings:
             self.name.set(initial_settings['name'])
-            # current_field_values['name'] = self.name.get(
-            # )
 
         if 'algorithm_selection' in initial_settings:
             self.algorithm_selection.set(
@@ -232,16 +247,9 @@ class AdvancedCreationMenu():
         self.algorithm_changed()
 
     def display(self):
-        """self.basic_settings_frame.grid_rowconfigure(
-            0, weight=1)
-        self.basic_settings_frame.grid_rowconfigure(
-            1, weight=1)
-        self.basic_settings_frame.grid_rowconfigure(
-            2, weight=1)
-        self.basic_settings_frame.grid_rowconfigure(
-            3, weight=1)
-        self.basic_settings_frame.grid_rowconfigure(
-            4, weight=1)"""
+        """
+        Displays the content of the advanced creation menu view.
+        """
 
         self.basic_settings_frame.grid_columnconfigure(0, weight=1)
         self.basic_settings_frame.grid_columnconfigure(1, weight=1)
@@ -319,14 +327,6 @@ class AdvancedCreationMenu():
         self.basic_settings_frame.grid(
             row=1, column=0, padx=(20, 10), pady=20, sticky="nesw")
 
-        """self.advanced_settings_frame.grid_rowconfigure(
-            0, weight=2, uniform="advanced_frame")
-        self.advanced_settings_framee.grid_rowconfigure(
-            1, weight=2, uniform="advanced_frame")
-        self.advanced_settings_frame.grid_rowconfigure(
-            2, weight=1, uniform="advanced_frame")
-        self.advanced_settings_frame.grid_rowconfigure(
-            3, weight=2, uniform="advanced_frame")"""
         self.advanced_settings_frame.grid_columnconfigure(0, weight=1)
         self.advanced_settings_frame.grid_columnconfigure(1, weight=1)
 
@@ -387,6 +387,9 @@ class AdvancedCreationMenu():
             self.show_ranking_options()
 
     def show_ranking_options(self):
+        """
+        Displays the ranking options frame.
+        """
 
         self.ranking_list_frame.grid(
             row=2, column=0, columnspan=2, sticky="ew")
@@ -394,6 +397,9 @@ class AdvancedCreationMenu():
         self.refresh_ranking_buttons()
 
     def show_rating_options(self):
+        """
+        Displays the rating options frame.
+        """
 
         self.rating_list_frame.grid(
             row=1, column=0, columnspan=2, sticky="ew")
@@ -401,6 +407,10 @@ class AdvancedCreationMenu():
         self.refresh_rating_buttons()
 
     def show_comparison_count(self):
+        """
+        Displays the comparison count label and entry in the basic settings frame.
+        """
+
         self.comparison_count_label.grid(
             row=6, column=0, padx=10, pady=self.basic_settings_pady,
             sticky="e")
@@ -410,19 +420,31 @@ class AdvancedCreationMenu():
             sticky="w")
 
     def hide_rating_options(self):
+        """
+        Hides the rating options frame.
+        """
 
         self.rating_list_frame.grid_remove()
 
     def hide_ranking_options(self):
+        """
+        Hides the ranking options frame.
+        """
 
         self.ranking_list_frame.grid_remove()
 
     def hide_comparison_count(self):
+        """
+        Hides the comparison count label and entry.
+        """
 
         self.comparison_count_label.grid_remove()
         self.comparison_count_entry.grid_remove()
 
     def refresh_ranking_buttons(self):
+        """
+        Updates to ranking options frame so that the correct fields are displayed.
+        """
 
         for child in self.ranking_list.winfo_children():
             child.destroy()
@@ -501,7 +523,15 @@ class AdvancedCreationMenu():
 
     def populate_rank_entry_frame(
             self, frame: ctk.CTkFrame, text: str, var_index: int):
+        """
+        Adds the widgets associated with each of the rank entries.
 
+        Args:
+            frame (CTkFrame): The frame that is to be populated.
+            text (str): The label text of the specific entry.
+            var_index: The index of the text variable in the ranking_buttons list that
+                       should be associated with this specific entry.
+        """
         label = ctk.CTkLabel(
             master=frame, text=text,
             font=('Helvetica bold', 18), width=60, anchor="e")
@@ -520,20 +550,12 @@ class AdvancedCreationMenu():
             self):
         """
         Handles the change event of the algorithm selection option menu.
-
-        Args:
-            value (str): The selected algorithm.
-            pop_out (CTkToplevel): The pop-out window.
-            slider (CTkSlider): The slider widget.
-            slider_frame (CTkFrame): The frame containing the slider.
-            label (CTkLabel): The label displaying the comparison size.
-            comp_label (CTkLabel): The label for comparison size.
         """
 
         value = self.algorithm_selection.get()
         if value == "Merge Sort":
             self.change_slider_row_state(
-                True, self.basic_settings_frame, self.slider_frame, self.comp_label)
+                True, self.slider_frame, self.comp_label)
             self.slider.set(2)
             self.comparison_size_label.configure(text=2, state=ctk.DISABLED)
             self.comp_label.configure(state=ctk.DISABLED)
@@ -545,11 +567,11 @@ class AdvancedCreationMenu():
 
         elif value == "Rating":
             self.change_slider_row_state(
-                False, self.basic_settings_frame, self.slider_frame, self.comp_label)
+                False, self.slider_frame, self.comp_label)
             self.hide_comparison_count()
         else:
             self.change_slider_row_state(
-                True, self.basic_settings_frame, self.slider_frame, self.comp_label)
+                True, self.slider_frame, self.comp_label)
             self.slider.configure(state=ctk.NORMAL)
             self.comparison_size_label.configure(state=ctk.NORMAL)
             self.comp_label.configure(state=ctk.NORMAL)
@@ -568,15 +590,14 @@ class AdvancedCreationMenu():
             self.hide_ranking_options()
 
     def change_slider_row_state(
-            self, state: bool, parent: ctk.CTkToplevel,
-            slider_frame: ctk.CTkFrame, comp_label: ctk.CTkLabel):
+            self, state: bool, slider_frame: ctk.CTkFrame,
+            comp_label: ctk.CTkLabel):
         """
         Changes the state of the slider row.
 
         Args:
             state (bool): Boolean indicating whether the slider row should be 
-            enabled or disabled.
-            pop_out (CTkToplevel): The pop-out window.
+                          enabled or disabled.
             slider_frame (CTkFrame): The frame containing the slider.
             comp_label (CTkLabel): The label for comparison size.
         """
@@ -616,6 +637,9 @@ class AdvancedCreationMenu():
         directory_var.set(directory)
 
     def refresh_rating_buttons(self):
+        """
+        Repopulates the rating buttons list with the current row view.
+        """
 
         for child in self.ratings_list.winfo_children():
             child.destroy()
@@ -627,7 +651,15 @@ class AdvancedCreationMenu():
             self.ratings_list, text="Add Rating", command=self.add_option)
         add_button.grid(row=len(self.rating_buttons), column=0, pady=3)
 
-    def append_row(self, index, button):
+    def append_row(self, index: int, button_text: str):
+        """
+        Adds a row to the rating buttons list
+
+        Args:
+            index (int): The index of the row in the list which it is supposed to be
+                         added to.
+            button_text (str): The currently assigned text of the rating button.
+        """
 
         row = ctk.CTkFrame(self.ratings_list)
 
@@ -643,7 +675,7 @@ class AdvancedCreationMenu():
 
         if self.edit_index == index:
 
-            text_var = ctk.StringVar(value=button)
+            text_var = ctk.StringVar(value=button_text)
 
             text_entry = ctk.CTkEntry(
                 row, textvariable=text_var, width=200,
@@ -660,7 +692,7 @@ class AdvancedCreationMenu():
             cancel_button.grid(row=0, column=1, sticky="e", padx=5, pady=3)
         else:
             button_text = ctk.CTkLabel(
-                row, text=button,
+                row, text=button_text,
                 font=('Helvetica bold', 20))
 
             button_up_state = ctk.NORMAL
@@ -697,11 +729,24 @@ class AdvancedCreationMenu():
         row.grid(row=index, column=0, sticky="ew", pady=3)
 
     def delete_rating(self, index: int):
+        """
+        Removes a rating from the list of ratings.
+
+        Args:
+            index (int): The index of the rating that is to be removed.
+        """
 
         del (self.rating_buttons[index])
         self.refresh_rating_buttons()
 
     def move_up(self, index: int):
+        """
+        Moves a rating up in the list of ratings (decreases its index in the list by 1).
+        Other elements are moved accordingly.
+
+        Args:
+            index (int): The index of the rating that is to be moved.
+        """
 
         if index > 0:
             temp = self.rating_buttons[index]
@@ -711,6 +756,13 @@ class AdvancedCreationMenu():
         self.refresh_rating_buttons()
 
     def move_down(self, index: int):
+        """
+        Moves a rating down in the list of ratings (increases its index in the list by 
+        1). Other elements are moved accordingly.
+
+        Args:
+            index (int): The index of the rating that is to be moved.
+        """
 
         if index < len(self.rating_buttons) - 1:
             temp = self.rating_buttons[index]
@@ -720,11 +772,21 @@ class AdvancedCreationMenu():
         self.refresh_rating_buttons()
 
     def cancel_edit(self):
+        """
+        Brings (all) rows out of edit mode.        
+        """
 
         self.edit_index = -1
         self.refresh_rating_buttons()
 
-    def update_rating(self, index, value):
+    def update_rating(self, index: int, value: str):
+        """
+        Updates the text of a rating specified by the index.
+
+        Args:
+            index (int): The index of the rating that is to be updated.
+            value (str): The new text associated with that rating.
+        """
 
         # make some checks perhaps...
         new_value = value.get()
@@ -735,13 +797,22 @@ class AdvancedCreationMenu():
 
         self.refresh_rating_buttons()
 
-    def edit(self, index):
+    def edit(self, index: int):
+        """
+        Brings a rating row into edit mode.
+
+        Args:
+            index (int): The index of the rating that is to be set to edit mode.
+        """
 
         self.edit_index = index
 
         self.refresh_rating_buttons()
 
     def add_option(self):
+        """
+        Creates a new rating button (and row) and brings it into edit mode.
+        """
 
         self.rating_buttons.append("")
         self.edit_index = len(self.rating_buttons) - 1
@@ -749,6 +820,13 @@ class AdvancedCreationMenu():
         self.refresh_rating_buttons()
 
     def should_show_rating_options(self):
+        """
+        Checks if the current selected algorithm implies that rating options should be 
+        shown.
+
+        Returns:
+            bool: True if rating options should be shown, False otherwise.
+        """
 
         show_rating = self.algorithm_selection.get(
         ) == "Rating" or self.algorithm_selection.get() == "Hybrid"
@@ -756,6 +834,13 @@ class AdvancedCreationMenu():
         return show_rating
 
     def should_show_ranking_options(self):
+        """
+        Checks if the current selected algorithm implies that ranking options should be 
+        shown.
+
+        Returns:
+            bool: True if ranking options should be shown, False otherwise.
+        """
 
         compatible_algorithm = self.algorithm_selection.get(
         ) == "True Skill" or self.algorithm_selection.get(
@@ -764,6 +849,14 @@ class AdvancedCreationMenu():
         return compatible_algorithm and self.slider.get() == 2
 
     def should_show_switches(self):
+        """
+        Checks if the current selected algorithm implies that the user should have the 
+        option to add the equal and much greater/smaller ranking buttons.
+
+        Returns:
+            bool: True if buttons should be available, False otherwise.
+        """
+
         return self.algorithm_selection.get() != "Merge Sort"
 
     def create_save(
@@ -776,83 +869,38 @@ class AdvancedCreationMenu():
         Args:
             name (StringVar): Name of the annotation item.
             algorithm (SortingAlgorithm): Selected algorithm for sorting 
-            the images.
+                                          the images.
             comparison_size (CTkSlider): Slider holding the size of the 
-            comparison.
+                                         comparison.
             image_directory (StringVar): Directory path containing the 
-            image files.
-            pop_out (CTkToplevel): The pop-out window.
+                                         image files.
             scroll_enabled (BooleanVar): A checkbox with a boolean indicating 
-            whether scrolling is enabled.
+                                         whether scrolling is enabled.
         """
 
-        directory = os.path.relpath(image_directory.get())
-        final_name = name.get()
-
-        img_paths = list(str(os.path.basename(p))
-                         for p in Path(directory).glob("**/*")
-                         if p.suffix
-                         in {'.jpg', '.png', '.nii'} and 'sorted'
-                         not in str(p).lower())
-
-        random.shuffle(img_paths)
-
-        alg = algorithm.get()
+        directory_value = image_directory.get()
+        name_value = name.get()
+        alg_value = algorithm.get()
+        comparison_size_value = int(comparison_size.get())
+        scroll_enabled_value = scroll_enabled.get()
 
         comp_max = None
-
         if self.comparison_count_entry.get().isnumeric():
             comp_max = int(self.comparison_count_entry.get())
 
-        if alg == "Merge Sort":
-            sort_alg = sa.MergeSort(data=img_paths)
-        elif alg == "Rating":
-            sort_alg = sa.RatingAlgorithm(data=img_paths)
-        elif alg == "Hybrid":
-            sort_alg = sa.HybridTrueSkill(
-                data=img_paths, comparison_size=int(comparison_size.get()),
-                comparison_max=comp_max)
-        else:
-            sort_alg = sa.TrueSkill(data=img_paths, comparison_size=int(
-                comparison_size.get()), comparison_max=comp_max)
-
-        file_name = str(int(time.time()))
-
-        if getattr(sys, 'frozen', False):
-            application_path = os.path.dirname(sys.executable)
-        elif __file__:
-            application_path = os.path.dirname(__file__)
-
-        path = application_path + "/saves"
-
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-        path_to_save = path + "/" + file_name
-
-        df = pd.DataFrame(
-            columns=['result', 'diff_levels', 'time', 'session', 'user',
-                     'undone', 'type'])
-
-        df.to_csv(path_to_save + ".csv", index=False)
-
-        rel_path_to_save = "saves/" + file_name
-        save_obj = {
-            "sort_alg": sort_alg,
-            "name": final_name,
-            "image_directory": directory,
-            "path_to_save": rel_path_to_save,
-            "user_directory_dict": {},
-            "scroll_allowed": scroll_enabled.get()}
+        rating_buttons = None
+        rating_prompt = None
 
         if self.should_show_rating_options():
 
             if self.rating_buttons:
-                save_obj["custom_ratings"] = self.rating_buttons
+                rating_buttons = self.rating_buttons
 
             if self.rating_prompt.get():
-                save_obj["custom_rating_prompt"] = self.rating_prompt.get()
+                rating_prompt = self.rating_prompt.get()
 
+        custom_rankings = None
+        ranking_prompt = None
         if self.should_show_ranking_options():
 
             custom_rankings = []
@@ -867,14 +915,13 @@ class AdvancedCreationMenu():
                 custom_rankings = [self.ranking_buttons[0].get(
                 )] + custom_rankings + [self.ranking_buttons[4].get()]
 
-            save_obj["custom_rankings"] = custom_rankings
-
             if self.ranking_prompt.get():
-                save_obj["custom_ranking_prompt"] = self.ranking_prompt.get()
+                ranking_prompt = self.ranking_prompt.get()
 
-        f = open(path + "/" + file_name + ".pickle", "wb")
-        pickle.dump(save_obj, f)
-        f.close()
+        utils.create_save(
+            name_value, alg_value, comparison_size_value, directory_value,
+            scroll_enabled_value, rating_buttons, rating_prompt,
+            custom_rankings, ranking_prompt, comp_max)
 
         self.menu_callback()
 

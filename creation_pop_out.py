@@ -233,62 +233,15 @@ class CreationPopOut():
             whether scrolling is enabled.
         """
 
-        directory = os.path.relpath(image_directory.get())
-        final_name = name.get()
+        directory_value = image_directory.get()
+        name_value = name.get()
+        alg_value = algorithm.get()
+        comparison_size_value = int(comparison_size.get())
+        scroll_enabled_value = scroll_enabled.get()
 
-        img_paths = list(str(os.path.basename(p))
-                         for p in Path(directory).glob("**/*")
-                         if p.suffix
-                         in {'.jpg', '.png', '.nii'} and 'sorted'
-                         not in str(p).lower())
-
-        random.shuffle(img_paths)
-
-        alg = algorithm.get()
-
-        if alg == "Merge Sort":
-            sort_alg = MergeSort(data=img_paths)
-        elif alg == "Rating":
-            sort_alg = RatingAlgorithm(data=img_paths)
-        elif alg == "Hybrid":
-            sort_alg = HybridTrueSkill(
-                data=img_paths, comparison_size=int(comparison_size.get()))
-        else:
-            sort_alg = TrueSkill(
-                data=img_paths, comparison_size=int(comparison_size.get()))
-
-        file_name = str(int(time.time()))
-
-        if getattr(sys, 'frozen', False):
-            application_path = os.path.dirname(sys.executable)
-        elif __file__:
-            application_path = os.path.dirname(__file__)
-
-        path = application_path + "/saves"
-
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-        path_to_save = path + "/" + file_name
-
-        df = pd.DataFrame(
-            columns=['result', 'diff_levels', 'time', 'session', 'user',
-                     'undone', 'type'])
-
-        df.to_csv(path_to_save + ".csv", index=False)
-
-        rel_path_to_save = "saves/" + file_name
-        save_obj = {
-            "sort_alg": sort_alg,
-            "name": final_name,
-            "image_directory": directory,
-            "path_to_save": rel_path_to_save,
-            "user_directory_dict": {},
-            "scroll_allowed": scroll_enabled.get()}
-
-        f = open(path + "/" + file_name + ".pickle", "wb")
-        pickle.dump(save_obj, f)
-        f.close()
+        utils.create_save(
+            name_value, alg_value, comparison_size_value, directory_value,
+            scroll_enabled_value)
 
         pop_out.destroy()
 
