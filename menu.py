@@ -16,7 +16,7 @@ class MenuScreen():
 
     def __init__(self, root: ctk.CTk, creation_callback: Callable,
                  ordering_callback: Callable, center: Callable,
-                 open_user_selection: Callable):
+                 open_user_selection: Callable, advanced_settings_callback: Callable):
         """
         Initializes the MenuScreen instance.
 
@@ -28,12 +28,15 @@ class MenuScreen():
                                           saved annotation.
             center (function): The function to center the window.
             open_user_selection (function): The function to open user selection.
+            advanced_settings_callback (function): Calback function to bring up the
+            advanced settings menu.
         """
 
         self.root = root
 
         self.creation_callback = creation_callback
         self.ordering_callback = ordering_callback
+        self.advanced_settings_callback = advanced_settings_callback
         self.center = center
         self.open_user_selection = open_user_selection
 
@@ -254,7 +257,8 @@ class MenuScreen():
         Callback function for the new annotation button.
         """
 
-        CreationPopOut(self.creation_callback, self.center)
+        CreationPopOut(self.creation_callback, self.center, 
+                       self.advanced_settings_callback)
 
     def load_save(self, index):
         """

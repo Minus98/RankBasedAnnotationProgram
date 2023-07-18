@@ -3,6 +3,7 @@ from typing import Tuple
 
 import customtkinter as ctk
 
+from advanced_creation_menu import AdvancedCreationMenu
 from menu import MenuScreen
 from multiordering import MultiOrderingScreen
 from pairwiseordering import PairwiseOrderingScreen
@@ -73,10 +74,22 @@ class AnnotationGui():
         self.clear_screen()
         self.menu_screen = MenuScreen(
             self.root, self.display_menu, self.display_ordering_screen, self.
-            center, self.open_user_selection)
+            center, self.open_user_selection, self.display_advanced_creation_menu)
         if hasattr(self, 'selected_user'):
             self.menu_screen.display_user(self.selected_user)
         self.menu_screen.display()
+
+    def display_advanced_creation_menu(self, initial_settings=None):
+        """
+        Displays the advanced creation menu.
+        """
+
+        self.clear_screen()
+
+        self.advanced_creation_menu = AdvancedCreationMenu(
+            self.root, self.display_menu, initial_settings)
+
+        self.advanced_creation_menu.display()
 
     def display_ordering_screen(self, save_obj: dict,
                                 hybrid_transition_made: bool = False):

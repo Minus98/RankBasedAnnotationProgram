@@ -6,7 +6,6 @@ from typing import Callable, List, Optional
 import customtkinter as ctk
 import pandas as pd
 
-import sorting_algorithms as sa
 from is_finished_pop_out import IsFinishedPopOut
 from ordering import OrderingScreen
 from utils import DiffLevel, get_full_path
@@ -41,54 +40,31 @@ class PairwiseOrderingScreen(OrderingScreen):
 
         ranking_buttons = prompts['ranking_buttons']
 
-        self.alot_less_button = ctk.CTkButton(
-            master=self.buttons_frame, text=ranking_buttons[0] + ' (1)',
-            width=160, height=40, command=lambda: self.submit(-2),
-            font=('Helvetica bold', 20))
-        self.less_button = ctk.CTkButton(
-            master=self.buttons_frame, text=ranking_buttons[1] + ' (2)',
-            width=160, height=40, command=lambda: self.submit(-1),
-            font=('Helvetica bold', 20))
-        self.same_button = ctk.CTkButton(
-            master=self.buttons_frame, text=ranking_buttons[2] + ' (3)',
-            width=160, height=40, command=lambda: self.submit(0),
-            font=('Helvetica bold', 20))
-        self.more_button = ctk.CTkButton(
-            master=self.buttons_frame, text=ranking_buttons[3] + ' (4)',
-            width=160, height=40, command=lambda: self.submit(1),
-            font=('Helvetica bold', 20))
-        self.alot_more_button = ctk.CTkButton(
-            master=self.buttons_frame, text=ranking_buttons[4] + ' (5)',
-            width=160, height=40, command=lambda: self.submit(2),
-            font=('Helvetica bold', 20))
+        if "custom_rankings" in save_obj:
+            ranking_buttons = save_obj["custom_rankings"]
+
+        self.tab_items = []
 
         self.tab_index = -1
 
-        if not type(self.sort_alg) == sa.MergeSort:
-            self.tab_items = [
-                self.alot_less_button, self.less_button, self.same_button,
-                self.more_button, self.alot_more_button]
-        else:
-            self.tab_items = [self.less_button, self.more_button]
-            self.less_button.configure(text=ranking_buttons[1] + ' (1)')
-            self.more_button.configure(text=ranking_buttons[3] + ' (2)')
+        for index, button in enumerate(ranking_buttons):
 
-        self.root.bind(
-            "1", lambda event: self.on_shortcmd(0))
-        self.root.bind(
-            "2", lambda event: self.on_shortcmd(1))
-        self.root.bind(
-            "3", lambda event: self.on_shortcmd(2))
-        self.root.bind(
-            "4", lambda event: self.on_shortcmd(3))
-        self.root.bind(
-            "5", lambda event: self.on_shortcmd(4))
+            submission_value = self.get_correct_value_for_index(
+                index, len(ranking_buttons))
 
-        self.root.bind("<KeyRelease-1>", lambda event: self.on_shortcmd_up(0))
-        self.root.bind("<KeyRelease-2>", lambda event: self.on_shortcmd_up(1))
-        self.root.bind("<KeyRelease-3>", lambda event: self.on_shortcmd_up(2))
-        self.root.bind("<KeyRelease-4>", lambda event: self.on_shortcmd_up(3))
-        self.root.bind("<KeyRelease-5>", lambda event: self.on_shortcmd_up(4))
+            self.tab_items.append(ctk.CTkButton(
+                master=self.buttons_frame, text=button +
+                ' (' + str(index + 1) + ')',
+                width=160, height=40,
+                command=lambda value=submission_value: self.submit(value),
+                font=('Helvetica bold', 20)))
+
+            self.root.bind(str(index + 1), lambda event,
+                           index=index: self.on_shortcmd(index))
+
+            self.root.bind(
+                "<KeyRelease-" + str(index + 1) + ">", lambda event,
+                index=index: self.on_shortcmd_up(index))
 
         self.root.bind(
             "<Return>", lambda event: self.on_enter())
@@ -118,15 +94,15 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.buttons_frame.grid(
             row=4, column=0, columnspan=2, pady=10, sticky="N")
 
-        if not type(self.sort_alg) == sa.MergeSort:
-            self.alot_less_button.grid(row=0, column=0, padx=(10, 5), pady=10)
-            self.less_button.grid(row=0, column=1, padx=5, pady=10)
-            self.same_button.grid(row=0, column=2, padx=5, pady=10)
-            self.more_button.grid(row=0, column=3, padx=5, pady=10)
-            self.alot_more_button.grid(row=0, column=4, padx=(5, 10), pady=10)
-        else:
-            self.less_button.grid(row=0, column=0, padx=(10, 5), pady=10)
-            self.more_button.grid(row=0, column=1, padx=(5, 10), pady=10)
+        for index, button in enumerate(self.tab_items):
+            if index <= 0:
+                padx = (10, 5)
+            elif index >= len(self.tab_items) - 1:
+                padx = (5, 10)
+            else:
+                padx = 5
+
+            button.grid(row=0, column=index, padx=padx, pady=10)
 
         self.session_duration_label.place(relx=0.98, y=20, anchor="ne")
 
@@ -372,3 +348,13 @@ class PairwiseOrderingScreen(OrderingScreen):
         diff_lvls = [DiffLevel(abs(difflevel))]
 
         self.submit_comparison(keys, diff_lvls, df_annotatation)
+
+    def get_correct_value_for_index(self, index, length):
+
+        value = index - length // 2
+
+        # If there is no equals option
+        if length % 2 == 0 and index >= length // 2:
+            value += 1
+
+        return value

@@ -14,10 +14,10 @@ import pandas as pd
 from PIL import Image
 
 import sorting_algorithms as sa
+import utils
 from image_directory_pop_out import ImageDirectoryPopOut
 from is_finished_pop_out import IsFinishedPopOut
 from switching_modes_pop_out import SwitchingModesPopOut
-from utils import get_full_path
 
 
 class OrderingScreen():
@@ -69,7 +69,7 @@ class OrderingScreen():
             master=self.root, text="0:00", font=('Helvetica bold', 30))
 
         try:
-            csv_df = pd.read_csv(get_full_path(
+            csv_df = pd.read_csv(utils.get_full_path(
                 self.save_obj["path_to_save"] + '.csv'))
         except Exception:
             if type(self.sort_alg) == sa.Rating:
@@ -81,7 +81,7 @@ class OrderingScreen():
                              'user', 'undone'])
 
             df.to_csv(self.save_obj["path_to_save"] + ".csv", index=False)
-            csv_df = pd.read_csv(get_full_path(
+            csv_df = pd.read_csv(utils.get_full_path(
                 self.save_obj["path_to_save"] + '.csv'))
 
         if (type(self.sort_alg) == sa.HybridTrueSkill
@@ -145,9 +145,9 @@ class OrderingScreen():
             text_color="#777777")
 
         self.undo_label.bind(
-            "<Enter>", lambda event: self.highlight_label(self.undo_label))
+            "<Enter>", lambda event: utils.highlight_label(self.undo_label))
         self.undo_label.bind(
-            "<Leave>", lambda event: self.remove_highlight_label(
+            "<Leave>", lambda event: utils.remove_highlight_label(
                 self.undo_label))
         self.undo_label.bind(
             "<Button-1>", lambda event: self.undo_annotation())
@@ -220,34 +220,6 @@ class OrderingScreen():
             return ctk_imgs
         else:
             return [ctk.CTkImage(Image.open(img_src), size=(250, 250))]
-
-    def highlight_label(self, label: ctk.CTkLabel):
-        """
-        Highlight the label by adjusting its text color.
-
-        Args:
-            label (CTkLabel): The widget containing the label to be highlighted.
-        """
-
-        hex = label.cget("text_color")
-
-        rgb = [int(hex[i:i+2], 16) for i in (1, 3, 5)]
-        for i in range(len(rgb)):
-            rgb[i] = min(rgb[i]+50, 255)
-
-        new_hex = '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
-        label.configure(text_color=new_hex)
-
-    def remove_highlight_label(self, label: ctk.CTkLabel):
-        """
-        Remove the highlight from the label by setting its text color to a 
-        default value.
-
-        Args:
-            label (CTkLabel): The label from which to remove the highlight.
-        """
-
-        label.configure(text_color="#777777")
 
     def load_initial_image(self, img_src: str) -> List[ctk.CTkImage]:
         """
@@ -407,7 +379,7 @@ class OrderingScreen():
         """
         Save the current state of the algorithm to a pickle file.
         """
-        f = open(get_full_path(
+        f = open(utils.get_full_path(
             self.save_obj["path_to_save"] + ".pickle"), "wb")
         pickle.dump(self.save_obj, f)
         f.close()
@@ -543,7 +515,7 @@ class OrderingScreen():
                            'undone': [False],
                            'type': [annotation_type]})
 
-        output_path = get_full_path(self.save_obj["path_to_save"] + ".csv")
+        output_path = utils.get_full_path(self.save_obj["path_to_save"] + ".csv")
         df.to_csv(output_path, mode='a',
                   header=not os.path.exists(output_path), index=False)
 
@@ -551,7 +523,7 @@ class OrderingScreen():
         """
         Undo the last entry in the CSV file by marking it as undone.
         """
-        path = get_full_path(self.save_obj["path_to_save"] + '.csv')
+        path = utils.get_full_path(self.save_obj["path_to_save"] + '.csv')
         copy_df = pd.read_csv(path)
         copy_df.iloc[-1, copy_df.columns.get_loc('undone')] = True
         copy_df.to_csv(path, index=False)
