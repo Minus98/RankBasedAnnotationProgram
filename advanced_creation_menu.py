@@ -918,8 +918,11 @@ class AdvancedCreationMenu():
 
         self.menu_callback()
 
-    def validate(self, value):
-        return value.isnumeric() or not value
+    def validate(self, value: str):
+        """
+        Validation function used to see if entry contains an integer.
 
-    def on_invalid(self):
-        print("Hold it right there!")
+        Args:
+            value (str): The string that is to be validated.
+        """
+        return value.isnumeric() or not value

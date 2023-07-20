@@ -1,5 +1,5 @@
 import sys
-from typing import Tuple
+from typing import Optional, Tuple
 
 import customtkinter as ctk
 
@@ -79,9 +79,14 @@ class AnnotationGui():
             self.menu_screen.display_user(self.selected_user)
         self.menu_screen.display()
 
-    def display_advanced_creation_menu(self, initial_settings=None):
+    def display_advanced_creation_menu(
+            self, initial_settings: Optional[dict] = None):
         """
         Displays the advanced creation menu.
+
+        Args:
+            initial_settings (Optional[dict]): Dictionary containing initial values 
+                                               for fields in the creation menu.
         """
 
         self.clear_screen()
