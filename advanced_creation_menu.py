@@ -328,8 +328,8 @@ class AdvancedCreationMenu():
 
         # Buttons
 
-        self.cancel_button.grid(row=2, column=0)
-        self.create_button.grid(row=2, column=1)
+        self.create_button.grid(row=2, column=0)
+        self.cancel_button.grid(row=2, column=1)
 
         self.ratings_list_label.grid(row=0, column=0, columnspan=2, pady=10)
 

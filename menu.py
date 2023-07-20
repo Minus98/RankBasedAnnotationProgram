@@ -1,12 +1,17 @@
 import json
 import pickle
+import random
 from pathlib import Path
 from typing import Callable, List
 
 import customtkinter as ctk
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from creation_pop_out import CreationPopOut
-from utils import add_hover, get_full_path
+from utils import (add_hover, get_full_path, highlight, remove_highlight,
+                   remove_hover)
 
 
 class MenuScreen():
@@ -14,9 +19,11 @@ class MenuScreen():
     Represents the menu screen of the Rank-Based Annotation application.
     """
 
-    def __init__(self, root: ctk.CTk, creation_callback: Callable,
-                 ordering_callback: Callable, center: Callable,
-                 open_user_selection: Callable, advanced_settings_callback: Callable):
+    def __init__(
+        self, root: ctk.CTk, creation_callback: Callable,
+        ordering_callback: Callable, center: Callable,
+        open_user_selection: Callable,
+            advanced_settings_callback: Callable):
         """
         Initializes the MenuScreen instance.
 
@@ -33,6 +40,8 @@ class MenuScreen():
         """
 
         self.root = root
+        self.root.protocol("WM_DELETE_WINDOW", root.quit)
+        plt.style.use("dark_background")
 
         self.creation_callback = creation_callback
         self.ordering_callback = ordering_callback
@@ -47,6 +56,11 @@ class MenuScreen():
 
         self.paths = list(Path(path).glob('*.pickle'))
 
+        self.selected_save = -1
+        self.annotation_rows = []
+        self.open_plot = None
+        self.og_row_color = None
+
         self.saves = [pickle.load(open(path, 'rb')) for path in self.paths]
 
         self.header = ctk.CTkLabel(
@@ -56,6 +70,7 @@ class MenuScreen():
         self.menu_frame = ctk.CTkFrame(master=self.root)
 
         self.instructions_frame = ctk.CTkFrame(master=self.root)
+        self.save_info_frame = ctk.CTkFrame(self.root)
 
         self.new_button = ctk.CTkButton(
             master=self.menu_frame, text="New Annotation", width=250,
@@ -132,8 +147,8 @@ class MenuScreen():
 
         self.root.grid_rowconfigure(0, weight=1, uniform="header")
         self.root.grid_rowconfigure(1, weight=8, uniform="header")
-        self.root.grid_columnconfigure(0, weight=2)
-        self.root.grid_columnconfigure(1, weight=1)
+        self.root.grid_columnconfigure(0, weight=2, uniform="root_column")
+        self.root.grid_columnconfigure(1, weight=1, uniform="root_column")
 
         self.header.grid(row=0, column=0, columnspan=2, sticky="S")
         self.user_label.place(relx=0.98, rely=0.02, anchor='ne')
@@ -190,7 +205,6 @@ class MenuScreen():
         """
         Displays the saved annotations in the menu.
         """
-
         for i, save in enumerate(self.saves):
             self.append_row(i, save)
 
@@ -206,8 +220,13 @@ class MenuScreen():
         saved_annotations_row = ctk.CTkFrame(
             master=self.saved_annotations_frame)
 
+        if not self.og_row_color:
+            self.og_row_color = saved_annotations_row.cget("fg_color")
+
+        self.annotation_rows.append(saved_annotations_row)
+
         saved_annotations_row.bind(
-            "<Button-1>", command=lambda event, i=index: self.load_save(i))
+            "<Button-1>", command=lambda event, i=index: self.target_save(i))
 
         saved_annotations_row.grid(row=index, column=0, sticky="ew", pady=3)
 
@@ -248,17 +267,140 @@ class MenuScreen():
 
         for child in saved_annotations_row.winfo_children():
             child.bind("<Button-1>", command=lambda event,
-                       i=index: self.load_save(i))
+                       i=index: self.target_save(i))
 
         add_hover(saved_annotations_row)
+
+        if index == self.selected_save:
+            highlight(self.saved_annotations_frame)
 
     def new_annotation(self):
         """
         Callback function for the new annotation button.
         """
 
-        CreationPopOut(self.creation_callback, self.center, 
+        CreationPopOut(self.creation_callback, self.center,
                        self.advanced_settings_callback)
+
+    def target_save(self, index):
+
+        if self.open_plot:
+            plt.close(self.open_plot)
+            self.open_plot = None
+
+        if self.selected_save < 0:
+            self.instructions_frame.grid_remove()
+            self.save_info_frame.grid(
+                row=1, column=1, sticky="nsew", padx=(20, 10),
+                pady=20)
+        else:
+            for child in self.save_info_frame.winfo_children():
+                child.destroy()
+
+            remove_highlight(
+                self.annotation_rows[self.selected_save],
+                self.og_row_color)
+            add_hover(self.annotation_rows[self.selected_save])
+
+        remove_hover(self.annotation_rows[index])
+        highlight(self.annotation_rows[index], self.og_row_color)
+        # Remove highlight
+        # Add new highlight
+
+        self.selected_save = index
+        self.show_save_info(index)
+
+    def show_save_info(self, index):
+
+        save = self.saves[index]
+
+        save_name_label = ctk.CTkLabel(
+            self.save_info_frame, text=save["name"],
+            font=('Helvetica bold', 24))
+
+        sort_alg = save["sort_alg"]
+
+        save_algorithm_label = ctk.CTkLabel(
+            self.save_info_frame, text="Algorithm:",
+            font=('Helvetica bold', 20))
+
+        save_algorithm_value = ctk.CTkLabel(
+            self.save_info_frame, text=type(sort_alg).__name__,
+            font=('Helvetica bold', 20))
+
+        save_image_count_label = ctk.CTkLabel(
+            self.save_info_frame, text="Images:",
+            font=('Helvetica bold', 20))
+
+        save_image_count_value = ctk.CTkLabel(
+            self.save_info_frame, text=str(len(sort_alg.data)),
+            font=('Helvetica bold', 20))
+
+        comp_count = sort_alg.get_comparison_count()
+
+        max_count = sort_alg.get_comparison_max()
+
+        save_comp_count_label = ctk.CTkLabel(
+            self.save_info_frame, text="Annotations made:",
+            font=('Helvetica bold', 20))
+
+        save_comp_count_value = ctk.CTkLabel(
+            self.save_info_frame, text=str(comp_count) + "/" + str(max_count),
+            font=('Helvetica bold', 20))
+
+        fig, ax = plt.subplots()
+        self.open_plot = fig
+        fig.set_size_inches(4, 2)
+        fig.set_facecolor("#1a1a1a")
+        ax.set_facecolor("#1a1a1a")
+
+        place_holder_values = [random.randint(1, 6) / np.log(i)
+                               for i in np.arange(1.1, 3, 0.1)]
+
+        ax.plot(place_holder_values)
+        ax.axis("off")
+        fig.subplots_adjust(left=0, right=1, bottom=0,
+                            top=1, wspace=0, hspace=0)
+        canvas = FigureCanvasTkAgg(fig, master=self.save_info_frame)
+        canvas.draw()
+
+        save_convergence_label = ctk.CTkLabel(
+            self.save_info_frame, text="Convergence",
+            font=('Helvetica bold', 20))
+
+        load_save_button = ctk.CTkButton(
+            master=self.save_info_frame, text="Load", height=45,
+            font=('Helvetica bold', 20),
+            command=lambda index=index: self.load_save(index))
+        delete_save_button = ctk.CTkButton(
+            master=self.save_info_frame, text="Delete",
+            height=45, fg_color="#ed022a", hover_color="#bf0021",
+            font=('Helvetica bold', 20), command=lambda: print("Delete!"))
+
+        self.save_info_frame.grid_columnconfigure(
+            0, weight=1, uniform="save_info")
+        self.save_info_frame.grid_columnconfigure(
+            1, weight=1, uniform="save_info")
+
+        save_name_label.grid(row=0, column=0, columnspan=2, pady=20)
+        save_algorithm_label.grid(row=1, column=0, pady=10, padx=5, sticky="e")
+        save_algorithm_value.grid(row=1, column=1, pady=10, padx=5, sticky="w")
+        save_image_count_label.grid(
+            row=2, column=0, pady=10, padx=5, sticky="e")
+        save_image_count_value.grid(
+            row=2, column=1, pady=10, padx=5, sticky="w")
+        save_comp_count_label.grid(
+            row=3, column=0, pady=10, padx=5, sticky="e")
+        save_comp_count_value.grid(
+            row=3, column=1, pady=10, padx=5, sticky="w")
+        save_convergence_label.grid(
+            row=4, column=0, pady=(10, 5),
+            columnspan=2)
+        canvas.get_tk_widget().grid(row=5, column=0, pady=(5, 10), columnspan=2)
+
+        load_save_button.grid(row=6, column=0, pady=10, padx=5)
+        delete_save_button.grid(row=6, column=1, pady=10, padx=5)
+        # Load save button
 
     def load_save(self, index):
         """

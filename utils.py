@@ -19,6 +19,15 @@ class DiffLevel(Enum):
     major = 2
 
 
+def remove_hover(widget: ctk.CTkBaseClass):
+
+    widget.unbind("<Enter>")
+    widget.unbind("<Leave>")
+
+    for child in widget.winfo_children():
+        remove_hover(child)
+
+
 def add_hover(widget: ctk.CTkBaseClass):
     """
     Add hover effect to the widget and its children.
