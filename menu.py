@@ -10,6 +10,7 @@ import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from creation_pop_out import CreationPopOut
+from delete_pop_out import DeletePopOut
 from utils import (add_hover, get_full_path, highlight, remove_highlight,
                    remove_hover)
 
@@ -20,7 +21,7 @@ class MenuScreen():
     """
 
     def __init__(
-        self, root: ctk.CTk, creation_callback: Callable,
+        self, root: ctk.CTk, display_menu_callback: Callable,
         ordering_callback: Callable, center: Callable,
         open_user_selection: Callable,
             advanced_settings_callback: Callable):
@@ -29,8 +30,8 @@ class MenuScreen():
 
         Args:
             root (CTk): The root window of the application.
-            creation_callback (function): The callback function for creating a 
-                                          new annotation.
+            display_menu_callback (function): The callback function used to refresh the
+                                              menu.
             ordering_callback (function): The callback function for loading a 
                                           saved annotation.
             center (function): The function to center the window.
@@ -43,7 +44,7 @@ class MenuScreen():
         self.root.protocol("WM_DELETE_WINDOW", root.quit)
         plt.style.use("dark_background")
 
-        self.creation_callback = creation_callback
+        self.display_menu_callback = display_menu_callback
         self.ordering_callback = ordering_callback
         self.advanced_settings_callback = advanced_settings_callback
         self.center = center
@@ -279,10 +280,18 @@ class MenuScreen():
         Callback function for the new annotation button.
         """
 
-        CreationPopOut(self.creation_callback, self.center,
+        CreationPopOut(self.display_menu_callback, self.center,
                        self.advanced_settings_callback)
 
     def target_save(self, index):
+        """
+        Changes which save is currently displayed, updates highlights in the saves list 
+        accordingly.
+
+        Args:
+            index (int): The index of the save file that is to be displayed in the 
+                         saves list 
+        """
 
         if self.open_plot:
             plt.close(self.open_plot)
@@ -304,13 +313,18 @@ class MenuScreen():
 
         remove_hover(self.annotation_rows[index])
         highlight(self.annotation_rows[index], self.og_row_color)
-        # Remove highlight
-        # Add new highlight
 
         self.selected_save = index
         self.show_save_info(index)
 
-    def show_save_info(self, index):
+    def show_save_info(self, index: int):
+        """
+        Displays information related to a save file.
+
+        Args:
+            index (int): The index of the save file that is to be displayed in the 
+                         saves list 
+        """
 
         save = self.saves[index]
 
@@ -357,8 +371,8 @@ class MenuScreen():
         place_holder_values = [random.randint(1, 6) / np.log(i)
                                for i in np.arange(1.1, 3, 0.1)]
 
-        ax.plot(place_holder_values)
         ax.axis("off")
+        ax.plot(place_holder_values)
         fig.subplots_adjust(left=0, right=1, bottom=0,
                             top=1, wspace=0, hspace=0)
         canvas = FigureCanvasTkAgg(fig, master=self.save_info_frame)
@@ -373,9 +387,10 @@ class MenuScreen():
             font=('Helvetica bold', 20),
             command=lambda index=index: self.load_save(index))
         delete_save_button = ctk.CTkButton(
-            master=self.save_info_frame, text="Delete",
-            height=45, fg_color="#ed022a", hover_color="#bf0021",
-            font=('Helvetica bold', 20), command=lambda: print("Delete!"))
+            master=self.save_info_frame, text="Delete", height=45,
+            fg_color="#ed022a", hover_color="#bf0021",
+            font=('Helvetica bold', 20),
+            command=lambda index=index: self.open_delete_save_pop_out(index))
 
         self.save_info_frame.grid_columnconfigure(
             0, weight=1, uniform="save_info")
@@ -400,7 +415,6 @@ class MenuScreen():
 
         load_save_button.grid(row=6, column=0, pady=10, padx=5)
         delete_save_button.grid(row=6, column=1, pady=10, padx=5)
-        # Load save button
 
     def load_save(self, index):
         """
@@ -413,6 +427,18 @@ class MenuScreen():
         file = open(self.paths[index], 'rb')
         save_obj = pickle.load(file)
         self.ordering_callback(save_obj)
+
+    def open_delete_save_pop_out(self, index):
+        """
+        Opens a confirmation pop out which allows the user to delete a save.
+
+        Args:
+            index (int): The index of the save object that is up for deletion in the 
+                         saves list.
+        """
+
+        DeletePopOut(self.root, self.center,
+                     self.display_menu_callback, self.saves[index])
 
     def update_wraplength(self, label: ctk.CTkLabel):
         """
