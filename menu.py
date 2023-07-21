@@ -4,7 +4,7 @@ import pickle
 import random
 import sys
 from pathlib import Path
-from typing import Callable, List
+from typing import Callable, List, Optional, Tuple
 
 import customtkinter as ctk
 import matplotlib.pyplot as plt
@@ -424,6 +424,11 @@ class MenuScreen():
             self.save_info_frame, text="Convergence",
             font=('Helvetica bold', 20))
 
+        more_information_button = ctk.CTkButton(
+            master=self.save_info_frame, text="More information", height=45,
+            font=('Helvetica bold', 20),
+            command=lambda index=index: print("Analyse " + str(index)))
+
         load_save_button = ctk.CTkButton(
             master=self.save_info_frame, text="Load", height=45,
             font=('Helvetica bold', 20),
@@ -474,10 +479,20 @@ class MenuScreen():
         self.root.after(100, lambda: self.replace_placeholder(
             place_holder_frame, canvas.get_tk_widget()))
 
-        load_save_button.grid(row=7, column=0, pady=10, padx=5)
-        delete_save_button.grid(row=7, column=1, pady=10, padx=5)
+        more_information_button.grid(
+            row=7, column=0, columnspan=2, pady=10, padx=5)
 
-    def open_folder(self, rel_path):
+        load_save_button.grid(row=8, column=0, pady=10, padx=5)
+        delete_save_button.grid(row=8, column=1, pady=10, padx=5)
+
+    def open_folder(self, rel_path: str):
+        """
+        Opens a folder in the file explorer of the operating system. If the provided 
+        folder does not exist, nothing happens.
+
+        Args:
+            rel_path (str): The relative path to the folder that is to be opened. 
+        """
         full_path = get_full_path(rel_path)
         if os.path.isdir(full_path):
             if sys.platform == "linux" or sys.platform == "linux2":
@@ -487,7 +502,20 @@ class MenuScreen():
             else:
                 os.startfile(full_path)
 
-    def get_status(self, count, max_count):
+    def get_status(self, count: int, max_count: int) -> Tuple[str,
+                                                              Optional[str]]:
+        """
+        Fetches the status of a save in the form of a string as well as color 
+        information for that string. 
+
+        Args:
+            count (int): The amount of comparisons made.
+            max_count (int): The total amount of comparisons allowed.
+        Returns:
+            Tuple[str, Optional[str]]: The text corresponding to the status of the save
+                                       as well as potentially a specific color for the
+                                       text.
+        """
 
         if count >= max_count:
             return "Finished", "green"

@@ -140,9 +140,9 @@ def remove_highlight_label(label: ctk.CTkLabel):
 
 def create_save(
         name: str, algorithm: str, comparison_size: int, image_directory: str,
-        scroll_enabled: bool, rating_buttons: Optional[list[str]] = None,
+        scroll_enabled: bool, rating_buttons: Optional[List[str]] = None,
         rating_prompt: Optional[str] = None,
-        custom_rankings: Optional[list[str]] = None,
+        custom_rankings: Optional[List[str]] = None,
         ranking_prompt: Optional[str] = None, comp_max: Optional[int] = None):
     """
     Creates and saves the annotation item.
@@ -153,10 +153,10 @@ def create_save(
         comparison_size (int): The size of the comparison.
         image_directory (str): Directory path containing the image files.
         scroll_enabled (bool): A boolean indicating whether scrolling is enabled.
-        rating_buttons (Optional[list[str]]): A list containing the buttons which should
+        rating_buttons (Optional[List[str]]): A list containing the buttons which should
                                               be available when rating.
         rating_prompt (Optional[str]): A new prompt which users are given when rating.
-        custom_rankings (Optional[list[str]]): A list containing the options available
+        custom_rankings (Optional[List[str]]): A list containing the options available
                                                when ranking.
         ranking_prompt (Optional[str]): A new prompt which users are given when ranking.
         comp_max (Optional[int]): The total amount of allowed comparisons.
