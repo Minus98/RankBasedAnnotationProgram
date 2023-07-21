@@ -2,6 +2,7 @@ import json
 import os
 import pickle
 import random
+import sys
 from pathlib import Path
 from typing import Callable, List
 
@@ -479,7 +480,12 @@ class MenuScreen():
     def open_folder(self, rel_path):
         full_path = get_full_path(rel_path)
         if os.path.isdir(full_path):
-            os.startfile(full_path)
+            if sys.platform == "linux" or sys.platform == "linux2":
+                os.system('xdg-open "%s"' % full_path)
+            elif sys.platform == "Darwin":
+                os.system('open "%s"' % full_path)
+            else:
+                os.startfile(full_path)
 
     def get_status(self, count, max_count):
 
