@@ -375,7 +375,8 @@ class MenuScreen():
         ax.plot(place_holder_values)
         fig.subplots_adjust(left=0, right=1, bottom=0,
                             top=1, wspace=0, hspace=0)
-        canvas = FigureCanvasTkAgg(fig, master=self.save_info_frame)
+        canvas = FigureCanvasTkAgg(
+            fig, master=self.save_info_frame)
         canvas.draw()
 
         save_convergence_label = ctk.CTkLabel(
@@ -411,10 +412,39 @@ class MenuScreen():
         save_convergence_label.grid(
             row=4, column=0, pady=(10, 5),
             columnspan=2)
-        canvas.get_tk_widget().grid(row=5, column=0, pady=(5, 10), columnspan=2)
+
+        width, height = canvas.get_width_height()
+
+        place_holder_frame = ctk.CTkFrame(
+            self.save_info_frame, width=width, height=height, corner_radius=0,
+            fg_color="#1a1a1a")
+
+        place_holder_frame.grid(
+            row=5, column=0, pady=(5, 10),
+            columnspan=2)
+
+        # Not a fan of this workaround, but the canvas has not necessarily been drawn
+        # when placed on the display, could not find any event to await so instead we
+        # use a placeholder for the first 100ms...
+        self.root.after(100, lambda: self.replace_placeholder(
+            place_holder_frame, canvas.get_tk_widget()))
 
         load_save_button.grid(row=6, column=0, pady=10, padx=5)
         delete_save_button.grid(row=6, column=1, pady=10, padx=5)
+
+    def replace_placeholder(self, placeholder: ctk.CTkFrame,
+                            canvas: ctk.CTkCanvas):
+        """
+        Function to replace the placeholder frame for flickering workaround.
+
+        Args:
+            placeholder (ctk.CTkFrame): The placeholder frame that is to be removed.
+            canvas (ctk.CTkCanvas): The Canvas that is to be placed instead.
+        """
+        placeholder.grid_remove()
+        canvas.grid(
+            row=5, column=0, pady=(5, 10),
+            columnspan=2)
 
     def load_save(self, index):
         """
