@@ -1,4 +1,5 @@
 import json
+import os
 import pickle
 import random
 from pathlib import Path
@@ -43,6 +44,8 @@ class MenuScreen():
         self.root = root
         self.root.protocol("WM_DELETE_WINDOW", root.quit)
         plt.style.use("dark_background")
+
+        self.selected_user = None
 
         self.display_menu_callback = display_menu_callback
         self.ordering_callback = ordering_callback
@@ -120,7 +123,7 @@ class MenuScreen():
 
         self.header_count_label = ctk.CTkLabel(
             master=self.saved_annotations_header,
-            text="Total annotations made:", font=('Helvetica bold', 20))
+            text="Status:", font=('Helvetica bold', 20))
 
         self.saved_annotations_frame = ctk.CTkScrollableFrame(
             master=self.menu_frame, height=400)
@@ -200,6 +203,7 @@ class MenuScreen():
         Args:
             user (str): The username to display.
         """
+        self.selected_user = user
         self.user_label.configure(text=user)
 
     def display_saves(self):
@@ -258,10 +262,11 @@ class MenuScreen():
 
         total_images_label.grid(row=0, column=2, padx=10, pady=4, sticky="w")
 
-        comp_count = sort_alg.get_comparison_count()
+        text, text_color = self.get_status(
+            sort_alg.get_comparison_count(), sort_alg.get_comparison_max())
 
         count_label = ctk.CTkLabel(
-            master=saved_annotations_row, text=comp_count,
+            master=saved_annotations_row, text=text, text_color=text_color,
             font=('Helvetica bold', 20))
 
         count_label.grid(row=0, column=3, padx=10, pady=4, sticky="w")
@@ -350,9 +355,44 @@ class MenuScreen():
             self.save_info_frame, text=str(len(sort_alg.data)),
             font=('Helvetica bold', 20))
 
+        dir_rel_path = ""
+
+        if os.path.isdir(get_full_path(save["image_directory"])):
+            dir_rel_path = save["image_directory"]
+        elif self.selected_user and self.selected_user in save['user_directory_dict']:
+            rel_path = save['user_directory_dict'][self.selected_user]
+
+            if os.path.isdir(get_full_path(rel_path)):
+                dir_rel_path = rel_path
+
+        if dir_rel_path:
+            save_image_count_value.bind(
+                "<Button-1>", command=lambda event,
+                path=dir_rel_path: self.open_folder(path))
+
+            og_color = save_image_count_value.cget("text_color")
+            save_image_count_value.bind(
+                "<Enter>", lambda event,
+                og_color=og_color: self.highlight_label(
+                    save_image_count_value, og_color))
+            save_image_count_value.bind(
+                "<Leave>", lambda event,
+                og_color=og_color: self.remove_highlight_label(
+                    save_image_count_value, og_color))
+
         comp_count = sort_alg.get_comparison_count()
 
         max_count = sort_alg.get_comparison_max()
+
+        save_status_label = ctk.CTkLabel(
+            self.save_info_frame, text="Status:",
+            font=('Helvetica bold', 20))
+
+        text, text_color = self.get_status(comp_count, max_count)
+
+        save_status_value = ctk.CTkLabel(
+            self.save_info_frame, text=text,
+            text_color=text_color, font=('Helvetica bold', 20))
 
         save_comp_count_label = ctk.CTkLabel(
             self.save_info_frame, text="Annotations made:",
@@ -405,12 +445,16 @@ class MenuScreen():
             row=2, column=0, pady=10, padx=5, sticky="e")
         save_image_count_value.grid(
             row=2, column=1, pady=10, padx=5, sticky="w")
-        save_comp_count_label.grid(
+        save_status_label.grid(
             row=3, column=0, pady=10, padx=5, sticky="e")
-        save_comp_count_value.grid(
+        save_status_value.grid(
             row=3, column=1, pady=10, padx=5, sticky="w")
+        save_comp_count_label.grid(
+            row=4, column=0, pady=10, padx=5, sticky="e")
+        save_comp_count_value.grid(
+            row=4, column=1, pady=10, padx=5, sticky="w")
         save_convergence_label.grid(
-            row=4, column=0, pady=(10, 5),
+            row=5, column=0, pady=(10, 5),
             columnspan=2)
 
         width, height = canvas.get_width_height()
@@ -420,7 +464,7 @@ class MenuScreen():
             fg_color="#1a1a1a")
 
         place_holder_frame.grid(
-            row=5, column=0, pady=(5, 10),
+            row=6, column=0, pady=(5, 10),
             columnspan=2)
 
         # Not a fan of this workaround, but the canvas has not necessarily been drawn
@@ -429,8 +473,20 @@ class MenuScreen():
         self.root.after(100, lambda: self.replace_placeholder(
             place_holder_frame, canvas.get_tk_widget()))
 
-        load_save_button.grid(row=6, column=0, pady=10, padx=5)
-        delete_save_button.grid(row=6, column=1, pady=10, padx=5)
+        load_save_button.grid(row=7, column=0, pady=10, padx=5)
+        delete_save_button.grid(row=7, column=1, pady=10, padx=5)
+
+    def open_folder(self, rel_path):
+        full_path = get_full_path(rel_path)
+        if os.path.isdir(full_path):
+            os.startfile(full_path)
+
+    def get_status(self, count, max_count):
+
+        if count >= max_count:
+            return "Finished", "green"
+
+        return "Ongoing", None
 
     def replace_placeholder(self, placeholder: ctk.CTkFrame,
                             canvas: ctk.CTkCanvas):
@@ -443,7 +499,7 @@ class MenuScreen():
         """
         placeholder.grid_remove()
         canvas.grid(
-            row=5, column=0, pady=(5, 10),
+            row=6, column=0, pady=(5, 10),
             columnspan=2)
 
     def load_save(self, index):
