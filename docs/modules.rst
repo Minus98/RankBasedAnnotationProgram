@@ -7,6 +7,7 @@ RankBasedAnnotationProgram
    advanced_creation_menu
    creation_pop_out
    gui
+   delete_pop_out
    image_directory_pop_out
    is_finished_pop_out
    menu
