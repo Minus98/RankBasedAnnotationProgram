@@ -473,7 +473,7 @@ class OrderingScreen():
 
         self.is_loading = False
 
-        self.root.after(500, self.remove_submission_timeout)
+        self.root.after(200, self.remove_submission_timeout)
 
     def remove_submission_timeout(self):
         """
@@ -515,7 +515,8 @@ class OrderingScreen():
                            'undone': [False],
                            'type': [annotation_type]})
 
-        output_path = utils.get_full_path(self.save_obj["path_to_save"] + ".csv")
+        output_path = utils.get_full_path(
+            self.save_obj["path_to_save"] + ".csv")
         df.to_csv(output_path, mode='a',
                   header=not os.path.exists(output_path), index=False)
 
