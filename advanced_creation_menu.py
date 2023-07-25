@@ -456,63 +456,74 @@ class AdvancedCreationMenu():
             self.ranking_equals_switch.configure(state=ctk.NORMAL)
             self.ranking_much_greater_switch.configure(state=ctk.NORMAL)
 
-        if self.ranking_equals_switch.get():
+        if self.slider.get() == 2:
+            if self.ranking_equals_switch.get():
 
-            equals_frame = ctk.CTkFrame(
+                equals_frame = ctk.CTkFrame(
+                    master=self.ranking_list, fg_color=self.ranking_list.cget(
+                        "fg_color"))
+
+                self.populate_rank_entry_frame(equals_frame, "A == B:", 2)
+
+                equals_frame.grid(row=current_row, column=0,
+                                  pady=5, columnspan=2)
+
+                current_row += 1
+
+            # A > B
+
+            A_greater_frame = ctk.CTkFrame(
                 master=self.ranking_list, fg_color=self.ranking_list.cget(
                     "fg_color"))
 
-            self.populate_rank_entry_frame(equals_frame, "A == B:", 2)
+            self.populate_rank_entry_frame(A_greater_frame, "A > B:", 1)
 
-            equals_frame.grid(row=current_row, column=0, pady=5, columnspan=2)
+            A_greater_frame.grid(row=current_row, column=0, pady=5)
+
+            # A < B
+
+            B_greater_frame = ctk.CTkFrame(
+                master=self.ranking_list, fg_color=self.ranking_list.cget(
+                    "fg_color"))
+
+            self.populate_rank_entry_frame(B_greater_frame, "A < B:", 3)
+
+            B_greater_frame.grid(row=current_row, column=1, pady=5)
 
             current_row += 1
 
-        # A > B
+            if self.ranking_much_greater_switch.get():
 
-        A_greater_frame = ctk.CTkFrame(
-            master=self.ranking_list, fg_color=self.ranking_list.cget(
-                "fg_color"))
+                # A >> B
 
-        self.populate_rank_entry_frame(A_greater_frame, "A > B:", 1)
+                A_much_greater_frame = ctk.CTkFrame(
+                    master=self.ranking_list, fg_color=self.ranking_list.cget(
+                        "fg_color"))
 
-        A_greater_frame.grid(row=current_row, column=0, pady=5)
+                self.populate_rank_entry_frame(
+                    A_much_greater_frame, "A >> B:", 0)
 
-        # A < B
+                A_much_greater_frame.grid(row=current_row, column=0, pady=5)
 
-        B_greater_frame = ctk.CTkFrame(
-            master=self.ranking_list, fg_color=self.ranking_list.cget(
-                "fg_color"))
+                # A << B
 
-        self.populate_rank_entry_frame(B_greater_frame, "A < B:", 3)
+                B_much_greater_frame = ctk.CTkFrame(
+                    master=self.ranking_list, fg_color=self.ranking_list.cget(
+                        "fg_color"))
 
-        B_greater_frame.grid(row=current_row, column=1, pady=5)
+                self.populate_rank_entry_frame(
+                    B_much_greater_frame, "A << B:", 4)
 
-        current_row += 1
+                B_much_greater_frame.grid(row=current_row, column=1, pady=5)
 
-        if self.ranking_much_greater_switch.get():
-
-            # A >> B
-
-            A_much_greater_frame = ctk.CTkFrame(
-                master=self.ranking_list, fg_color=self.ranking_list.cget(
-                    "fg_color"))
-
-            self.populate_rank_entry_frame(A_much_greater_frame, "A >> B:", 0)
-
-            A_much_greater_frame.grid(row=current_row, column=0, pady=5)
-
-            # A << B
-
-            B_much_greater_frame = ctk.CTkFrame(
-                master=self.ranking_list, fg_color=self.ranking_list.cget(
-                    "fg_color"))
-
-            self.populate_rank_entry_frame(B_much_greater_frame, "A << B:", 4)
-
-            B_much_greater_frame.grid(row=current_row, column=1, pady=5)
-
-            current_row += 1
+                current_row += 1
+        else:
+            multi_info_text = ctk.CTkLabel(
+                master=self.ranking_list,
+                text="There are not buttons when the comparison size is greater than 2",
+                font=('Helvetica bold', 18),
+                width=60)
+            multi_info_text.grid(row=0, column=0, columnspan=2, pady=10)
 
     def populate_rank_entry_frame(
             self, frame: ctk.CTkFrame, text: str, var_index: int):
@@ -848,18 +859,19 @@ class AdvancedCreationMenu():
         ) == "True Skill" or self.algorithm_selection.get(
         ) == "Merge Sort" or self.algorithm_selection.get() == "Hybrid"
 
-        return compatible_algorithm and self.slider.get() == 2
+        return compatible_algorithm
 
     def should_show_switches(self):
         """
-        Checks if the current selected algorithm implies that the user should have the 
-        option to add the equal and much greater/smaller ranking buttons.
+        Checks if the current selected algorithm and comparison size implies that the 
+        user should have the option to add the equal and much greater/smaller ranking 
+        buttons.
 
         Returns:
             bool: True if buttons should be available, False otherwise.
         """
 
-        return self.algorithm_selection.get() != "Merge Sort"
+        return self.algorithm_selection.get() != "Merge Sort" and self.slider.get() == 2
 
     def create_save(
             self, name: ctk.StringVar, algorithm: sa.SortingAlgorithm,
