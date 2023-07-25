@@ -72,13 +72,10 @@ class OrderingScreen():
             csv_df = pd.read_csv(utils.get_full_path(
                 self.save_obj["path_to_save"] + '.csv'))
         except Exception:
-            if type(self.sort_alg) == sa.Rating:
-                df = pd.DataFrame(
-                    columns=['src', 'rating', 'time', 'session', 'user', 'undone'])
-            else:
-                df = pd.DataFrame(
-                    columns=['result', 'diff_levels', 'time', 'session',
-                             'user', 'undone'])
+
+            df = pd.DataFrame(
+                columns=['result', 'diff_levels', 'time', 'session', 'user',
+                         'undone', 'type'])
 
             df.to_csv(self.save_obj["path_to_save"] + ".csv", index=False)
             csv_df = pd.read_csv(utils.get_full_path(
