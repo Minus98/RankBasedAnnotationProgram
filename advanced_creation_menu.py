@@ -709,9 +709,15 @@ class AdvancedCreationMenu():
             edit_button = ctk.CTkButton(
                 button_frame, text="Edit", width=56,
                 command=lambda i=index: self.edit(i))
+
+            delete_button_state = ctk.NORMAL
+            if len(self.rating_buttons) <= 2:
+                delete_button_state = ctk.DISABLED
+
             delete_button = ctk.CTkButton(
                 button_frame, text="X", width=28, fg_color="#ed022a",
-                hover_color="#bf0021",
+                hover_color="#bf0021", state=delete_button_state,
+                text_color_disabled="#BBBBBB",
                 command=lambda i=index: self.delete_rating(i))
 
             button_text.grid(row=0, column=1, sticky="w", padx=5, pady=3)
@@ -889,7 +895,7 @@ class AdvancedCreationMenu():
 
         if self.should_show_rating_options():
 
-            if self.rating_buttons:
+            if self.rating_buttons and len(self.rating_buttons) >= 2:
                 rating_buttons = self.rating_buttons
 
             if self.rating_prompt.get():
