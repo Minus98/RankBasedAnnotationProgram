@@ -1,5 +1,5 @@
 import sys
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 import customtkinter as ctk
 
@@ -37,6 +37,8 @@ class AnnotationGui():
         if sys.platform == "linux" or sys.platform == "linux2":
             self.root.attributes('-zoomed', True)
 
+        self.root_bindings = []
+
     def run(self):
         """
         Runs the Annotation GUI application.
@@ -53,15 +55,17 @@ class AnnotationGui():
         Clears the screen by destroying all child widgets and resetting column 
         and row configurations.
         """
+        for binding in self.root_bindings:
+            self.root.unbind(binding)
 
         cols, rows = self.root.grid_size()
 
         # Reset the column and row configurations
         for i in range(cols):
-            self.root.columnconfigure(i, weight=0)
+            self.root.columnconfigure(i, weight=0, uniform="")
 
         for i in range(rows):
-            self.root.rowconfigure(i, weight=0)
+            self.root.rowconfigure(i, weight=0, uniform="")
 
         for child in self.root.winfo_children():
             child.destroy()
@@ -119,17 +123,17 @@ class AnnotationGui():
                 ordering_screen = RatingScreen(
                     self.root, save_obj, self.display_menu, self.center, self.
                     selected_user, self.reload_ordering_screen,
-                    hybrid_transition_made)
+                    hybrid_transition_made, self.add_root_binding)
 
             elif sort_alg.comparison_size == 2:
                 ordering_screen = PairwiseOrderingScreen(
                     self.root, save_obj, self.display_menu, self.center, self.
-                    selected_user, self.reload_ordering_screen)
+                    selected_user, self.reload_ordering_screen, self.add_root_binding)
 
             else:
                 ordering_screen = MultiOrderingScreen(
                     self.root, save_obj, self.display_menu, self.center, self.
-                    selected_user, self.reload_ordering_screen)
+                    selected_user, self.reload_ordering_screen, self.add_root_binding)
 
             if ordering_screen.image_directory_located:
                 ordering_screen.display()
@@ -182,3 +186,15 @@ class AnnotationGui():
             save_obj (dict): The updated save object.
         """
         self.display_ordering_screen(save_obj, hybrid_transition_made=True)
+
+    def add_root_binding(self, event: str, function: Callable):
+        """
+        Binds the event to the root element while keeping track of added events.
+
+        Args:
+            event (str): The event that is to be bound.
+            function (function): The function that is to be called when the event 
+                                 occurs.
+        """
+        self.root.bind(event, function)
+        self.root_bindings.append(event)

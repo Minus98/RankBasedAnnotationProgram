@@ -15,7 +15,7 @@ class RatingScreen(OrderingScreen):
     def __init__(
             self, root: ctk.CTk, save_obj: dict, menu_callback: Callable,
             center: Callable, user: str, reload_ordering_screen: Callable,
-            hybrid_transition_made: bool):
+            hybrid_transition_made: bool, root_bind_callback: Callable):
         """
         Initialize the RatingScreen.
 
@@ -29,10 +29,15 @@ class RatingScreen(OrderingScreen):
                                                ordering screen.
             hybrid_transition_made (bool): Flag indicating whether hybrid 
                                            transition was made.
+            root_bind_callback (function): Callback function used to bind events to the
+                                           root element.
         """
 
-        super().__init__(root, save_obj, menu_callback, center,
-                         user, reload_ordering_screen, hybrid_transition_made)
+        super().__init__(root, save_obj, menu_callback, center, user,
+                         reload_ordering_screen, hybrid_transition_made,
+                         root_bind_callback)
+
+        self.root_bind_callback = self.root_bind_callback
 
         self.buttons_frame = ctk.CTkFrame(master=self.root)
 
@@ -65,16 +70,16 @@ class RatingScreen(OrderingScreen):
 
             self.tab_items.append(ctk_button)
 
-            self.root.bind(str(index + 1), lambda event,
-                           index=index: self.on_shortcmd(index))
-            self.root.bind(
+            self.root_bind_callback(str(index + 1), lambda event,
+                                    index=index: self.on_shortcmd(index))
+            self.root_bind_callback(
                 "<KeyRelease-" + str(index + 1) + ">", lambda event,
                 index=index: self.on_shortcmd_up(index))
 
-        self.root.bind(
+        self.root_bind_callback(
             "<Return>", lambda event: self.on_enter())
 
-        self.root.bind(
+        self.root_bind_callback(
             "<Tab>", lambda event: self.on_tab())
 
     def display(self):

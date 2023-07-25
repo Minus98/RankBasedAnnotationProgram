@@ -16,7 +16,8 @@ class PairwiseOrderingScreen(OrderingScreen):
 
     def __init__(
             self, root: ctk.CTk, save_obj: dict, menu_callback: Callable,
-            center: Callable, user: str, reload_ordering_screen: Callable):
+            center: Callable, user: str, reload_ordering_screen: Callable,
+            root_bind_callback: Callable):
         """
         Initialize the PairwiseOrderingScreen.
 
@@ -28,12 +29,15 @@ class PairwiseOrderingScreen(OrderingScreen):
             user (str): The user currently annotating.
             reload_ordering_screen (function): Callback function to reload the 
                                                ordering screen.
+            root_bind_callback (function): Callback function used to bind events to the
+                                           root element.
         """
 
-        super().__init__(root, save_obj, menu_callback,
-                         center, user, reload_ordering_screen, True)
+        super().__init__(root, save_obj, menu_callback, center,
+                         user, reload_ordering_screen, True, root_bind_callback)
 
         self.buttons_frame = ctk.CTkFrame(master=self.root)
+        self.root_bind_callback = root_bind_callback
 
         with open('prompts.json', 'r') as file:
             prompts = json.load(file)
@@ -59,18 +63,16 @@ class PairwiseOrderingScreen(OrderingScreen):
                 command=lambda value=submission_value: self.submit(value),
                 font=('Helvetica bold', 20)))
 
-            self.root.bind(str(index + 1), lambda event,
-                           index=index: self.on_shortcmd(index))
+            self.root_bind_callback(str(index + 1), lambda event,
+                                    index=index: self.on_shortcmd(index))
 
-            self.root.bind(
+            self.root_bind_callback(
                 "<KeyRelease-" + str(index + 1) + ">", lambda event,
                 index=index: self.on_shortcmd_up(index))
 
-        self.root.bind(
-            "<Return>", lambda event: self.on_enter())
+        self.root_bind_callback("<Return>", lambda event: self.on_enter())
 
-        self.root.bind(
-            "<Tab>", lambda event: self.on_tab())
+        self.root_bind_callback("<Tab>", lambda event: self.on_tab())
 
     def display(self):
 
