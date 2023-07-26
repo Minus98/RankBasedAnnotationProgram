@@ -4,6 +4,7 @@ from typing import Callable, Optional, Tuple
 import customtkinter as ctk
 
 from advanced_creation_menu import AdvancedCreationMenu
+from advanced_information_page import AdvancedInformationPage
 from menu import MenuScreen
 from multiordering import MultiOrderingScreen
 from pairwiseordering import PairwiseOrderingScreen
@@ -78,7 +79,8 @@ class AnnotationGui():
         self.clear_screen()
         self.menu_screen = MenuScreen(
             self.root, self.display_menu, self.display_ordering_screen, self.
-            center, self.open_user_selection, self.display_advanced_creation_menu)
+            center, self.open_user_selection, self.
+            display_advanced_creation_menu, self.display_information_screen)
         if hasattr(self, 'selected_user'):
             self.menu_screen.display_user(self.selected_user)
         self.menu_screen.display()
@@ -139,6 +141,13 @@ class AnnotationGui():
                 ordering_screen.display()
         else:
             UserSelectionPopOut(self.root, self.center, self.select_user)
+
+    def display_information_screen(self, save_obj: dict):
+
+        self.clear_screen()
+        self.advanced_information_screen = AdvancedInformationPage(
+            self.root, save_obj, self.display_menu)
+        self.advanced_information_screen.display()
 
     def center(self, w: int, h: int) -> Tuple[int, int]:
         """

@@ -23,10 +23,11 @@ class MenuScreen():
     """
 
     def __init__(
-        self, root: ctk.CTk, display_menu_callback: Callable,
-        ordering_callback: Callable, center: Callable,
-        open_user_selection: Callable,
-            advanced_settings_callback: Callable):
+            self, root: ctk.CTk, display_menu_callback: Callable,
+            ordering_callback: Callable, center: Callable,
+            open_user_selection: Callable,
+            advanced_settings_callback: Callable,
+            information_page_callback: Callable):
         """
         Initializes the MenuScreen instance.
 
@@ -51,6 +52,7 @@ class MenuScreen():
         self.display_menu_callback = display_menu_callback
         self.ordering_callback = ordering_callback
         self.advanced_settings_callback = advanced_settings_callback
+        self.information_page_callback = information_page_callback
         self.center = center
         self.open_user_selection = open_user_selection
 
@@ -427,7 +429,8 @@ class MenuScreen():
         more_information_button = ctk.CTkButton(
             master=self.save_info_frame, text="More information", height=45,
             font=('Helvetica bold', 20),
-            command=lambda index=index: print("Analyse " + str(index)))
+            command=lambda index=index: self.information_page_callback(
+                self.saves[index]))
 
         load_save_button = ctk.CTkButton(
             master=self.save_info_frame, text="Load", height=45,
