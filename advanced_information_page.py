@@ -7,7 +7,6 @@ import customtkinter as ctk
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.backend_tools import Cursors
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from utils import get_full_path
@@ -118,65 +117,16 @@ class AdvancedInformationPage():
             self.general_info_frame, text=str(comp_count) + "/" + str(max_count),
             font=('Helvetica bold', 20))
 
-        fig, ax = plt.subplots()
-        fig.set_size_inches(6, 4)
-        fig.set_facecolor("#212121")
-        fig.canvas.mpl_connect("motion_notify_event", self.hover)
-        ax.set_facecolor("#1a1a1a")
-        self.fig = fig
-        self.ax = ax
-        self.annot = ax.annotate(
-            "", xy=(0, 0),
-            xytext=(-20, 20),
-            textcoords="offset points", bbox=dict(
-                boxstyle="round", fc="#1f538d"),
-            arrowprops=dict(arrowstyle="simple"))
-        self.annot.set_visible(False)
-
-        place_holder_values = [random.randint(1, 6) / np.log(i)
-                               for i in np.arange(1.1, 3, 0.1)]
-
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-
-        self.line, = ax.plot(place_holder_values)
-
-        canvas = FigureCanvasTkAgg(
-            fig, master=self.tab_view.tab("Convergence"))
-        canvas.draw()
-
         self.save_convergence_label = ctk.CTkLabel(
             master=self.tab_view.tab("Convergence"), text="Convergence",
             font=('Helvetica bold', 22))
 
-        self.general_info_frame.grid_columnconfigure(
-            0, weight=1, uniform="save_info")
-        self.general_info_frame.grid_columnconfigure(
-            1, weight=1, uniform="save_info")
-        width, height = canvas.get_width_height()
-
-        place_holder_frame = ctk.CTkFrame(
-            master=self.tab_view.tab("Convergence"),
-            width=width, height=height, corner_radius=0, fg_color="#1a1a1a")
-
-        place_holder_frame.grid(
-            row=1, column=0, pady=(5, 10))
-        self.save_convergence_label.grid(
-            row=0, column=0, pady=(10, 5),
-            columnspan=2)
-
-        # Not a fan of this workaround, but the canvas has not necessarily been drawn
-        # when placed on the display, could not find any event to await so instead we
-        # use a placeholder for the first 100ms...
-        self.root.after(100, lambda: self.replace_placeholder(
-            place_holder_frame, canvas.get_tk_widget()))
+        self.generate_convergence_plot()
 
         self.menu_button = ctk.CTkButton(
             master=self.root, text="Back to menu", width=250,
             height=45, font=('Helvetica bold', 20),
             command=self.menu_callback)
-
-        self.tab_view.tab("Convergence").columnconfigure(0, weight=1)
 
     def display(self):
 
@@ -193,9 +143,16 @@ class AdvancedInformationPage():
 
         self.display_general_information()
 
+        self.display_convergence()
+
         self.menu_button.grid(row=1, column=0, columnspan=2)
 
     def display_general_information(self):
+
+        self.general_info_frame.grid_columnconfigure(
+            0, weight=1, uniform="save_info")
+        self.general_info_frame.grid_columnconfigure(
+            1, weight=1, uniform="save_info")
 
         self.save_name_label.grid(row=0, column=0, columnspan=2, pady=20)
         self.save_algorithm_label.grid(
@@ -214,6 +171,23 @@ class AdvancedInformationPage():
             row=4, column=0, pady=10, padx=5, sticky="e")
         self.save_comp_count_value.grid(
             row=4, column=1, pady=10, padx=5, sticky="w")
+
+    def display_convergence(self):
+
+        self.tab_view.tab("Convergence").columnconfigure(0, weight=1)
+
+        self.save_convergence_label.grid(
+            row=0, column=0, pady=(10, 5),
+            columnspan=2)
+
+        self.place_holder_frame.grid(
+            row=1, column=0, pady=(5, 10))
+
+        # Not a fan of this workaround, but the canvas has not necessarily been drawn
+        # when placed on the display, could not find any event to await so instead we
+        # use a placeholder for the first 100ms...
+        self.root.after(100, lambda: self.replace_placeholder(
+            self.place_holder_frame, self.canvas_widget))
 
     def get_status(self, count: int, max_count: int) -> Tuple[str,
                                                               Optional[str]]:
@@ -273,13 +247,13 @@ class AdvancedInformationPage():
                 self.update_annot(ind)
                 self.annot.set_visible(True)
                 self.line.set_linewidth(2)
-                self.root.config(cursor="tcross")
+                self.canvas_widget.config(cursor="tcross")
                 self.fig.canvas.draw_idle()
             else:
                 if vis:
                     self.annot.set_visible(False)
                     self.line.set_linewidth(1)
-                    self.root.config(cursor="arrow")
+                    self.canvas_widget.config(cursor="arrow")
                     self.fig.canvas.draw_idle()
 
     def update_annot(self, ind):
@@ -289,3 +263,39 @@ class AdvancedInformationPage():
         y_value = y[ind["ind"]][0]
         self.annot.set_text("({0}, {1:.2f})".format(x_value, y_value))
         self.annot.get_bbox_patch().set_alpha(0.7)
+
+    def generate_convergence_plot(self):
+
+        fig, ax = plt.subplots()
+        fig.set_size_inches(6, 4)
+        fig.set_facecolor("#212121")
+        fig.canvas.mpl_connect("motion_notify_event", self.hover)
+        ax.set_facecolor("#1a1a1a")
+        self.fig = fig
+        self.ax = ax
+        self.annot = ax.annotate(
+            "", xy=(0, 0),
+            xytext=(-20, 20),
+            textcoords="offset points", bbox=dict(
+                boxstyle="round", fc="#1f538d"),
+            arrowprops=dict(arrowstyle="simple"))
+        self.annot.set_visible(False)
+
+        place_holder_values = [random.randint(1, 6) / np.log(i)
+                               for i in np.arange(1.1, 3, 0.1)]
+
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        self.line, = ax.plot(place_holder_values)
+
+        canvas = FigureCanvasTkAgg(
+            fig, master=self.tab_view.tab("Convergence"))
+        canvas.draw()
+
+        self.canvas_widget = canvas.get_tk_widget()
+
+        width, height = canvas.get_width_height()
+        self.place_holder_frame = ctk.CTkFrame(
+            master=self.tab_view.tab("Convergence"),
+            width=width, height=height, corner_radius=0, fg_color="#1a1a1a")
