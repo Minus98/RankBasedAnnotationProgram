@@ -26,7 +26,7 @@ class OrderingScreen():
     def __init__(
             self, root: ctk.CTk, save_obj: dict, menu_callback: Callable,
             center: Callable, user: str, reload_ordering_screen: Callable,
-            hybrid_transition_made: bool):
+            hybrid_transition_made: bool, root_bind_callback: Callable):
         """
         Initialize the OrderingScreen.
 
@@ -40,6 +40,8 @@ class OrderingScreen():
                                                ordering screen.
             hybrid_transition_made (bool): Flag indicating whether hybrid 
                                            transition was made.
+            root_bind_callback (function): Callback function used to bind events to the
+                                           root element.
         """
 
         self.image_directory_located = False
@@ -49,6 +51,7 @@ class OrderingScreen():
         self.center = center
         self.user = user
         self.reload_ordering_screen = reload_ordering_screen
+        self.root_bind_callback = root_bind_callback
 
         self.hybrid_transition_made = hybrid_transition_made
 
@@ -72,13 +75,10 @@ class OrderingScreen():
             csv_df = pd.read_csv(utils.get_full_path(
                 self.save_obj["path_to_save"] + '.csv'))
         except Exception:
-            if type(self.sort_alg) == sa.Rating:
-                df = pd.DataFrame(
-                    columns=['src', 'rating', 'time', 'session', 'user', 'undone'])
-            else:
-                df = pd.DataFrame(
-                    columns=['result', 'diff_levels', 'time', 'session',
-                             'user', 'undone'])
+
+            df = pd.DataFrame(
+                columns=['result', 'diff_levels', 'time', 'session', 'user',
+                         'undone', 'type'])
 
             df.to_csv(self.save_obj["path_to_save"] + ".csv", index=False)
             csv_df = pd.read_csv(utils.get_full_path(
@@ -126,13 +126,18 @@ class OrderingScreen():
 
         self.session_id = uuid4()
 
-        self.root.bind("<Control-z>", lambda event: self.undo_annotation())
-        self.root.bind("<Control-Z>", lambda event: self.undo_annotation())
-        self.root.bind("<Command-z>", lambda event: self.undo_annotation())
-        self.root.bind("<Command-Z>", lambda event: self.undo_annotation())
+        self.root_bind_callback(
+            "<Control-z>", lambda event: self.undo_annotation())
+        self.root_bind_callback(
+            "<Control-Z>", lambda event: self.undo_annotation())
+        self.root_bind_callback(
+            "<Command-z>", lambda event: self.undo_annotation())
+        self.root_bind_callback(
+            "<Command-Z>", lambda event: self.undo_annotation())
 
-        self.root.bind("<Up>", lambda event: self.on_image_key_scroll('up'))
-        self.root.bind(
+        self.root_bind_callback(
+            "<Up>", lambda event: self.on_image_key_scroll('up'))
+        self.root_bind_callback(
             "<Down>", lambda event: self.on_image_key_scroll('down'))
 
         self.progress_bar = ctk.CTkProgressBar(self.root, width=400)
@@ -463,8 +468,6 @@ class OrderingScreen():
 
                 self.root.after_cancel(self.timer_after)
                 # Switching modes popout
-                self.root.unbind("6")
-                self.root.unbind("<KeyRelease-6>")
                 self.reload_ordering_screen(self.save_obj)
                 SwitchingModesPopOut(self.root, self.center)
 
@@ -473,7 +476,7 @@ class OrderingScreen():
 
         self.is_loading = False
 
-        self.root.after(500, self.remove_submission_timeout)
+        self.root.after(200, self.remove_submission_timeout)
 
     def remove_submission_timeout(self):
         """
@@ -515,7 +518,8 @@ class OrderingScreen():
                            'undone': [False],
                            'type': [annotation_type]})
 
-        output_path = utils.get_full_path(self.save_obj["path_to_save"] + ".csv")
+        output_path = utils.get_full_path(
+            self.save_obj["path_to_save"] + ".csv")
         df.to_csv(output_path, mode='a',
                   header=not os.path.exists(output_path), index=False)
 
@@ -538,7 +542,6 @@ class OrderingScreen():
         """
         if remove_after:
             self.root.after_cancel(self.timer_after)
-        self.root.unbind("<Return>")
         self.menu_callback()
 
     def submit_path(self, path: str):

@@ -318,5 +318,8 @@ class CreationPopOut():
             directory_var (StringVar): The element to store the selected 
             directory.
         """
-        directory = ctk.filedialog.askdirectory(parent=root)
-        directory_var.set(directory)
+        current_dir = directory_var.get()
+        res_directory = ctk.filedialog.askdirectory(
+            parent=root, initialdir=current_dir)
+        if res_directory:
+            directory_var.set(res_directory)

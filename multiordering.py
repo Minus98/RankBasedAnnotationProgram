@@ -13,7 +13,8 @@ class MultiOrderingScreen(OrderingScreen):
 
     def __init__(
             self, root: ctk.CTkFrame, save_obj: dict, menu_callback: Callable,
-            center: Callable, user: str, reload_ordering_screen: Callable):
+            center: Callable, user: str, reload_ordering_screen: Callable,
+            root_bind_callback: Callable):
         """
         Initialize the MultiOrderingScreen.
 
@@ -25,10 +26,14 @@ class MultiOrderingScreen(OrderingScreen):
             user (str): The user name.
             reload_ordering_screen (function): The function to reload the 
                                                ordering screen.
+            root_bind_callback (function): Callback function used to bind events to the
+                                           root element.
         """
 
         super().__init__(root, save_obj, menu_callback,
                          center, user, reload_ordering_screen, True)
+
+        self.root_bind_callback = root_bind_callback
 
         self.int_diff_levels = [ctk.IntVar(None, 1)
                                 for _ in range(self.comparison_size - 1)]
@@ -165,7 +170,7 @@ class MultiOrderingScreen(OrderingScreen):
             displayed_image.bind("<Button-5>", command=lambda event,
                                  i=i: self.on_image_scroll_down(i))
 
-            self.root.bind(
+            self.root_bind_callback(
                 "<Return>", lambda event: self.submit())
 
             displayed_image.bind(
