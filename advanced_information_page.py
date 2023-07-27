@@ -1,3 +1,5 @@
+import ast
+import json
 import os
 import random
 import sys
@@ -7,6 +9,7 @@ import customtkinter as ctk
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 import ctk_utils
@@ -54,9 +57,6 @@ class AdvancedInformationPage():
         self.tab_view = ctk.CTkTabview(self.root)
         self.tab_view._segmented_button.configure(
             font=('Helvetica bold', 18))
-
-        self.tab_view.add("Convergence")
-        self.tab_view.add("Current Ordering")
 
         self.save_name_label = ctk.CTkLabel(
             self.general_info_frame, text=self.save_obj["name"],
@@ -142,13 +142,22 @@ class AdvancedInformationPage():
             self.general_info_frame, text=scroll_text,
             font=('Helvetica bold', 20))
 
-        self.save_convergence_label = ctk.CTkLabel(
-            master=self.tab_view.tab("Convergence"), text="Convergence",
-            font=('Helvetica bold', 22))
-
+        self.tab_view.add("Convergence")
         self.generate_convergence_plot()
 
-        self.generate_ordering_frame()
+        alg = type(self.sort_alg).__name__
+
+        if alg == "RatingAlgorithm" or alg == "HybridTrueSkill":
+            self.tab_view.add("Rating Distribution")
+            self.generate_rating_distribution()
+
+        if alg == "TrueSkill":
+            self.tab_view.add("Current Ordering")
+            self.generate_ordering_frame()
+        elif alg == "HybridTrueSkill":
+            if not self.sort_alg.is_rating:
+                self.tab_view.add("Current Ordering")
+                self.generate_ordering_frame()
 
         self.menu_button = ctk.CTkButton(
             master=self.root, text="Back to menu", width=250,
@@ -172,7 +181,15 @@ class AdvancedInformationPage():
 
         self.display_convergence()
 
-        self.display_current_ordering()
+        alg = type(self.sort_alg).__name__
+        if alg == "TrueSkill":
+            self.display_current_ordering()
+        elif alg == "RatingAlgorithm":
+            self.display_rating_distribution()
+        elif alg == "HybridTrueSkill":
+            self.display_rating_distribution()
+            if not self.sort_alg.is_rating:
+                self.display_current_ordering()
 
         self.menu_button.grid(row=1, column=0, columnspan=2)
 
@@ -225,9 +242,19 @@ class AdvancedInformationPage():
     def display_current_ordering(self):
 
         self.tab_view.tab("Current Ordering").columnconfigure(0, weight=1)
+        self.tab_view.tab("Current Ordering").rowconfigure(0, weight=5)
         self.tab_view.tab("Current Ordering").rowconfigure(0, weight=1)
 
         self.images_frame.grid(row=0, column=0)
+
+    def display_rating_distribution(self):
+
+        self.tab_view.tab("Rating Distribution").columnconfigure(0, weight=1)
+        self.tab_view.tab("Rating Distribution").rowconfigure(0, weight=1)
+        self.tab_view.tab("Rating Distribution").rowconfigure(1, weight=5)
+
+        self.ratings_menu.grid(row=0, column=0, sticky="e")
+        self.ratings_frame.grid(row=1, column=0)
 
     def get_status(self, count: int, max_count: int) -> Tuple[str,
                                                               Optional[str]]:
@@ -306,6 +333,10 @@ class AdvancedInformationPage():
 
     def generate_convergence_plot(self):
 
+        self.save_convergence_label = ctk.CTkLabel(
+            master=self.tab_view.tab("Convergence"), text="Convergence",
+            font=('Helvetica bold', 22))
+
         fig, ax = plt.subplots()
         fig.set_size_inches(6, 4)
         fig.set_facecolor("#212121")
@@ -349,31 +380,6 @@ class AdvancedInformationPage():
         self.images_frame = ctk.CTkFrame(
             master=self.tab_view.tab("Current Ordering"))
 
-        """
-        ordered_images = self.sort_alg.get_result()
-        currently_shown_images = ordered_images[:10]
-        dir_path = utils.get_full_path(self.dir_rel_path)
-        image_height = self.root.winfo_screenheight()/8
-
-        images_per_row = 5
-
-        for index, img_src in enumerate(currently_shown_images):
-            full_img_path = dir_path + "/" + img_src
-            image = ctk_utils.file_2_CTkImage(
-                full_img_path, image_height)[0]
-            preview_image = ctk.CTkLabel(
-                self.images_frame, image=image, text="")
-            preview_image.grid(row=index//images_per_row,
-                               column=index % images_per_row, padx=3, pady=3)
-
-            img_label = ctk.CTkLabel(
-                master=preview_image, text=index + 1,
-                font=('Helvetica bold', 18),
-                width=25, height=25, bg_color=self.images_frame.cget(
-                    'fg_color'))
-            img_label.place(relx=0, rely=1,
-                            anchor="sw")
-        """
         pagination_widget = self.create_pagination_widget()
         pagination_widget.grid(row=1, column=0)
         self.load_page(1)
@@ -480,6 +486,69 @@ class AdvancedInformationPage():
                 master=preview_image, text=start_index + index + 1,
                 font=('Helvetica bold', 18),
                 width=25, height=25, bg_color=self.images_frame.cget(
+                    'fg_color'))
+            img_label.place(relx=0, rely=1,
+                            anchor="sw")
+
+    def generate_rating_distribution(self):
+
+        if "custom_ratings" in self.save_obj:
+            self.custom_ratings = self.save_obj["custom_ratings"]
+        else:
+            with open('prompts.json', 'r') as file:
+                prompts = json.load(file)
+            self.custom_ratings = prompts['rating_buttons']
+
+        self.ratings_menu = ctk.CTkOptionMenu(
+            self.tab_view.tab("Rating Distribution"),
+            values=self.custom_ratings,
+            command=lambda event: self.load_rating_page(1))
+
+        self.ratings_frame = ctk.CTkFrame(
+            self.tab_view.tab("Rating Distribution"))
+
+        # pd.read_csv()
+        csv_path = utils.get_full_path(self.save_obj["path_to_save"] + ".csv")
+        df = pd.read_csv(csv_path, converters={"result": ast.literal_eval})
+
+        ratings_df = df[(df["type"] == "Rating") & (df["undone"] == False)]
+
+        self.ratings = ratings_df["result"].to_list()
+        self.load_rating_page(1)
+
+    def load_rating_page(self, page_number):
+
+        for child in self.ratings_frame.winfo_children():
+            child.destroy()
+
+        current_selection = self.ratings_menu.get()
+        current_rating = self.custom_ratings.index(current_selection)
+
+        filtered_ratings = [
+            rating[0] for rating in self.ratings
+            if rating[1] == current_rating]
+
+        start_index = self.images_per_page*(page_number-1)
+
+        images_to_show = filtered_ratings[start_index: start_index +
+                                          self.images_per_page]
+
+        dir_path = utils.get_full_path(self.dir_rel_path)
+        image_height = self.root.winfo_screenheight()/8
+
+        for index, img_src in enumerate(images_to_show):
+            full_img_path = dir_path + "/" + img_src
+            image = ctk_utils.file_2_CTkImage(
+                full_img_path, image_height)[0]
+            preview_image = ctk.CTkLabel(
+                self.ratings_frame, image=image, text="")
+            preview_image.grid(row=index//self.images_per_row,
+                               column=index % self.images_per_row, padx=3, pady=3)
+
+            img_label = ctk.CTkLabel(
+                master=preview_image, text=current_rating,
+                font=('Helvetica bold', 18),
+                width=25, height=25, bg_color=self.ratings_frame.cget(
                     'fg_color'))
             img_label.place(relx=0, rely=1,
                             anchor="sw")
