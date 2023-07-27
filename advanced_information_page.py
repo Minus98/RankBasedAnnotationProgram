@@ -1,7 +1,7 @@
 import os
 import random
 import sys
-from typing import Callable, Optional, Tuple
+from typing import Any, Callable, Optional, Tuple
 
 import customtkinter as ctk
 import matplotlib
@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-from utils import get_full_path
+import ctk_utils
+import utils
 
 
 class AdvancedInformationPage():
@@ -33,6 +34,16 @@ class AdvancedInformationPage():
         self.menu_callback = menu_callback
         self.save_obj = save_obj
 
+        self.sort_alg = self.save_obj["sort_alg"]
+
+        self.images_per_page = 15
+        self.images_per_row = 5
+
+        results = self.sort_alg.get_result()
+        self.last_page = len(results) // self.images_per_page
+        if len(results) % self.images_per_page > 0:
+            self.last_page += 1
+
         font = {'weight': 'bold',
                 'size': 14}
 
@@ -51,8 +62,6 @@ class AdvancedInformationPage():
             self.general_info_frame, text=self.save_obj["name"],
             font=('Helvetica bold', 24))
 
-        self.sort_alg = self.save_obj["sort_alg"]
-
         self.save_algorithm_label = ctk.CTkLabel(
             self.general_info_frame, text="Algorithm:",
             font=('Helvetica bold', 20))
@@ -69,22 +78,23 @@ class AdvancedInformationPage():
             self.general_info_frame, text=str(len(self.sort_alg.data)),
             font=('Helvetica bold', 20))
 
-        dir_rel_path = ""
+        self.dir_rel_path = ""
 
-        if os.path.isdir(get_full_path(self.save_obj["image_directory"])):
-            dir_rel_path = self.save_obj["image_directory"]
+        if os.path.isdir(utils.get_full_path(
+                self.save_obj["image_directory"])):
+            self.dir_rel_path = self.save_obj["image_directory"]
         elif self.selected_user:
             if self.selected_user in self.save_obj['user_directory_dict']:
                 rel_path = self.save_obj['user_directory_dict'][
                     self.selected_user]
 
-                if os.path.isdir(get_full_path(rel_path)):
-                    dir_rel_path = rel_path
+                if os.path.isdir(utils.get_full_path(rel_path)):
+                    self.dir_rel_path = rel_path
 
-        if dir_rel_path:
+        if self.dir_rel_path:
             self.save_image_count_value.bind(
                 "<Button-1>", command=lambda event,
-                path=dir_rel_path: self.open_folder(path))
+                path=self.dir_rel_path: self.open_folder(path))
             """
             og_color = self.save_image_count_value.cget("text_color")
             self.save_image_count_value.bind(
@@ -119,11 +129,26 @@ class AdvancedInformationPage():
             self.general_info_frame, text=str(comp_count) + "/" + str(max_count),
             font=('Helvetica bold', 20))
 
+        self.scroll_enabled_label = ctk.CTkLabel(
+            self.general_info_frame, text="Scrolling:",
+            font=('Helvetica bold', 20))
+
+        scroll_text = "Disabled"
+
+        if save_obj["scroll_allowed"]:
+            scroll_text = "Enabled"
+
+        self.scroll_enabled_value = ctk.CTkLabel(
+            self.general_info_frame, text=scroll_text,
+            font=('Helvetica bold', 20))
+
         self.save_convergence_label = ctk.CTkLabel(
             master=self.tab_view.tab("Convergence"), text="Convergence",
             font=('Helvetica bold', 22))
 
         self.generate_convergence_plot()
+
+        self.generate_ordering_frame()
 
         self.menu_button = ctk.CTkButton(
             master=self.root, text="Back to menu", width=250,
@@ -146,6 +171,8 @@ class AdvancedInformationPage():
         self.display_general_information()
 
         self.display_convergence()
+
+        self.display_current_ordering()
 
         self.menu_button.grid(row=1, column=0, columnspan=2)
 
@@ -173,6 +200,10 @@ class AdvancedInformationPage():
             row=4, column=0, pady=10, padx=5, sticky="e")
         self.save_comp_count_value.grid(
             row=4, column=1, pady=10, padx=5, sticky="w")
+        self.scroll_enabled_label.grid(
+            row=5, column=0, pady=10, padx=5, sticky="e")
+        self.scroll_enabled_value.grid(
+            row=5, column=1, pady=10, padx=5, sticky="w")
 
     def display_convergence(self):
 
@@ -190,6 +221,13 @@ class AdvancedInformationPage():
         # use a placeholder for the first 100ms...
         self.root.after(100, lambda: self.replace_placeholder(
             self.place_holder_frame, self.canvas_widget))
+
+    def display_current_ordering(self):
+
+        self.tab_view.tab("Current Ordering").columnconfigure(0, weight=1)
+        self.tab_view.tab("Current Ordering").rowconfigure(0, weight=1)
+
+        self.images_frame.grid(row=0, column=0)
 
     def get_status(self, count: int, max_count: int) -> Tuple[str,
                                                               Optional[str]]:
@@ -232,7 +270,7 @@ class AdvancedInformationPage():
         Args:
             rel_path (str): The relative path to the folder that is to be opened. 
         """
-        full_path = get_full_path(rel_path)
+        full_path = utils.get_full_path(rel_path)
         if os.path.isdir(full_path):
             if sys.platform == "linux" or sys.platform == "linux2":
                 os.system('xdg-open "%s"' % full_path)
@@ -305,3 +343,143 @@ class AdvancedInformationPage():
         self.place_holder_frame = ctk.CTkFrame(
             master=self.tab_view.tab("Convergence"),
             width=width, height=height, corner_radius=0, fg_color="#1a1a1a")
+
+    def generate_ordering_frame(self):
+
+        self.images_frame = ctk.CTkFrame(
+            master=self.tab_view.tab("Current Ordering"))
+
+        """
+        ordered_images = self.sort_alg.get_result()
+        currently_shown_images = ordered_images[:10]
+        dir_path = utils.get_full_path(self.dir_rel_path)
+        image_height = self.root.winfo_screenheight()/8
+
+        images_per_row = 5
+
+        for index, img_src in enumerate(currently_shown_images):
+            full_img_path = dir_path + "/" + img_src
+            image = ctk_utils.file_2_CTkImage(
+                full_img_path, image_height)[0]
+            preview_image = ctk.CTkLabel(
+                self.images_frame, image=image, text="")
+            preview_image.grid(row=index//images_per_row,
+                               column=index % images_per_row, padx=3, pady=3)
+
+            img_label = ctk.CTkLabel(
+                master=preview_image, text=index + 1,
+                font=('Helvetica bold', 18),
+                width=25, height=25, bg_color=self.images_frame.cget(
+                    'fg_color'))
+            img_label.place(relx=0, rely=1,
+                            anchor="sw")
+        """
+        pagination_widget = self.create_pagination_widget()
+        pagination_widget.grid(row=1, column=0)
+        self.load_page(1)
+
+    def create_pagination_widget(self):
+
+        pagination_frame = ctk.CTkFrame(
+            master=self.tab_view.tab("Current Ordering"))
+
+        self.current_page = ctk.StringVar(value=1)
+        # self.current_page.trace_add("write", self.page_changed)
+
+        previous_page_button = ctk.CTkButton(
+            master=pagination_frame, text="<", width=35, height=35,
+            font=('Helvetica bold', 20),
+            command=self.decrement_page)
+
+        next_page_button = ctk.CTkButton(
+            master=pagination_frame, text=">", width=35, height=35,
+            font=('Helvetica bold', 20),
+            command=self.increment_page)
+
+        vcmd = (self.root.register(self.validate_number), '%P')
+
+        current_page_entry = ctk.CTkEntry(
+            master=pagination_frame, width=35, height=35,
+            font=('Helvetica bold', 16), justify="center", validate='key',
+            validatecommand=vcmd,
+            textvariable=self.current_page)
+
+        current_page_entry.bind("<Return>", lambda event: self.page_changed())
+
+        max_page_label = ctk.CTkLabel(
+            master=pagination_frame, text="of " + str(self.last_page),
+            font=('Helvetica bold', 16))
+
+        previous_page_button.grid(row=0, column=0, padx=5, pady=3)
+        current_page_entry.grid(row=0, column=1, padx=(5, 2), pady=3)
+        max_page_label.grid(row=0, column=2, padx=(2, 5), pady=3)
+        next_page_button.grid(row=0, column=3, padx=5, pady=3)
+
+        return pagination_frame
+
+    def validate_number(self, value: str):
+        """
+        Validation function used to see if entry contains an integer.
+
+        Args:
+            value (str): The string that is to be validated.
+        """
+        return value.isnumeric() or not value
+
+    def increment_page(self):
+        self.current_page.set(
+
+            int(self.current_page.get()) + 1)
+
+        self.page_changed()
+
+    def decrement_page(self):
+        self.current_page.set(
+            int(self.current_page.get()) - 1)
+
+        self.page_changed()
+
+    def page_changed(self):
+
+        page = int(self.current_page.get())
+
+        if page < 1:
+            self.current_page.set(1)
+            page = 1
+        elif page > self.last_page:
+            self.current_page.set(self.last_page)
+            page = self.last_page
+
+        self.load_page(page)
+
+    def load_page(self, page_number):
+
+        for child in self.images_frame.winfo_children():
+            child.destroy()
+
+        ordered_results = self.sort_alg.get_result()
+
+        start_index = self.images_per_page*(page_number-1)
+
+        images_to_show = ordered_results[start_index: start_index +
+                                         self.images_per_page]
+
+        dir_path = utils.get_full_path(self.dir_rel_path)
+        image_height = self.root.winfo_screenheight()/8
+
+        for index, img_src in enumerate(images_to_show):
+            full_img_path = dir_path + "/" + img_src
+            image = ctk_utils.file_2_CTkImage(
+                full_img_path, image_height)[0]
+            preview_image = ctk.CTkLabel(
+                self.images_frame, image=image, text="")
+            preview_image.grid(row=index//self.images_per_row,
+                               column=index % self.images_per_row, padx=3, pady=3)
+
+            img_label = ctk.CTkLabel(
+                master=preview_image, text=start_index + index + 1,
+                font=('Helvetica bold', 18),
+                width=25, height=25, bg_color=self.images_frame.cget(
+                    'fg_color'))
+            img_label.place(relx=0, rely=1,
+                            anchor="sw")
