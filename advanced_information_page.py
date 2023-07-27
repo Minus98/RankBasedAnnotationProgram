@@ -29,6 +29,7 @@ class AdvancedInformationPage():
 
         Args:
             root (CTk): The root cutom tkinter object.
+            save_obj (dict): The save object containing various parameters.
             menu_callback (function): Callback function to return to the main 
             menu.
         """
@@ -95,17 +96,6 @@ class AdvancedInformationPage():
             self.save_image_count_value.bind(
                 "<Button-1>", command=lambda event,
                 path=self.dir_rel_path: self.open_folder(path))
-            """
-            og_color = self.save_image_count_value.cget("text_color")
-            self.save_image_count_value.bind(
-                "<Enter>", lambda event,
-                og_color=og_color: self.highlight_label(
-                    self.save_image_count_value, og_color))
-            self.save_image_count_value.bind(
-                "<Leave>", lambda event,
-                og_color=og_color: self.remove_highlight_label(
-                    self.save_image_count_value, og_color))
-            """
 
         comp_count = self.sort_alg.get_comparison_count()
 
@@ -165,6 +155,9 @@ class AdvancedInformationPage():
             command=self.menu_callback)
 
     def display(self):
+        """
+        Displays all the fields that should be displayed.
+        """
 
         self.root.columnconfigure(0, weight=2, uniform="information_page")
         self.root.columnconfigure(1, weight=3, uniform="information_page")
@@ -194,6 +187,9 @@ class AdvancedInformationPage():
         self.menu_button.grid(row=1, column=0, columnspan=2)
 
     def display_general_information(self):
+        """
+        Displays all of the general information fields.
+        """
 
         self.general_info_frame.grid_columnconfigure(
             0, weight=1, uniform="save_info")
@@ -223,6 +219,9 @@ class AdvancedInformationPage():
             row=5, column=1, pady=10, padx=5, sticky="w")
 
     def display_convergence(self):
+        """
+        Displays the convergence tab, including the convergence graph.
+        """
 
         self.tab_view.tab("Convergence").columnconfigure(0, weight=1)
 
@@ -240,6 +239,9 @@ class AdvancedInformationPage():
             self.place_holder_frame, self.canvas_widget))
 
     def display_current_ordering(self):
+        """
+        Displays the current ordering tab.
+        """
 
         self.tab_view.tab("Current Ordering").columnconfigure(0, weight=1)
         self.tab_view.tab("Current Ordering").rowconfigure(0, weight=5)
@@ -248,6 +250,9 @@ class AdvancedInformationPage():
         self.images_frame.grid(row=0, column=0)
 
     def display_rating_distribution(self):
+        """
+        Displays the rating distribution tab.
+        """
 
         self.tab_view.tab("Rating Distribution").columnconfigure(0, weight=1)
         self.tab_view.tab("Rating Distribution").rowconfigure(0, weight=1)
@@ -306,7 +311,14 @@ class AdvancedInformationPage():
             else:
                 os.startfile(full_path)
 
-    def hover(self, event):
+    def hover(self, event: Any):
+        """
+        Handles the hover effects over the convergence graph.
+
+        Args:
+            event (Any): The hover event. 
+        """
+
         vis = self.annot.get_visible()
         if event.inaxes == self.ax:
             cont, ind = self.line.contains(event)
@@ -324,6 +336,9 @@ class AdvancedInformationPage():
                     self.fig.canvas.draw_idle()
 
     def update_annot(self, ind):
+        """
+
+        """
         x, y = self.line.get_data()
         self.annot.xy = (x[ind["ind"][0]], y[ind["ind"][0]])
         x_value = int(x[ind["ind"]][0])
@@ -390,7 +405,6 @@ class AdvancedInformationPage():
             master=self.tab_view.tab("Current Ordering"))
 
         self.current_page = ctk.StringVar(value=1)
-        # self.current_page.trace_add("write", self.page_changed)
 
         previous_page_button = ctk.CTkButton(
             master=pagination_frame, text="<", width=35, height=35,
