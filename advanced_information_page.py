@@ -73,11 +73,13 @@ class AdvancedInformationPage():
 
         if os.path.isdir(get_full_path(self.save_obj["image_directory"])):
             dir_rel_path = self.save_obj["image_directory"]
-        elif self.selected_user and self.selected_user in self.save_obj['user_directory_dict']:
-            rel_path = self.save_obj['user_directory_dict'][self.selected_user]
+        elif self.selected_user:
+            if self.selected_user in self.save_obj['user_directory_dict']:
+                rel_path = self.save_obj['user_directory_dict'][
+                    self.selected_user]
 
-            if os.path.isdir(get_full_path(rel_path)):
-                dir_rel_path = rel_path
+                if os.path.isdir(get_full_path(rel_path)):
+                    dir_rel_path = rel_path
 
         if dir_rel_path:
             self.save_image_count_value.bind(
@@ -286,6 +288,10 @@ class AdvancedInformationPage():
 
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
+        ax.set_xlabel("Comparisons")
+        ax.set_ylabel("RMSE")
+        plt.subplots_adjust(bottom=0.15)
+        # fig.subplots_adjust(hspace=10)
 
         self.line, = ax.plot(place_holder_values)
 
