@@ -1,6 +1,5 @@
 import copy
 import os
-import pickle
 import shutil
 import time
 from tkinter import Event
@@ -13,6 +12,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
+import convergence as conv
 import saves_handler
 import sorting_algorithms as sa
 import utils
@@ -429,9 +429,15 @@ class OrderingScreen():
 
         user = 'DF' if df_annotatation else self.user
 
-        self.sort_alg.inference(user, keys, lvl)
+        if type(self.sort_alg) == sa.TrueSkill:
+            prev_ratings = copy.deepcopy(self.sort_alg.ratings)
+            self.save_to_csv_file(keys, lvl, df_annotatation)
+            self.sort_alg.inference(user, keys, lvl)
+            conv.rmses_inference(self.save_obj, prev_ratings, self.sort_alg)
 
-        self.save_to_csv_file(keys, lvl, df_annotatation)
+        else:
+            self.sort_alg.inference(user, keys, lvl)
+            self.save_to_csv_file(keys, lvl, df_annotatation)
 
         self.comp_count += 1
         self.comp_count_label.configure(

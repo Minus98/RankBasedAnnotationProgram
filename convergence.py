@@ -1,48 +1,87 @@
 import copy
 import math
+from typing import List
 
 import pandas as pd
 
 import saves_handler
-import sorting_algorithms
-import utils
+import sorting_algorithms as sa
 
 
-def get_convergence(save):
+def get_convergence(save: dict) -> List[float]:
+    """
+    Computes and returns the RMS errors for the provided 'save'.
 
-    print(save)
+    Args:
+        save (dict): The dictionary containing the necessary information.
 
-    if "rmses" in save and len(
+    Returns:
+        List[float]: The computed RMS errors.
+    """
+
+    if "rmses" not in save or not len(
             save["rmses"]) == (save["sort_alg"].comp_count-1):
-        print('yep')
-        pass
-
-    else:
-        save["rmses"] = recompute_algorithms(save)
-        saves_handler.save_algorithm_pickle(save)
+        create_rmses_from_recomputation(save)
 
     return save["rmses"]
 
 
-def recompute_algorithms(save):
-    if type(save['sort_alg']) == sorting_algorithms.TrueSkill:
-        return recompute_trueskill(save)
-    elif type(save['sort_alg']) == sorting_algorithms.RatingAlgorithm:
-        # TODO
-        pass
-    elif type(save['sort_alg']) == sorting_algorithms.HybridTrueSkill:
-        # TODO
-        pass
-    elif type(save['sort_alg']) == sorting_algorithms.MergeSort:
-        # TODO
-        pass
+def create_rmses_from_recomputation(save: dict) -> None:
+    """
+    Computes RMS errors for the provided 'save' using the appropriate algorithm.
 
-    return None
+    Args:
+        save (dict): The dictionary containing the necessary information.
+    """
+    if type(save['sort_alg']) == sa.TrueSkill:
+        save["rmses"] = recompute_trueskill(save)
+        saves_handler.save_algorithm_pickle(save)
 
 
-def recompute_trueskill(save):
+def rmses_inference(save: dict, prev_ratings: dict, sort_alg: sa.TrueSkill):
+    """
+    Computes RMS errors for the provided 'save' using the appropriate algorithm and saves the results.
+
+    Args:
+        save (dict): The dictionary containing the necessary information.
+        prev_ratings (dict): The previous ratings dictionary.
+        sort_alg (TrueSkill): The TrueSkill sorting algorithm.
+    """
+    save = get_convergence(save)
+    save["rmses"].append(calc_rmse(prev_ratings, sort_alg))
+    saves_handler.save_algorithm_pickle(save)
+
+
+def calc_rmse(prev_ratings: dict, sort_alg: sa.TrueSkill) -> float:
+    """
+    Calculates the Root Mean Square Error (RMSE) between previous ratings and current ratings.
+
+    Args:
+        prev_ratings (dict): The previous ratings dictionary.
+        sort_alg (TrueSkill): The TrueSkill sorting algorithm.
+
+    Returns:
+        float: The computed RMSE.
+    """
+    rmse = math.sqrt(
+        sum(
+            (prev_ratings[key].mu - sort_alg.ratings[key].mu) ** 2
+            for key in sort_alg.data) / sort_alg.n)
+    return rmse
+
+
+def recompute_trueskill(save: dict) -> List[float]:
+    """
+    Recomputes TrueSkill algorithm based on the data in 'save' and returns the RMS errors.
+
+    Args:
+        save (dict): The dictionary containing the necessary information.
+
+    Returns:
+        List[float]: The computed RMS errors.
+    """
     csv = pd.read_csv(save['path_to_save'] + '.csv')
-    sort_alg = sorting_algorithms.TrueSkill(
+    sort_alg = sa.TrueSkill(
         data=save['sort_alg'].data,
         comparison_max=save['sort_alg'].comparison_max)
     rmses = []
@@ -54,7 +93,7 @@ def recompute_trueskill(save):
             "'", "").split(", ")
 
         diff_lvls = [
-            sorting_algorithms.DiffLevel(
+            sa.DiffLevel(
                 abs([int(s) for s in dl if s.isdigit()][0]))
             for dl in i_df['diff_levels'].split(", ")]
 
@@ -64,10 +103,7 @@ def recompute_trueskill(save):
             sort_alg.inference(i_df['user'], res, diff_lvls)
 
             if i > 0:
-                rmse = math.sqrt(sum(
-                    (prev_ratings[key].mu - sort_alg.ratings[key].mu)
-                    ** 2 for key in sort_alg.data) / sort_alg.n)
-                rmses.append(rmse)
+                rmses.append(calc_rmse(prev_ratings, sort_alg))
 
             prev_ratings = copy.deepcopy(sort_alg.ratings)
 
