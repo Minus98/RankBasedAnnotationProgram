@@ -85,6 +85,7 @@ def recompute_trueskill(save: dict) -> List[float]:
         data=save['sort_alg'].data,
         comparison_max=save['sort_alg'].comparison_max)
     rmses = []
+    prev_ratings = copy.deepcopy(sort_alg.ratings)
 
     for i, i_df in csv.iterrows():
         res = i_df['result'].replace(
