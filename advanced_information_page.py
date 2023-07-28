@@ -306,7 +306,7 @@ class AdvancedInformationPage():
         if os.path.isdir(full_path):
             if sys.platform == "linux" or sys.platform == "linux2":
                 os.system('xdg-open "%s"' % full_path)
-            elif sys.platform == "Darwin":
+            elif sys.platform == "Darwin" or sys.platform == "darwin":
                 os.system('open "%s"' % full_path)
             else:
                 os.startfile(full_path)
