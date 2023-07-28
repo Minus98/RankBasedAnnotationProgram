@@ -47,12 +47,9 @@ def rmses_inference(save: dict, prev_ratings: dict, sort_alg: sa.TrueSkill):
         prev_ratings (dict): The previous ratings dictionary.
         sort_alg (TrueSkill): The TrueSkill sorting algorithm.
     """
-    if "rmses" not in save or not len(
-            save["rmses"]) == (save["sort_alg"].comp_count-1):
-        create_rmses_from_recomputation(save)
+    get_convergence(save)
     save["rmses"].append(calc_rmse(prev_ratings, sort_alg))
     saves_handler.save_algorithm_pickle(save)
-    print(save["rmses"])
 
 
 def calc_rmse(prev_ratings: dict, sort_alg: sa.TrueSkill) -> float:
