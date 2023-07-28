@@ -40,7 +40,8 @@ def create_rmses_from_recomputation(save: dict) -> None:
 
 def rmses_inference(save: dict, prev_ratings: dict, sort_alg: sa.TrueSkill):
     """
-    Computes RMS errors for the provided 'save' using the appropriate algorithm and saves the results.
+    Computes RMS errors for the provided 'save' using the appropriate algorithm and 
+    saves the results.
 
     Args:
         save (dict): The dictionary containing the necessary information.
@@ -54,7 +55,8 @@ def rmses_inference(save: dict, prev_ratings: dict, sort_alg: sa.TrueSkill):
 
 def calc_rmse(prev_ratings: dict, sort_alg: sa.TrueSkill) -> float:
     """
-    Calculates the Root Mean Square Error (RMSE) between previous ratings and current ratings.
+    Calculates the Root Mean Square Error (RMSE) between previous ratings and current 
+    ratings.
 
     Args:
         prev_ratings (dict): The previous ratings dictionary.
@@ -72,7 +74,8 @@ def calc_rmse(prev_ratings: dict, sort_alg: sa.TrueSkill) -> float:
 
 def recompute_trueskill(save: dict) -> List[float]:
     """
-    Recomputes TrueSkill algorithm based on the data in 'save' and returns the RMS errors.
+    Recomputes TrueSkill algorithm based on the data in 'save' and returns the RMS 
+    errors.
 
     Args:
         save (dict): The dictionary containing the necessary information.
@@ -80,6 +83,7 @@ def recompute_trueskill(save: dict) -> List[float]:
     Returns:
         List[float]: The computed RMS errors.
     """
+    print('hi')
     csv = pd.read_csv(save['path_to_save'] + '.csv')
     sort_alg = sa.TrueSkill(
         data=save['sort_alg'].data,
@@ -98,7 +102,7 @@ def recompute_trueskill(save: dict) -> List[float]:
                 abs([int(s) for s in dl if s.isdigit()][0]))
             for dl in i_df['diff_levels'].split(", ")]
 
-        if i_df['undone'] == True:
+        if i_df['undone']:
             pass
         else:
             sort_alg.inference(i_df['user'], res, diff_lvls)

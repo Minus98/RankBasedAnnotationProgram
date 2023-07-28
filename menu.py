@@ -1,14 +1,12 @@
 import json
 import os
 import pickle
-import random
 import sys
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 
 import customtkinter as ctk
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 import convergence as conv

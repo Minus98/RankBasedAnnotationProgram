@@ -1,14 +1,12 @@
 import ast
 import json
 import os
-import random
 import sys
 from typing import Any, Callable, Optional, Tuple
 
 import customtkinter as ctk
 import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -526,7 +524,7 @@ class AdvancedInformationPage():
         csv_path = utils.get_full_path(self.save_obj["path_to_save"] + ".csv")
         df = pd.read_csv(csv_path, converters={"result": ast.literal_eval})
 
-        ratings_df = df[(df["type"] == "Rating") & (df["undone"] == False)]
+        ratings_df = df[(df["type"] == "Rating") & (~df["undone"])]
 
         self.ratings = ratings_df["result"].to_list()
         self.load_rating_page(1)
