@@ -1,6 +1,5 @@
 import copy
 import os
-import pickle
 import shutil
 import time
 from tkinter import Event
@@ -13,6 +12,8 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
+import convergence as conv
+import saves_handler
 import sorting_algorithms as sa
 import utils
 from image_directory_pop_out import ImageDirectoryPopOut
@@ -364,7 +365,7 @@ class OrderingScreen():
             self.undo_label.place_forget()
 
             self.undo_csv_file()
-            self.save_algorithm()
+            saves_handler.save_algorithm_pickle(self.save_obj)
             self.display_new_comparison()
 
             self.comp_count -= 1
@@ -379,15 +380,6 @@ class OrderingScreen():
         """
         self.comparison_bar.set(
             self.comp_count / self.sort_alg.get_comparison_max())
-
-    def save_algorithm(self):
-        """
-        Save the current state of the algorithm to a pickle file.
-        """
-        f = open(utils.get_full_path(
-            self.save_obj["path_to_save"] + ".pickle"), "wb")
-        pickle.dump(self.save_obj, f)
-        f.close()
 
     def is_finished_check(self) -> bool:
         """
@@ -437,9 +429,15 @@ class OrderingScreen():
 
         user = 'DF' if df_annotatation else self.user
 
-        self.sort_alg.inference(user, keys, lvl)
+        if type(self.sort_alg) == sa.TrueSkill:
+            prev_ratings = copy.deepcopy(self.sort_alg.ratings)
+            self.save_to_csv_file(keys, lvl, df_annotatation)
+            self.sort_alg.inference(user, keys, lvl)
+            conv.rmses_inference(self.save_obj, prev_ratings, self.sort_alg)
 
-        self.save_to_csv_file(keys, lvl, df_annotatation)
+        else:
+            self.sort_alg.inference(user, keys, lvl)
+            self.save_to_csv_file(keys, lvl, df_annotatation)
 
         self.comp_count += 1
         self.comp_count_label.configure(
@@ -457,7 +455,7 @@ class OrderingScreen():
 
         self.update_comparison_bar()
 
-        self.save_algorithm()
+        saves_handler.save_algorithm_pickle(self.save_obj)
 
         self.session_elapsed_time_prev = time.time() - self.session_start_time
 
@@ -555,5 +553,5 @@ class OrderingScreen():
         self.image_directory_located = True
         directory_dict = self.save_obj['user_directory_dict']
         directory_dict[self.user] = path
-        self.save_algorithm()
+        saves_handler.save_algorithm_pickle(self.save_obj)
         self.display()

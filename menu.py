@@ -1,16 +1,15 @@
 import json
 import os
 import pickle
-import random
 import sys
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 
 import customtkinter as ctk
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+import convergence as conv
 from creation_pop_out import CreationPopOut
 from delete_pop_out import DeletePopOut
 from utils import (add_hover, get_full_path, highlight, remove_highlight,
@@ -411,11 +410,8 @@ class MenuScreen():
         fig.set_facecolor("#1a1a1a")
         ax.set_facecolor("#1a1a1a")
 
-        place_holder_values = [random.randint(1, 6) / np.log(i)
-                               for i in np.arange(1.1, 3, 0.1)]
-
         ax.axis("off")
-        ax.plot(place_holder_values)
+        ax.plot(conv.get_convergence(save))
         fig.subplots_adjust(left=0, right=1, bottom=0,
                             top=1, wspace=0, hspace=0)
         canvas = FigureCanvasTkAgg(
