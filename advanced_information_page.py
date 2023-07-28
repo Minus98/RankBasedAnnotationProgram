@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+import convergence as conv
 import ctk_utils
 import utils
 
@@ -116,7 +117,8 @@ class AdvancedInformationPage():
             font=('Helvetica bold', 20))
 
         self.save_comp_count_value = ctk.CTkLabel(
-            self.general_info_frame, text=str(comp_count) + "/" + str(max_count),
+            self.general_info_frame, text=str(
+                comp_count) + "/" + str(max_count),
             font=('Helvetica bold', 20))
 
         self.scroll_enabled_label = ctk.CTkLabel(
@@ -367,8 +369,7 @@ class AdvancedInformationPage():
             arrowprops=dict(arrowstyle="simple"))
         self.annot.set_visible(False)
 
-        place_holder_values = [random.randint(1, 6) / np.log(i)
-                               for i in np.arange(1.1, 3, 0.1)]
+        rmses = conv.get_convergence(self.save_obj)
 
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -377,7 +378,7 @@ class AdvancedInformationPage():
         plt.subplots_adjust(bottom=0.15)
         # fig.subplots_adjust(hspace=10)
 
-        self.line, = ax.plot(place_holder_values)
+        self.line, = ax.plot(rmses)
 
         canvas = FigureCanvasTkAgg(
             fig, master=self.tab_view.tab("Convergence"))
