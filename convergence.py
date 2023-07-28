@@ -54,7 +54,8 @@ def recompute_trueskill(save):
             "'", "").split(", ")
 
         diff_lvls = [
-            utils.DiffLevel(abs([int(s) for s in dl if s.isdigit()][0]))
+            sorting_algorithms.DiffLevel(
+                abs([int(s) for s in dl if s.isdigit()][0]))
             for dl in i_df['diff_levels'].split(", ")]
 
         if i_df['undone'] == True:

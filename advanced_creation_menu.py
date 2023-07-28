@@ -3,8 +3,8 @@ from typing import Callable, Optional
 
 import customtkinter as ctk
 
+import saves_handler
 import sorting_algorithms as sa
-import utils
 
 
 class AdvancedCreationMenu():
@@ -932,7 +932,7 @@ class AdvancedCreationMenu():
             if self.ranking_prompt.get():
                 ranking_prompt = self.ranking_prompt.get()
 
-        utils.create_save(
+        saves_handler.create_save(
             name_value, alg_value, comparison_size_value, directory_value,
             scroll_enabled_value, rating_buttons, rating_prompt,
             custom_rankings, ranking_prompt, comp_max)

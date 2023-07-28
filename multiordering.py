@@ -4,8 +4,8 @@ from typing import Callable
 
 import customtkinter as ctk
 
+import sorting_algorithms as sa
 from ordering import OrderingScreen
-from utils import DiffLevel
 
 
 class MultiOrderingScreen(OrderingScreen):
@@ -481,7 +481,7 @@ class MultiOrderingScreen(OrderingScreen):
 
         keys = [key for key, _, _ in self.images]
 
-        diff_lvls = [DiffLevel(int_diff_lvl.get())
+        diff_lvls = [sa.DiffLevel(int_diff_lvl.get())
                      for int_diff_lvl in self.int_diff_levels]
 
         self.submit_comparison(keys, diff_lvls)
