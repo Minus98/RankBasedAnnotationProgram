@@ -1,5 +1,6 @@
 import ast
 import json
+import math
 import os
 import random
 import sys
@@ -247,6 +248,13 @@ class AdvancedInformationPage():
         self.tab_view.tab("Current Ordering").rowconfigure(0, weight=5)
         self.tab_view.tab("Current Ordering").rowconfigure(0, weight=1)
 
+        for i in range(self.images_per_row):
+            self.images_frame.columnconfigure(
+                i, weight=1, uniform="images_frame")
+
+        for i in range(math.ceil(self.images_per_page/self.images_per_row)):
+            self.images_frame.rowconfigure(i, weight=1, uniform="images_frame")
+
         self.images_frame.grid(row=0, column=0)
 
     def display_rating_distribution(self):
@@ -259,6 +267,15 @@ class AdvancedInformationPage():
         self.tab_view.tab("Rating Distribution").rowconfigure(1, weight=5)
 
         self.ratings_menu.grid(row=0, column=0, sticky="e")
+
+        for i in range(self.images_per_row):
+            self.ratings_frame.columnconfigure(
+                i, weight=1, uniform="ratings_frame")
+
+        for i in range(math.ceil(self.images_per_page/self.images_per_row)):
+            self.ratings_frame.rowconfigure(
+                i, weight=1, uniform="ratings_frame")
+
         self.ratings_frame.grid(row=1, column=0)
 
     def get_status(self, count: int, max_count: int) -> Tuple[str,
@@ -375,7 +392,6 @@ class AdvancedInformationPage():
         ax.set_xlabel("Comparisons")
         ax.set_ylabel("RMSE")
         plt.subplots_adjust(bottom=0.15)
-        # fig.subplots_adjust(hspace=10)
 
         self.line, = ax.plot(place_holder_values)
 
@@ -491,15 +507,19 @@ class AdvancedInformationPage():
             full_img_path = dir_path + "/" + img_src
             image = ctk_utils.file_2_CTkImage(
                 full_img_path, image_height)[0]
+
+            preview_image_frame = ctk.CTkFrame(self.images_frame)
+
             preview_image = ctk.CTkLabel(
-                self.images_frame, image=image, text="")
-            preview_image.grid(row=index//self.images_per_row,
-                               column=index % self.images_per_row, padx=3, pady=3)
+                preview_image_frame, image=image, text="")
+            preview_image.grid(row=0, column=0, padx=5, pady=5)
+            preview_image_frame.grid(row=index//self.images_per_row,
+                                     column=index % self.images_per_row, padx=3, pady=3)
 
             img_label = ctk.CTkLabel(
                 master=preview_image, text=start_index + index + 1,
                 font=('Helvetica bold', 18),
-                width=25, height=25, bg_color=self.images_frame.cget(
+                width=25, height=25, bg_color=preview_image_frame.cget(
                     'fg_color'))
             img_label.place(relx=0, rely=1,
                             anchor="sw")
