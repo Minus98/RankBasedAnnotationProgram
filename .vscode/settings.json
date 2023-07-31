@@ -1,0 +1,17 @@
+{
+  "[python]": {
+    "editor.formatOnType": true,
+    "editor.defaultFormatter": "ms-python.autopep8",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  },
+  "editor.formatOnSave": true,
+  "python.formatting.blackArgs": ["--line-length", "79"],
+  "python.formatting.autopep8Args": [
+    "--max-line-length",
+    "79",
+    "--experimental"
+  ],
+  "editor.rulers": [88]
+}

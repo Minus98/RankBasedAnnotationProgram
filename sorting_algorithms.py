@@ -1,12 +1,17 @@
 import copy
 import random
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 from trueskill import Rating, rate_1vs1
 
-import utils
+
+class DiffLevel(Enum):
+    none = 0
+    normal = 1
+    major = 2
 
 
 class SortingAlgorithm (ABC):
@@ -28,7 +33,7 @@ class SortingAlgorithm (ABC):
     @abstractmethod
     def inference(
             self, user_id: str, keys: List[str],
-            diff_lvls: List[utils.DiffLevel]):
+            diff_lvls: List[DiffLevel]):
         """
         Updates the algorithms estimated ordering based on the 
         results of a comparison.
