@@ -1,6 +1,5 @@
 import ast
 import json
-import math
 import os
 import sys
 from typing import Any, Callable, Optional, Tuple
@@ -12,7 +11,6 @@ import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 import convergence as conv
-import ctk_utils
 import utils
 from pagination import Pagination
 
@@ -304,10 +302,15 @@ class AdvancedInformationPage():
                     self.canvas_widget.config(cursor="arrow")
                     self.fig.canvas.draw_idle()
 
-    def update_annot(self, ind):
+    def update_annot(self, ind: dict):
+        """
+        Updates the text and location of the convergence graph annotation.
+
+        Args:
+            ind (dict): A dict containing information about the x coordinates that are
+                        in proximity of the mouse.
         """
 
-        """
         x, y = self.line.get_data()
         self.annot.xy = (x[ind["ind"][0]], y[ind["ind"][0]])
         x_value = int(x[ind["ind"]][0])
@@ -316,6 +319,9 @@ class AdvancedInformationPage():
         self.annot.get_bbox_patch().set_alpha(0.7)
 
     def generate_convergence_plot(self):
+        """
+        Creates the convergence plot.
+        """
 
         self.save_convergence_label = ctk.CTkLabel(
             master=self.tab_view.tab("Convergence"), text="Convergence",
@@ -358,6 +364,9 @@ class AdvancedInformationPage():
             width=width, height=height, corner_radius=0, fg_color="#1a1a1a")
 
     def generate_ordering_frame(self):
+        """
+        Creates the list of the current ordering of elements.
+        """
 
         self.ordering_frame = Pagination(
             self.tab_view.tab("Current Ordering"),
@@ -366,9 +375,13 @@ class AdvancedInformationPage():
             image_width=self.root.winfo_screenwidth() // 14)
 
         self.tab_view.tab("Current Ordering").columnconfigure(0, weight=1)
+        self.tab_view.tab("Current Ordering").rowconfigure(0, weight=1)
         self.ordering_frame.grid(row=0, column=0)
 
     def generate_rating_distribution(self):
+        """
+        Creates the rating distribution view.
+        """
 
         if "custom_ratings" in self.save_obj:
             self.custom_ratings = self.save_obj["custom_ratings"]
@@ -404,6 +417,10 @@ class AdvancedInformationPage():
         self.rating_frame.grid(row=1, column=0)
 
     def rating_changed(self):
+        """
+        Replaces the content of the list of images to match that of the currently 
+        selected rating.
+        """
 
         current_selection = self.ratings_menu.get()
         current_rating = self.custom_ratings.index(current_selection)

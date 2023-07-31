@@ -1,5 +1,5 @@
 import math
-from typing import List
+from typing import List, Optional
 
 import customtkinter as ctk
 
@@ -7,11 +7,31 @@ import ctk_utils
 
 
 class Pagination(ctk.CTkFrame):
+    """
+    A widget used to display images using pagination.
+    """
 
     def __init__(
             self, master: ctk.CTkBaseClass, data: List[str],
             src_dir: str, images_per_row: int = 5, images_per_page: int = 15,
-            image_width=130, image_label=None):
+            image_width=130, image_label: Optional[int] = None):
+        """
+        Initialize the Pagination.
+
+        Args:
+            master (ctk.CtkBaseClass): The parent ctk widget.
+            data (List[str]): A list containint the filenames of the images that are to 
+                              be shown.
+            src_dir (str): The path to the directory containing the images.
+            images_per_row (int): The amount of images that should be shown on a single 
+                                  row.
+            images_per_page (int): The amount of images that should be contained within
+                                   one page.
+            image_width (int): The width each image should have.
+            image_label (Optional[int]): The label the images should have in the bottom
+                                         left corner. Defaults to displaying the rank of
+                                         the elements in the provided list.
+        """
 
         ctk.CTkFrame.__init__(self, master)
 
@@ -43,12 +63,18 @@ class Pagination(ctk.CTkFrame):
             self.images_frame.rowconfigure(
                 i, weight=1, uniform="images_frame")
 
-        self.images_frame.grid(row=0, column=0)
-        self.pagination_controls.grid(row=1, column=0)
+        self.images_frame.grid(row=0, column=0, pady=5)
+        self.pagination_controls.grid(row=1, column=0, pady=5)
 
         self.load_page(1)
 
-    def load_page(self, page_number):
+    def load_page(self, page_number: int):
+        """
+        Loads the list of images corresponding to the pagenumber.
+
+        Args:
+            page_number (int): The page of images that should be shown.
+        """
 
         for child in self.images_frame.winfo_children():
             child.destroy()
@@ -85,6 +111,9 @@ class Pagination(ctk.CTkFrame):
                             anchor="sw")
 
     def create_pagination_controls(self):
+        """
+        Creates the pagination control buttons and entry field.
+        """
 
         self.pagination_controls = ctk.CTkFrame(
             master=self)
@@ -128,18 +157,29 @@ class Pagination(ctk.CTkFrame):
         return value.isnumeric() or not value
 
     def increment_page(self):
+        """
+        Increases the current page number by 1.
+        """
+
         self.current_page.set(
             int(self.current_page.get()) + 1)
 
         self.page_changed()
 
     def decrement_page(self):
+        """
+        Decreases the current page number by 1.
+        """
+
         self.current_page.set(
             int(self.current_page.get()) - 1)
 
         self.page_changed()
 
     def page_changed(self):
+        """
+        Corrects non-compatible page numbers and loads the correct page.
+        """
 
         page = int(self.current_page.get())
 
@@ -152,7 +192,15 @@ class Pagination(ctk.CTkFrame):
 
         self.load_page(page)
 
-    def change_data(self, data, image_label=None):
+    def change_data(self, data: List[str], image_label: Optional[int] = None):
+        """
+        Changes the images that the widget displays.
+
+        Args:
+            data (List[str]): The filenames of the images that should be shown.
+            image_label (Optional[int]): The number that should be displayed in the
+                                         bottom left corner.
+        """
 
         self.data = data
         self.last_page = math.ceil(len(data) / self.images_per_page)
