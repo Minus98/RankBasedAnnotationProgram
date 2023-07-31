@@ -69,7 +69,6 @@ def recompute_ratings(save: dict) -> sa.RatingAlgorithm:
     """
     csv = pd.read_csv(save['path_to_save'] + '.csv')
     csv = csv[csv['type'] == 'Rating']
-    print(csv)
     sort_alg = sa.RatingAlgorithm(
         data=save['sort_alg'].data)
 
