@@ -30,8 +30,8 @@ class MultiOrderingScreen(OrderingScreen):
                                            root element.
         """
 
-        super().__init__(root, save_obj, menu_callback,
-                         center, user, reload_ordering_screen, True)
+        super().__init__(root, save_obj, menu_callback, center,
+                         user, reload_ordering_screen, True, root_bind_callback)
 
         self.root_bind_callback = root_bind_callback
 
