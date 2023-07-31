@@ -483,4 +483,5 @@ class AdvancedInformationPage():
             rating[0] for rating in self.ratings
             if rating[1] == current_rating]
 
-        self.rating_frame.change_data(filtered_ratings)
+        self.rating_frame.change_data(
+            filtered_ratings, image_label=current_rating)

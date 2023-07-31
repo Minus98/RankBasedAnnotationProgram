@@ -11,7 +11,7 @@ class Pagination(ctk.CTkFrame):
     def __init__(
             self, master: ctk.CTkBaseClass, data: List[str],
             src_dir: str, images_per_row: int = 5, images_per_page: int = 15,
-            image_height=100):
+            image_height=100, image_label=None):
 
         ctk.CTkFrame.__init__(self, master)
 
@@ -22,6 +22,8 @@ class Pagination(ctk.CTkFrame):
         self.images_per_row = images_per_row
         self.last_page = math.ceil(len(data) / self.images_per_page)
         self.image_height = image_height
+
+        self.image_label = image_label
 
         self.current_page = ctk.StringVar(value=1)
 
@@ -69,8 +71,13 @@ class Pagination(ctk.CTkFrame):
             preview_image_frame.grid(row=index//self.images_per_row,
                                      column=index % self.images_per_row, padx=3, pady=3)
 
+            if not self.image_label is None:
+                label = self.image_label
+            else:
+                label = start_index + index + 1
+
             img_label = ctk.CTkLabel(
-                master=preview_image, text=start_index + index + 1,
+                master=preview_image, text=label,
                 font=('Helvetica bold', 18),
                 width=25, height=25, bg_color=preview_image_frame.cget(
                     'fg_color'))
@@ -145,11 +152,12 @@ class Pagination(ctk.CTkFrame):
 
         self.load_page(page)
 
-    def change_data(self, data):
+    def change_data(self, data, image_label=None):
 
         self.data = data
         self.last_page = math.ceil(len(data) / self.images_per_page)
         self.max_page_label.configure(text="of " + str(self.last_page))
+        self.image_label = image_label
 
         self.current_page.set(1)
         self.load_page(1)
