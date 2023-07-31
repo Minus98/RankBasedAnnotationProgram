@@ -1,14 +1,14 @@
-import copy
 import math
 from typing import List
 
-import pandas as pd
+import numpy as np
 
+import recomputation as recomp
 import saves_handler
 import sorting_algorithms as sa
 
 
-def get_convergence(save: dict) -> List[float]:
+def update_convergence_save(save: dict) -> List[float]:
     """
     Computes and returns the RMS errors for the provided 'save'.
 
@@ -21,24 +21,37 @@ def get_convergence(save: dict) -> List[float]:
     if type(save['sort_alg']) == sa.TrueSkill:
         if "rmses" not in save or not len(
                 save["rmses"]) == (save["sort_alg"].comp_count-1):
-            create_rmses_from_recomputation(save)
+            _, save["rmses"] = recomp.recompute_trueskill(save)
+            saves_handler.save_algorithm_pickle(save)
+    elif type(save['sort_alg']) == sa.HybridTrueSkill:
+        if not save["sort_alg"].is_rating or "rmses" not in save or not len(
+                save["rmses"]) == (save["sort_alg"].sort_alg.comp_count-1):
+            _, save["rmses"] = recomp.recompute_hybridtrueskill(save)
+            saves_handler.save_algorithm_pickle(save)
     else:
         if "rmses" not in save:
             save["rmses"] = []
+            saves_handler.save_algorithm_pickle(save)
 
     return save["rmses"]
 
 
-def create_rmses_from_recomputation(save: dict) -> None:
+def get_convergence(save) -> List[float]:
     """
-    Computes RMS errors for the provided 'save' using the appropriate algorithm.
+    Retrieves the convergence data from the given 'save' dictionary and provides 
+    suitable representation of the RMS errors.
 
     Args:
         save (dict): The dictionary containing the necessary information.
+
+    Returns:
+        List[float]: A list containing the convergence data (RMS errors).
     """
-    if type(save['sort_alg']) == sa.TrueSkill:
-        save["rmses"] = recompute_trueskill(save)
-        saves_handler.save_algorithm_pickle(save)
+    rmses = update_convergence_save(save)
+    window = 10
+    if (len(rmses) // (2*window)) > 0:
+        return moving_average(rmses, window)
+    return rmses
 
 
 def rmses_inference(save: dict, prev_ratings: dict, sort_alg: sa.TrueSkill):
@@ -51,67 +64,25 @@ def rmses_inference(save: dict, prev_ratings: dict, sort_alg: sa.TrueSkill):
         prev_ratings (dict): The previous ratings dictionary.
         sort_alg (TrueSkill): The TrueSkill sorting algorithm.
     """
-    get_convergence(save)
-    save["rmses"].append(calc_rmse(prev_ratings, sort_alg))
-    saves_handler.save_algorithm_pickle(save)
-
-
-def calc_rmse(prev_ratings: dict, sort_alg: sa.TrueSkill) -> float:
-    """
-    Calculates the Root Mean Square Error (RMSE) between previous ratings and current 
-    ratings.
-
-    Args:
-        prev_ratings (dict): The previous ratings dictionary.
-        sort_alg (TrueSkill): The TrueSkill sorting algorithm.
-
-    Returns:
-        float: The computed RMSE.
-    """
+    update_convergence_save(save)
     rmse = math.sqrt(
         sum(
             (prev_ratings[key].mu - sort_alg.ratings[key].mu) ** 2
             for key in sort_alg.data) / sort_alg.n)
-    return rmse
+    save["rmses"].append(rmse)
+    saves_handler.save_algorithm_pickle(save)
 
 
-def recompute_trueskill(save: dict) -> List[float]:
+def moving_average(values: List[float], window: int) -> List[float]:
     """
-    Recomputes TrueSkill algorithm based on the data in 'save' and returns the RMS 
-    errors.
+    Computes the moving average of a given data list with a specified window size.
 
     Args:
-        save (dict): The dictionary containing the necessary information.
+        data (List[float]): A list of numerical values.
+        window (int): The size of the window for moving average computation.
 
     Returns:
-        List[float]: The computed RMS errors.
+        List[float]: A list containing the moving average of the input data.
     """
-    csv = pd.read_csv(save['path_to_save'] + '.csv')
-    sort_alg = sa.TrueSkill(
-        data=save['sort_alg'].data,
-        comparison_max=save['sort_alg'].comparison_max)
-    rmses = []
-    prev_ratings = copy.deepcopy(sort_alg.ratings)
-
-    for i, i_df in csv.iterrows():
-        res = i_df['result'].replace(
-            "[", "").replace(
-            "]", "").replace(
-            "'", "").split(", ")
-
-        diff_lvls = [
-            sa.DiffLevel(
-                abs([int(s) for s in dl if s.isdigit()][0]))
-            for dl in i_df['diff_levels'].split(", ")]
-
-        if i_df['undone']:
-            pass
-        else:
-            sort_alg.inference(i_df['user'], res, diff_lvls)
-
-            if i > 0:
-                rmses.append(calc_rmse(prev_ratings, sort_alg))
-
-            prev_ratings = copy.deepcopy(sort_alg.ratings)
-
-    return rmses
+    weights = np.repeat(1.0, window) / window
+    return np.convolve(values, weights, 'valid')
