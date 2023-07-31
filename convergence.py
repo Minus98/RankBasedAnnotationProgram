@@ -16,10 +16,15 @@ def get_convergence(save: dict) -> List[float]:
     Returns:
         List[float]: The computed RMS errors.
     """
-    if type(save['sort_alg']) in [sa.TrueSkill]:
+    if type(save['sort_alg']) == sa.TrueSkill:
         if "rmses" not in save or not len(
                 save["rmses"]) == (save["sort_alg"].comp_count-1):
-            create_rmses_from_recomputation(save)
+            _, save["rmses"] = recomp.recompute_trueskill(save)
+            saves_handler.save_algorithm_pickle(save)
+    elif type(save['sort_alg']) == sa.HybridTrueSkill:
+        if not save["sort_alg"].is_rating or "rmses" not in save or not len(
+                save["rmses"]) == (save["sort_alg"].sort_alg.comp_count-1):
+            _, save["rmses"] = recomp.recompute_hybridtrueskill(save)
             saves_handler.save_algorithm_pickle(save)
     else:
         if "rmses" not in save:
@@ -27,19 +32,6 @@ def get_convergence(save: dict) -> List[float]:
             saves_handler.save_algorithm_pickle(save)
 
     return save["rmses"]
-
-
-def create_rmses_from_recomputation(save: dict) -> None:
-    """
-    Computes RMS errors for the provided 'save' using the appropriate algorithm.
-
-    Args:
-        save (dict): The dictionary containing the necessary information.
-    """
-    if type(save['sort_alg']) == sa.TrueSkill:
-        _, save["rmses"] = recomp.recompute_trueskill(save)
-    elif type(save['sort_alg']) == sa.HybridTrueSkill:
-        _, save["rmses"] = recomp.recompute_hybridtrueskill(save)
 
 
 def rmses_inference(save: dict, prev_ratings: dict, sort_alg: sa.TrueSkill):
