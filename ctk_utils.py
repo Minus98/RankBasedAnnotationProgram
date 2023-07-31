@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 
 
-def file_2_CTkImage(img_src: str, height) -> List[ctk.CTkImage]:
+def file_2_CTkImage(img_src: str, height=None, width=None) -> List[ctk.CTkImage]:
     """
     Convert an image file to a list of CTkImage objects.
 
@@ -28,10 +28,14 @@ def file_2_CTkImage(img_src: str, height) -> List[ctk.CTkImage]:
     if extension == '.nii':
         ctk_imgs = []
         nib_imgs = nib.load(img_src).get_fdata()
-
         for i in range(nib_imgs.shape[2]):
             img = nib_imgs[:, :, i]
-            resize_factor = height / img.shape[1]
+            if height:
+                resize_factor = height / img.shape[1]
+            elif width:
+                resize_factor = width / img.shape[0]
+            else:
+                resize_factor = 1
             new_shape = (
                 int(img.shape[0] * resize_factor),
                 int(img.shape[1] * resize_factor))
@@ -42,4 +46,8 @@ def file_2_CTkImage(img_src: str, height) -> List[ctk.CTkImage]:
                     size=(new_shape)))
         return ctk_imgs
     else:
-        return [ctk.CTkImage(Image.open(img_src), size=(height, height))]
+        if height:
+            size = (height, height)
+        elif width:
+            size = (width, width)
+        return [ctk.CTkImage(Image.open(img_src), size=size)]

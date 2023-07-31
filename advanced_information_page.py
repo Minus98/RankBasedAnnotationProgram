@@ -363,81 +363,10 @@ class AdvancedInformationPage():
             self.tab_view.tab("Current Ordering"),
             self.sort_alg.get_result(),
             utils.get_full_path(self.dir_rel_path),
-            image_height=self.root.winfo_screenheight() // 8)
+            image_width=self.root.winfo_screenwidth() // 14)
 
         self.tab_view.tab("Current Ordering").columnconfigure(0, weight=1)
         self.ordering_frame.grid(row=0, column=0)
-
-    def validate_number(self, value: str):
-        """
-        Validation function used to see if entry contains an integer.
-
-        Args:
-            value (str): The string that is to be validated.
-        """
-        return value.isnumeric() or not value
-
-    def increment_page(self):
-        self.current_page.set(
-
-            int(self.current_page.get()) + 1)
-
-        self.page_changed()
-
-    def decrement_page(self):
-        self.current_page.set(
-            int(self.current_page.get()) - 1)
-
-        self.page_changed()
-
-    def page_changed(self):
-
-        page = int(self.current_page.get())
-
-        if page < 1:
-            self.current_page.set(1)
-            page = 1
-        elif page > self.last_page:
-            self.current_page.set(self.last_page)
-            page = self.last_page
-
-        self.load_page(page)
-
-    def load_page(self, page_number):
-
-        for child in self.images_frame.winfo_children():
-            child.destroy()
-
-        ordered_results = self.sort_alg.get_result()
-
-        start_index = self.images_per_page*(page_number-1)
-
-        images_to_show = ordered_results[start_index: start_index +
-                                         self.images_per_page]
-
-        dir_path = utils.get_full_path(self.dir_rel_path)
-        image_height = self.root.winfo_screenheight()/8
-
-        for index, img_src in enumerate(images_to_show):
-            full_img_path = dir_path + "/" + img_src
-            image = ctk_utils.file_2_CTkImage(
-                full_img_path, image_height)[0]
-
-            preview_image_frame = ctk.CTkFrame(self.images_frame)
-
-            preview_image = ctk.CTkLabel(
-                preview_image_frame, image=image, text="")
-            preview_image.grid(row=0, column=0, padx=5, pady=5)
-            preview_image_frame.grid(row=index//self.images_per_row,
-                                     column=index % self.images_per_row, padx=3, pady=3)
-
-            img_label = ctk.CTkLabel(
-                master=preview_image, text=start_index + index + 1,
-                font=('Helvetica bold', 18),
-                width=25, height=25, bg_color=preview_image_frame.cget(
-                    'fg_color'))
-            img_label.place(relx=0, rely=1,
-                            anchor="sw")
 
     def generate_rating_distribution(self):
 
@@ -462,7 +391,7 @@ class AdvancedInformationPage():
         self.rating_frame = Pagination(
             self.tab_view.tab("Rating Distribution"),
             [], utils.get_full_path(self.dir_rel_path),
-            image_height=self.root.winfo_screenheight() / 8)
+            image_width=self.root.winfo_screenwidth() // 14)
 
         self.rating_changed()
 

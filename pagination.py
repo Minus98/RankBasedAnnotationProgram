@@ -11,7 +11,7 @@ class Pagination(ctk.CTkFrame):
     def __init__(
             self, master: ctk.CTkBaseClass, data: List[str],
             src_dir: str, images_per_row: int = 5, images_per_page: int = 15,
-            image_height=100, image_label=None):
+            image_width=130, image_label=None):
 
         ctk.CTkFrame.__init__(self, master)
 
@@ -21,7 +21,7 @@ class Pagination(ctk.CTkFrame):
         self.images_per_page = images_per_page
         self.images_per_row = images_per_row
         self.last_page = math.ceil(len(data) / self.images_per_page)
-        self.image_height = image_height
+        self.image_width = image_width
 
         self.image_label = image_label
 
@@ -61,7 +61,7 @@ class Pagination(ctk.CTkFrame):
         for index, img_src in enumerate(images_to_show):
             full_img_path = self.src_dir + "/" + img_src
             image = ctk_utils.file_2_CTkImage(
-                full_img_path, self.image_height)[0]
+                full_img_path, width=self.image_width)[0]
 
             preview_image_frame = ctk.CTkFrame(self.images_frame)
 
