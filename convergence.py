@@ -36,10 +36,20 @@ def update_convergence_save(save: dict) -> List[float]:
     return save["rmses"]
 
 
-def get_convergence(save):
+def get_convergence(save) -> List[float]:
+    """
+    Retrieves the convergence data from the given 'save' dictionary and provides 
+    suitable representation of the RMS errors.
+
+    Args:
+        save (dict): The dictionary containing the necessary information.
+
+    Returns:
+        List[float]: A list containing the convergence data (RMS errors).
+    """
     rmses = update_convergence_save(save)
     window = 10
-    if len(rmses) // 3 > 0:
+    if (len(rmses) // (2*window)) > 0:
         return moving_average(rmses, window)
     return rmses
 
@@ -63,6 +73,16 @@ def rmses_inference(save: dict, prev_ratings: dict, sort_alg: sa.TrueSkill):
     saves_handler.save_algorithm_pickle(save)
 
 
-def moving_average(values, window):
+def moving_average(values: List[float], window: int) -> List[float]:
+    """
+    Computes the moving average of a given data list with a specified window size.
+
+    Args:
+        data (List[float]): A list of numerical values.
+        window (int): The size of the window for moving average computation.
+
+    Returns:
+        List[float]: A list containing the moving average of the input data.
+    """
     weights = np.repeat(1.0, window) / window
     return np.convolve(values, weights, 'valid')
