@@ -18,10 +18,13 @@ def get_convergence(save: dict) -> List[float]:
     Returns:
         List[float]: The computed RMS errors.
     """
-
-    if "rmses" not in save or not len(
-            save["rmses"]) == (save["sort_alg"].comp_count-1):
-        create_rmses_from_recomputation(save)
+    if type(save['sort_alg']) == sa.TrueSkill:
+        if "rmses" not in save or not len(
+                save["rmses"]) == (save["sort_alg"].comp_count-1):
+            create_rmses_from_recomputation(save)
+    else:
+        if "rmses" not in save:
+            save["rmses"] = []
 
     return save["rmses"]
 
@@ -83,7 +86,6 @@ def recompute_trueskill(save: dict) -> List[float]:
     Returns:
         List[float]: The computed RMS errors.
     """
-    print('hi')
     csv = pd.read_csv(save['path_to_save'] + '.csv')
     sort_alg = sa.TrueSkill(
         data=save['sort_alg'].data,
