@@ -1,12 +1,14 @@
 import math
 from typing import List
 
+import numpy as np
+
 import recomputation as recomp
 import saves_handler
 import sorting_algorithms as sa
 
 
-def get_convergence(save: dict) -> List[float]:
+def update_convergence_save(save: dict) -> List[float]:
     """
     Computes and returns the RMS errors for the provided 'save'.
 
@@ -34,6 +36,14 @@ def get_convergence(save: dict) -> List[float]:
     return save["rmses"]
 
 
+def get_convergence(save):
+    rmses = update_convergence_save(save)
+    window = 10
+    if len(rmses) // 3 > 0:
+        return moving_average(rmses, window)
+    return rmses
+
+
 def rmses_inference(save: dict, prev_ratings: dict, sort_alg: sa.TrueSkill):
     """
     Computes RMS errors for the provided 'save' using the appropriate algorithm and 
@@ -44,10 +54,15 @@ def rmses_inference(save: dict, prev_ratings: dict, sort_alg: sa.TrueSkill):
         prev_ratings (dict): The previous ratings dictionary.
         sort_alg (TrueSkill): The TrueSkill sorting algorithm.
     """
-    get_convergence(save)
+    update_convergence_save(save)
     rmse = math.sqrt(
         sum(
             (prev_ratings[key].mu - sort_alg.ratings[key].mu) ** 2
             for key in sort_alg.data) / sort_alg.n)
     save["rmses"].append(rmse)
     saves_handler.save_algorithm_pickle(save)
+
+
+def moving_average(values, window):
+    weights = np.repeat(1.0, window) / window
+    return np.convolve(values, weights, 'valid')
