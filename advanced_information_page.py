@@ -14,6 +14,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import convergence as conv
 import ctk_utils
 import utils
+from pagination import Pagination
 
 
 class AdvancedInformationPage():
@@ -175,16 +176,6 @@ class AdvancedInformationPage():
 
         self.display_convergence()
 
-        alg = type(self.sort_alg).__name__
-        if alg == "TrueSkill":
-            self.display_current_ordering()
-        elif alg == "RatingAlgorithm":
-            self.display_rating_distribution()
-        elif alg == "HybridTrueSkill":
-            self.display_rating_distribution()
-            if not self.sort_alg.is_rating:
-                self.display_current_ordering()
-
         self.menu_button.grid(row=1, column=0, columnspan=2)
 
     def display_general_information(self):
@@ -238,45 +229,6 @@ class AdvancedInformationPage():
         # use a placeholder for the first 100ms...
         self.root.after(100, lambda: self.replace_placeholder(
             self.place_holder_frame, self.canvas_widget))
-
-    def display_current_ordering(self):
-        """
-        Displays the current ordering tab.
-        """
-
-        self.tab_view.tab("Current Ordering").columnconfigure(0, weight=1)
-        self.tab_view.tab("Current Ordering").rowconfigure(0, weight=5)
-        self.tab_view.tab("Current Ordering").rowconfigure(0, weight=1)
-
-        for i in range(self.images_per_row):
-            self.images_frame.columnconfigure(
-                i, weight=1, uniform="images_frame")
-
-        for i in range(math.ceil(self.images_per_page/self.images_per_row)):
-            self.images_frame.rowconfigure(i, weight=1, uniform="images_frame")
-
-        self.images_frame.grid(row=0, column=0)
-
-    def display_rating_distribution(self):
-        """
-        Displays the rating distribution tab.
-        """
-
-        self.tab_view.tab("Rating Distribution").columnconfigure(0, weight=1)
-        self.tab_view.tab("Rating Distribution").rowconfigure(0, weight=1)
-        self.tab_view.tab("Rating Distribution").rowconfigure(1, weight=5)
-
-        self.ratings_menu.grid(row=0, column=0, sticky="e")
-
-        for i in range(self.images_per_row):
-            self.ratings_frame.columnconfigure(
-                i, weight=1, uniform="ratings_frame")
-
-        for i in range(math.ceil(self.images_per_page/self.images_per_row)):
-            self.ratings_frame.rowconfigure(
-                i, weight=1, uniform="ratings_frame")
-
-        self.ratings_frame.grid(row=1, column=0)
 
     def get_status(self, count: int, max_count: int) -> Tuple[str,
                                                               Optional[str]]:
@@ -407,50 +359,14 @@ class AdvancedInformationPage():
 
     def generate_ordering_frame(self):
 
-        self.images_frame = ctk.CTkFrame(
-            master=self.tab_view.tab("Current Ordering"))
+        self.ordering_frame = Pagination(
+            self.tab_view.tab("Current Ordering"),
+            self.sort_alg.get_result(),
+            utils.get_full_path(self.dir_rel_path),
+            image_height=self.root.winfo_screenheight() // 8)
 
-        pagination_widget = self.create_pagination_widget()
-        pagination_widget.grid(row=1, column=0)
-        self.load_page(1)
-
-    def create_pagination_widget(self):
-
-        pagination_frame = ctk.CTkFrame(
-            master=self.tab_view.tab("Current Ordering"))
-
-        self.current_page = ctk.StringVar(value=1)
-
-        previous_page_button = ctk.CTkButton(
-            master=pagination_frame, text="<", width=35, height=35,
-            font=('Helvetica bold', 20),
-            command=self.decrement_page)
-
-        next_page_button = ctk.CTkButton(
-            master=pagination_frame, text=">", width=35, height=35,
-            font=('Helvetica bold', 20),
-            command=self.increment_page)
-
-        vcmd = (self.root.register(self.validate_number), '%P')
-
-        current_page_entry = ctk.CTkEntry(
-            master=pagination_frame, width=35, height=35,
-            font=('Helvetica bold', 16), justify="center", validate='key',
-            validatecommand=vcmd,
-            textvariable=self.current_page)
-
-        current_page_entry.bind("<Return>", lambda event: self.page_changed())
-
-        max_page_label = ctk.CTkLabel(
-            master=pagination_frame, text="of " + str(self.last_page),
-            font=('Helvetica bold', 16))
-
-        previous_page_button.grid(row=0, column=0, padx=5, pady=3)
-        current_page_entry.grid(row=0, column=1, padx=(5, 2), pady=3)
-        max_page_label.grid(row=0, column=2, padx=(2, 5), pady=3)
-        next_page_button.grid(row=0, column=3, padx=5, pady=3)
-
-        return pagination_frame
+        self.tab_view.tab("Current Ordering").columnconfigure(0, weight=1)
+        self.ordering_frame.grid(row=0, column=0)
 
     def validate_number(self, value: str):
         """
@@ -535,24 +451,30 @@ class AdvancedInformationPage():
         self.ratings_menu = ctk.CTkOptionMenu(
             self.tab_view.tab("Rating Distribution"),
             values=self.custom_ratings,
-            command=lambda event: self.load_rating_page(1))
+            command=lambda event: self.rating_changed())
 
-        self.ratings_frame = ctk.CTkFrame(
-            self.tab_view.tab("Rating Distribution"))
-
-        # pd.read_csv()
         csv_path = utils.get_full_path(self.save_obj["path_to_save"] + ".csv")
         df = pd.read_csv(csv_path, converters={"result": ast.literal_eval})
-
         ratings_df = df[(df["type"] == "Rating") & (~df["undone"])]
 
         self.ratings = ratings_df["result"].to_list()
-        self.load_rating_page(1)
 
-    def load_rating_page(self, page_number):
+        self.rating_frame = Pagination(
+            self.tab_view.tab("Rating Distribution"),
+            [], utils.get_full_path(self.dir_rel_path),
+            image_height=self.root.winfo_screenheight() / 8)
 
-        for child in self.ratings_frame.winfo_children():
-            child.destroy()
+        self.rating_changed()
+
+        self.tab_view.tab("Rating Distribution").columnconfigure(0, weight=1)
+        self.tab_view.tab("Rating Distribution").rowconfigure(0, weight=1)
+        self.tab_view.tab("Rating Distribution").rowconfigure(1, weight=5)
+
+        self.ratings_menu.grid(row=0, column=0, sticky="e")
+
+        self.rating_frame.grid(row=1, column=0)
+
+    def rating_changed(self):
 
         current_selection = self.ratings_menu.get()
         current_rating = self.custom_ratings.index(current_selection)
@@ -561,27 +483,4 @@ class AdvancedInformationPage():
             rating[0] for rating in self.ratings
             if rating[1] == current_rating]
 
-        start_index = self.images_per_page*(page_number-1)
-
-        images_to_show = filtered_ratings[start_index: start_index +
-                                          self.images_per_page]
-
-        dir_path = utils.get_full_path(self.dir_rel_path)
-        image_height = self.root.winfo_screenheight()/8
-
-        for index, img_src in enumerate(images_to_show):
-            full_img_path = dir_path + "/" + img_src
-            image = ctk_utils.file_2_CTkImage(
-                full_img_path, image_height)[0]
-            preview_image = ctk.CTkLabel(
-                self.ratings_frame, image=image, text="")
-            preview_image.grid(row=index//self.images_per_row,
-                               column=index % self.images_per_row, padx=3, pady=3)
-
-            img_label = ctk.CTkLabel(
-                master=preview_image, text=current_rating,
-                font=('Helvetica bold', 18),
-                width=25, height=25, bg_color=self.ratings_frame.cget(
-                    'fg_color'))
-            img_label.place(relx=0, rely=1,
-                            anchor="sw")
+        self.rating_frame.change_data(filtered_ratings)
