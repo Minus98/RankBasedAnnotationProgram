@@ -142,8 +142,9 @@ def recompute_hybridtrueskill(save: dict) -> Tuple[sa.HybridTrueSkill,
                 if i > len(sort_alg.data):
                     rmse = math.sqrt(
                         sum(
-                            (prev_ratings[key].mu - sort_alg.sort_alg.ratings[key].mu)
-                            ** 2 for key in sort_alg.data) / sort_alg.sort_alg.n)
+                            (prev_ratings[key].mu -
+                             sort_alg.sort_alg.ratings[key].mu)
+                            ** 2 for key in sort_alg.sort_alg.data) / sort_alg.sort_alg.n)
                     rmses.append(rmse)
 
                 prev_ratings = copy.deepcopy(sort_alg.sort_alg.ratings)
