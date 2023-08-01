@@ -24,7 +24,7 @@ class AdvancedInformationPage():
 
     def __init__(
             self, root: ctk.CTk, save_obj: dict, menu_callback: Callable,
-            selected_user: Optional[str]):
+            selected_user: str):
         """
         Initializes the AdvancedInformationPage instance.
 
@@ -33,6 +33,7 @@ class AdvancedInformationPage():
             save_obj (dict): The save object containing various parameters.
             menu_callback (function): Callback function to return to the main 
             menu.
+            selected_user (str): The currently selected user.
         """
 
         self.root = root
@@ -455,12 +456,33 @@ class AdvancedInformationPage():
         self.rating_frame.change_data(
             filtered_ratings, image_label=current_rating)
 
-    def images_available(self, path):
+    def images_available(self, path: str) -> bool:
+        """
+        Checks if all the images of the sorting_algorithm could be found at the provided
+        path.
+
+        Args:
+            path (str): The path that is to be checked.
+        Returns:
+            bool: True if all images were found in the provided directory, otherwise
+                  false
+        """
 
         return all([os.path.isfile(path + "/" + k)
                     for k in self.save_obj["sort_alg"].data])
 
-    def get_images_not_found_widget(self, parent):
+    def get_images_not_found_widget(self, parent: ctk.CTkBaseClass):
+        """
+        Creates and returns a widget that can be used to select the directory containing
+        the images of the sorting algorithm.
+
+        Args:
+            parent (ctk.CTkBaseClass): The parent widget that is to facilitate the 
+                                       widget.
+        Returns:
+            ctk.CTkFrame: The constructed widget, including a label, a directory entry
+                          and a submit button.
+        """
 
         widget = ctk.CTkFrame(parent)
 
@@ -512,6 +534,14 @@ class AdvancedInformationPage():
             submit_button.configure(state=ctk.NORMAL)
 
     def submit_directory(self, directory_var: ctk.StringVar):
+        """
+        Saves the directory path to the user and refreshes the GUI so that the images
+        are fetched.
+
+        Args: 
+            directory_var (ctk.StringVar): The string variable containing the path where
+                                           the images are located.
+        """
 
         path = directory_var.get()
 
