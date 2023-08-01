@@ -97,7 +97,7 @@ class Pagination(ctk.CTkFrame):
             preview_image_frame.grid(row=index//self.images_per_row,
                                      column=index % self.images_per_row, padx=3, pady=3)
 
-            if not self.image_label is None:
+            if self.image_label is not None:
                 label = self.image_label
             else:
                 label = start_index + index + 1
