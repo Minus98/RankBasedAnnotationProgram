@@ -7,6 +7,7 @@ from typing import Any, Callable, Optional, Tuple
 import customtkinter as ctk
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -418,19 +419,23 @@ class AdvancedInformationPage():
             ratings_df = df[(df["type"] == "Rating") & (~df["undone"])]
 
             self.ratings = ratings_df["result"].to_list()
+            hist_canvas_widget = self.create_histogram()
 
             self.rating_frame = Pagination(
                 self.tab_view.tab("Rating Distribution"),
-                [], self.dir_path,
+                [], self.dir_path, images_per_page=10,
                 image_width=self.root.winfo_screenwidth() // 14)
 
             self.rating_changed()
 
+            self.tab_view.tab("Rating Distribution").rowconfigure(0, weight=4)
             self.tab_view.tab("Rating Distribution").rowconfigure(1, weight=5)
 
-            self.ratings_menu.grid(row=0, column=0, sticky="e")
+            hist_canvas_widget.grid(row=0, column=0)
 
-            self.rating_frame.grid(row=1, column=0)
+            self.ratings_menu.grid(row=0, column=1, sticky="se")
+
+            self.rating_frame.grid(row=1, column=0, columnspan=2)
         else:
 
             not_found_widget = self.get_images_not_found_widget(
@@ -560,3 +565,48 @@ class AdvancedInformationPage():
         elif alg == "HybridTrueSkill":
             if not self.sort_alg.is_rating:
                 self.generate_ordering_frame()
+
+    def create_histogram(self):
+
+        fig, ax = plt.subplots()
+        fig.set_size_inches(5, 2)
+        fig.set_facecolor("#212121")
+        # fig.canvas.mpl_connect("motion_notify_event", self.hover)
+        ax.set_facecolor("#1a1a1a")
+        """
+        self.fig = fig
+        self.ax = ax
+        self.annot = ax.annotate(
+            "", xy=(0, 0),
+            xytext=(-20, 20),
+            textcoords="offset points", bbox=dict(
+                boxstyle="round", fc="#1f538d"),
+            arrowprops=dict(arrowstyle="simple"))
+        self.annot.set_visible(False)
+        """
+
+        # rmses = conv.get_convergence(self.save_obj)
+
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.set_ylabel("Amount")
+        plt.subplots_adjust(bottom=0.15)
+
+        labels = np.array([r[1] for r in self.ratings])
+
+        d = np.diff(np.unique(labels)).min()
+        left_of_first_bin = labels.min() - float(d)/2
+        right_of_last_bin = labels.max() + float(d)/2
+        plt.hist(labels, np.arange(
+            left_of_first_bin, right_of_last_bin + d, d),
+            edgecolor='black', linewidth=1.2)
+        plt.xticks(range(labels.max() + 1))
+        # ax.hist(labels, bins=[0, 1, 2, 3, 4, 5, 6])  # range(6))
+        # ax.hist(labels, bins=6)
+        # self.line, = ax.plot(rmses)
+
+        canvas = FigureCanvasTkAgg(
+            fig, master=self.tab_view.tab("Rating Distribution"))
+        canvas.draw()
+
+        return canvas.get_tk_widget()
