@@ -144,10 +144,13 @@ class AnnotationGui():
 
     def display_information_screen(self, save_obj: dict):
 
-        self.clear_screen()
-        self.advanced_information_screen = AdvancedInformationPage(
-            self.root, save_obj, self.display_menu)
-        self.advanced_information_screen.display()
+        if hasattr(self, 'selected_user'):
+            self.clear_screen()
+            self.advanced_information_screen = AdvancedInformationPage(
+                self.root, save_obj, self.display_menu, self.selected_user)
+            self.advanced_information_screen.display()
+        else:
+            UserSelectionPopOut(self.root, self.center, self.select_user)
 
     def center(self, w: int, h: int) -> Tuple[int, int]:
         """

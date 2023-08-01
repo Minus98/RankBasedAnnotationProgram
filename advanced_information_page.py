@@ -11,6 +11,7 @@ import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 import convergence as conv
+import saves_handler
 import utils
 from pagination import Pagination
 
@@ -22,7 +23,8 @@ class AdvancedInformationPage():
     """
 
     def __init__(
-            self, root: ctk.CTk, save_obj: dict, menu_callback: Callable):
+            self, root: ctk.CTk, save_obj: dict, menu_callback: Callable,
+            selected_user: Optional[str]):
         """
         Initializes the AdvancedInformationPage instance.
 
@@ -36,6 +38,7 @@ class AdvancedInformationPage():
         self.root = root
         self.menu_callback = menu_callback
         self.save_obj = save_obj
+        self.selected_user = selected_user
 
         self.sort_alg = self.save_obj["sort_alg"]
 
@@ -78,23 +81,24 @@ class AdvancedInformationPage():
             self.general_info_frame, text=str(len(self.sort_alg.data)),
             font=('Helvetica bold', 20))
 
-        self.dir_rel_path = ""
+        self.dir_path = ""
 
         if os.path.isdir(utils.get_full_path(
                 self.save_obj["image_directory"])):
-            self.dir_rel_path = self.save_obj["image_directory"]
+            self.dir_path = utils.get_full_path(
+                self.save_obj["image_directory"])
         elif self.selected_user:
             if self.selected_user in self.save_obj['user_directory_dict']:
-                rel_path = self.save_obj['user_directory_dict'][
+                path = self.save_obj['user_directory_dict'][
                     self.selected_user]
 
-                if os.path.isdir(utils.get_full_path(rel_path)):
-                    self.dir_rel_path = rel_path
+                if os.path.isdir(path):
+                    self.dir_path = path
 
-        if self.dir_rel_path:
+        if self.dir_path:
             self.save_image_count_value.bind(
                 "<Button-1>", command=lambda event,
-                path=self.dir_rel_path: self.open_folder(path))
+                path=self.dir_path: self.open_folder(path))
 
         comp_count = self.sort_alg.get_comparison_count()
 
@@ -261,22 +265,21 @@ class AdvancedInformationPage():
         canvas.grid(
             row=1, column=0, pady=(5, 10))
 
-    def open_folder(self, rel_path: str):
+    def open_folder(self, path: str):
         """
         Opens a folder in the file explorer of the operating system. If the provided 
         folder does not exist, nothing happens.
 
         Args:
-            rel_path (str): The relative path to the folder that is to be opened. 
+            path (str): The full path to the folder that is to be opened. 
         """
-        full_path = utils.get_full_path(rel_path)
-        if os.path.isdir(full_path):
+        if os.path.isdir(path):
             if sys.platform == "linux" or sys.platform == "linux2":
-                os.system('xdg-open "%s"' % full_path)
+                os.system('xdg-open "%s"' % path)
             elif sys.platform == "Darwin" or sys.platform == "darwin":
-                os.system('open "%s"' % full_path)
+                os.system('open "%s"' % path)
             else:
-                os.startfile(full_path)
+                os.startfile(path)
 
     def hover(self, event: Any):
         """
@@ -368,53 +371,73 @@ class AdvancedInformationPage():
         Creates the list of the current ordering of elements.
         """
 
-        self.ordering_frame = Pagination(
-            self.tab_view.tab("Current Ordering"),
-            self.sort_alg.get_result(),
-            utils.get_full_path(self.dir_rel_path),
-            image_width=self.root.winfo_screenwidth() // 14)
+        for child in self.tab_view.tab("Current Ordering").winfo_children():
+            child.destroy()
+
+        if self.images_available(self.dir_path):
+            ordering_frame = Pagination(
+                self.tab_view.tab("Current Ordering"),
+                self.sort_alg.get_result(),
+                self.dir_path,
+                image_width=self.root.winfo_screenwidth() // 14)
+            ordering_frame.grid(row=0, column=0)
+        else:
+            could_not_find_images_label = self.get_images_not_found_widget(
+                self.tab_view.tab("Current Ordering"))
+            could_not_find_images_label.grid(row=0, column=0)
 
         self.tab_view.tab("Current Ordering").columnconfigure(0, weight=1)
         self.tab_view.tab("Current Ordering").rowconfigure(0, weight=1)
-        self.ordering_frame.grid(row=0, column=0)
 
     def generate_rating_distribution(self):
         """
         Creates the rating distribution view.
         """
 
-        if "custom_ratings" in self.save_obj:
-            self.custom_ratings = self.save_obj["custom_ratings"]
+        for child in self.tab_view.tab("Rating Distribution").winfo_children():
+            child.destroy()
+
+        if self.images_available(self.dir_path):
+
+            if "custom_ratings" in self.save_obj:
+                self.custom_ratings = self.save_obj["custom_ratings"]
+            else:
+                with open('prompts.json', 'r') as file:
+                    prompts = json.load(file)
+                self.custom_ratings = prompts['rating_buttons']
+
+            self.ratings_menu = ctk.CTkOptionMenu(
+                self.tab_view.tab("Rating Distribution"),
+                values=self.custom_ratings,
+                command=lambda event: self.rating_changed())
+
+            csv_path = utils.get_full_path(
+                self.save_obj["path_to_save"] + ".csv")
+            df = pd.read_csv(csv_path, converters={"result": ast.literal_eval})
+            ratings_df = df[(df["type"] == "Rating") & (~df["undone"])]
+
+            self.ratings = ratings_df["result"].to_list()
+
+            self.rating_frame = Pagination(
+                self.tab_view.tab("Rating Distribution"),
+                [], self.dir_path,
+                image_width=self.root.winfo_screenwidth() // 14)
+
+            self.rating_changed()
+
+            self.tab_view.tab("Rating Distribution").rowconfigure(1, weight=5)
+
+            self.ratings_menu.grid(row=0, column=0, sticky="e")
+
+            self.rating_frame.grid(row=1, column=0)
         else:
-            with open('prompts.json', 'r') as file:
-                prompts = json.load(file)
-            self.custom_ratings = prompts['rating_buttons']
 
-        self.ratings_menu = ctk.CTkOptionMenu(
-            self.tab_view.tab("Rating Distribution"),
-            values=self.custom_ratings,
-            command=lambda event: self.rating_changed())
-
-        csv_path = utils.get_full_path(self.save_obj["path_to_save"] + ".csv")
-        df = pd.read_csv(csv_path, converters={"result": ast.literal_eval})
-        ratings_df = df[(df["type"] == "Rating") & (~df["undone"])]
-
-        self.ratings = ratings_df["result"].to_list()
-
-        self.rating_frame = Pagination(
-            self.tab_view.tab("Rating Distribution"),
-            [], utils.get_full_path(self.dir_rel_path),
-            image_width=self.root.winfo_screenwidth() // 14)
-
-        self.rating_changed()
+            not_found_widget = self.get_images_not_found_widget(
+                self.tab_view.tab("Rating Distribution"))
+            not_found_widget.grid(row=0, column=0)
 
         self.tab_view.tab("Rating Distribution").columnconfigure(0, weight=1)
         self.tab_view.tab("Rating Distribution").rowconfigure(0, weight=1)
-        self.tab_view.tab("Rating Distribution").rowconfigure(1, weight=5)
-
-        self.ratings_menu.grid(row=0, column=0, sticky="e")
-
-        self.rating_frame.grid(row=1, column=0)
 
     def rating_changed(self):
         """
@@ -431,3 +454,79 @@ class AdvancedInformationPage():
 
         self.rating_frame.change_data(
             filtered_ratings, image_label=current_rating)
+
+    def images_available(self, path):
+
+        return all([os.path.isfile(path + "/" + k)
+                    for k in self.save_obj["sort_alg"].data])
+
+    def get_images_not_found_widget(self, parent):
+
+        widget = ctk.CTkFrame(parent)
+
+        ctk.CTkLabel(
+            widget, text="Images not found", font=('Helvetica bold', 24)).grid(
+            row=0, column=0, pady=10, padx=10)
+
+        directory_var = ctk.StringVar()
+
+        directory_entry = ctk.CTkEntry(
+            master=widget, textvariable=directory_var,
+            placeholder_text="select the directory which contains the files",
+            width=500, height=40, font=('Helvetica bold', 16),
+            state=ctk.DISABLED)
+
+        submit_button = ctk.CTkButton(
+            widget, text="Submit", font=('Helvetica bold', 20),
+            command=lambda directory=directory_var: self.submit_directory(directory),
+            state=ctk.DISABLED, width=160, height=40)
+
+        directory_entry.bind(
+            "<Button-1>", command=lambda event, image_directory=directory_var,
+            button=submit_button: self.select_directory(
+                image_directory, button))
+
+        directory_entry.grid(row=1, column=0, pady=10, padx=10)
+
+        submit_button.grid(row=3, column=0, pady=10, padx=10)
+
+        return widget
+
+    def select_directory(self, directory_var: ctk.StringVar,
+                         submit_button: ctk.CTkButton):
+        """
+        Selects a directory using a file dialog.
+
+        Args:
+            event: The event that triggered the callback.
+            root (CTk): The root Tk object.
+            directory_var (StringVar): The directory.
+        """
+
+        directory = ctk.filedialog.askdirectory(
+            parent=self.root, initialdir=directory_var.get())
+
+        directory_var.set(directory)
+
+        if self.images_available(directory):
+            submit_button.configure(state=ctk.NORMAL)
+
+    def submit_directory(self, directory_var: ctk.StringVar):
+
+        path = directory_var.get()
+
+        self.save_obj['user_directory_dict'][self.selected_user] = path
+        saves_handler.save_algorithm_pickle(self.save_obj)
+
+        self.dir_path = path
+
+        alg = type(self.sort_alg).__name__
+
+        if alg == "RatingAlgorithm" or alg == "HybridTrueSkill":
+            self.generate_rating_distribution()
+
+        if alg == "TrueSkill":
+            self.generate_ordering_frame()
+        elif alg == "HybridTrueSkill":
+            if not self.sort_alg.is_rating:
+                self.generate_ordering_frame()
