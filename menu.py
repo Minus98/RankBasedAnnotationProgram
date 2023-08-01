@@ -1,16 +1,15 @@
 import json
 import os
 import pickle
-import random
 import sys
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 
 import customtkinter as ctk
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+import convergence as conv
 from creation_pop_out import CreationPopOut
 from delete_pop_out import DeletePopOut
 from utils import (add_hover, get_full_path, highlight, remove_highlight,
@@ -23,10 +22,11 @@ class MenuScreen():
     """
 
     def __init__(
-        self, root: ctk.CTk, display_menu_callback: Callable,
-        ordering_callback: Callable, center: Callable,
-        open_user_selection: Callable,
-            advanced_settings_callback: Callable):
+            self, root: ctk.CTk, display_menu_callback: Callable,
+            ordering_callback: Callable, center: Callable,
+            open_user_selection: Callable,
+            advanced_settings_callback: Callable,
+            information_page_callback: Callable):
         """
         Initializes the MenuScreen instance.
 
@@ -51,6 +51,7 @@ class MenuScreen():
         self.display_menu_callback = display_menu_callback
         self.ordering_callback = ordering_callback
         self.advanced_settings_callback = advanced_settings_callback
+        self.information_page_callback = information_page_callback
         self.center = center
         self.open_user_selection = open_user_selection
 
@@ -409,11 +410,8 @@ class MenuScreen():
         fig.set_facecolor("#1a1a1a")
         ax.set_facecolor("#1a1a1a")
 
-        place_holder_values = [random.randint(1, 6) / np.log(i)
-                               for i in np.arange(1.1, 3, 0.1)]
-
         ax.axis("off")
-        ax.plot(place_holder_values)
+        ax.plot(conv.get_convergence(save))
         fig.subplots_adjust(left=0, right=1, bottom=0,
                             top=1, wspace=0, hspace=0)
         canvas = FigureCanvasTkAgg(
@@ -427,7 +425,8 @@ class MenuScreen():
         more_information_button = ctk.CTkButton(
             master=self.save_info_frame, text="More information", height=45,
             font=('Helvetica bold', 20),
-            command=lambda index=index: print("Analyse " + str(index)))
+            command=lambda index=index: self.information_page_callback(
+                self.saves[index]))
 
         load_save_button = ctk.CTkButton(
             master=self.save_info_frame, text="Load", height=45,
@@ -497,7 +496,7 @@ class MenuScreen():
         if os.path.isdir(full_path):
             if sys.platform == "linux" or sys.platform == "linux2":
                 os.system('xdg-open "%s"' % full_path)
-            elif sys.platform == "Darwin":
+            elif sys.platform == "Darwin" or sys.platform == "darwin":
                 os.system('open "%s"' % full_path)
             else:
                 os.startfile(full_path)

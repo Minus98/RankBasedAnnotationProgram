@@ -3,6 +3,7 @@ from typing import Callable
 
 import customtkinter as ctk
 
+import saves_handler
 import utils
 from sorting_algorithms import SortingAlgorithm
 
@@ -232,7 +233,7 @@ class CreationPopOut():
         comparison_size_value = int(comparison_size.get())
         scroll_enabled_value = scroll_enabled.get()
 
-        utils.create_save(
+        saves_handler.create_save(
             name_value, alg_value, comparison_size_value, directory_value,
             scroll_enabled_value)
 
