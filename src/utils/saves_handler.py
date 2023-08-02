@@ -122,11 +122,7 @@ def get_full_path(path: str) -> str:
     if getattr(sys, 'frozen', False):
         application_path = os.path.dirname(sys.executable)
     elif __file__:
-        print(path)
         application_path = str(Path(os.path.dirname(__file__)).parent.parent)
 
-        print(application_path)
-
     path = application_path + "/" + path
-    print(path)
     return path.replace("\\", "/")
