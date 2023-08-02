@@ -3,7 +3,7 @@ from typing import Callable
 
 import customtkinter as ctk
 
-import utils
+import utils.saves_handler as saves_handler
 
 
 class DeletePopOut():
@@ -69,7 +69,7 @@ class DeletePopOut():
         Refreshes menu and destroys pop out.
         """
 
-        path = utils.get_full_path(self.save_obj["path_to_save"])
+        path = saves_handler.get_full_path(self.save_obj["path_to_save"])
 
         # Should the csv file be kept?
         os.remove(path + ".csv")

@@ -13,9 +13,9 @@ import pandas as pd
 from PIL import Image
 
 import convergence as conv
-import saves_handler
+import utils.saves_handler as saves_handler
 import sorting_algorithms as sa
-import utils
+import utils.ctk_utils as ctk_utils
 from image_directory_pop_out import ImageDirectoryPopOut
 from is_finished_pop_out import IsFinishedPopOut
 from switching_modes_pop_out import SwitchingModesPopOut
@@ -73,7 +73,7 @@ class OrderingScreen():
             master=self.root, text="0:00", font=('Helvetica bold', 30))
 
         try:
-            csv_df = pd.read_csv(utils.get_full_path(
+            csv_df = pd.read_csv(saves_handler.get_full_path(
                 self.save_obj["path_to_save"] + '.csv'))
         except Exception:
 
@@ -82,7 +82,7 @@ class OrderingScreen():
                          'undone', 'type'])
 
             df.to_csv(self.save_obj["path_to_save"] + ".csv", index=False)
-            csv_df = pd.read_csv(utils.get_full_path(
+            csv_df = pd.read_csv(saves_handler.get_full_path(
                 self.save_obj["path_to_save"] + '.csv'))
 
         if (type(self.sort_alg) == sa.HybridTrueSkill
@@ -151,9 +151,9 @@ class OrderingScreen():
             text_color="#777777")
 
         self.undo_label.bind(
-            "<Enter>", lambda event: utils.highlight_label(self.undo_label))
+            "<Enter>", lambda event: ctk_utils.highlight_label(self.undo_label))
         self.undo_label.bind(
-            "<Leave>", lambda event: utils.remove_highlight_label(
+            "<Leave>", lambda event: ctk_utils.remove_highlight_label(
                 self.undo_label))
         self.undo_label.bind(
             "<Button-1>", lambda event: self.undo_annotation())
@@ -516,7 +516,7 @@ class OrderingScreen():
                            'undone': [False],
                            'type': [annotation_type]})
 
-        output_path = utils.get_full_path(
+        output_path = saves_handler.get_full_path(
             self.save_obj["path_to_save"] + ".csv")
         df.to_csv(output_path, mode='a',
                   header=not os.path.exists(output_path), index=False)
@@ -525,7 +525,7 @@ class OrderingScreen():
         """
         Undo the last entry in the CSV file by marking it as undone.
         """
-        path = utils.get_full_path(self.save_obj["path_to_save"] + '.csv')
+        path = saves_handler.get_full_path(self.save_obj["path_to_save"] + '.csv')
         copy_df = pd.read_csv(path)
         copy_df.iloc[-1, copy_df.columns.get_loc('undone')] = True
         copy_df.to_csv(path, index=False)

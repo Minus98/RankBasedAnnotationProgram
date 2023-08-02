@@ -11,8 +11,7 @@ import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 import convergence as conv
-import saves_handler
-import utils
+import utils.saves_handler as saves_handler
 from pagination import Pagination
 
 
@@ -84,9 +83,9 @@ class AdvancedInformationPage():
 
         self.dir_path = ""
 
-        if os.path.isdir(utils.get_full_path(
+        if os.path.isdir(saves_handler.get_full_path(
                 self.save_obj["image_directory"])):
-            self.dir_path = utils.get_full_path(
+            self.dir_path = saves_handler.get_full_path(
                 self.save_obj["image_directory"])
         elif self.selected_user:
             if self.selected_user in self.save_obj['user_directory_dict']:
@@ -412,7 +411,7 @@ class AdvancedInformationPage():
                 values=self.custom_ratings,
                 command=lambda event: self.rating_changed())
 
-            csv_path = utils.get_full_path(
+            csv_path = saves_handler.get_full_path(
                 self.save_obj["path_to_save"] + ".csv")
             df = pd.read_csv(csv_path, converters={"result": ast.literal_eval})
             ratings_df = df[(df["type"] == "Rating") & (~df["undone"])]

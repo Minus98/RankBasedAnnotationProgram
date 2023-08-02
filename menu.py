@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 import convergence as conv
+import utils.ctk_utils as ctk_utils
+import utils.saves_handler as saves_handler
 from creation_pop_out import CreationPopOut
 from delete_pop_out import DeletePopOut
-from utils import (add_hover, get_full_path, highlight, remove_highlight,
-                   remove_hover)
 
 
 class MenuScreen():
@@ -58,7 +58,7 @@ class MenuScreen():
         with open('prompts.json', 'r') as file:
             prompts = json.load(file)
 
-        path = get_full_path("saves")
+        path = saves_handler.get_full_path("saves")
 
         self.paths = list(Path(path).glob('*.pickle'))
 
@@ -277,10 +277,10 @@ class MenuScreen():
             child.bind("<Button-1>", command=lambda event,
                        i=index: self.target_save(i))
 
-        add_hover(saved_annotations_row)
+        ctk_utils.add_hover(saved_annotations_row)
 
         if index == self.selected_save:
-            highlight(self.saved_annotations_frame)
+            ctk_utils.highlight(self.saved_annotations_frame)
 
     def new_annotation(self):
         """
@@ -313,13 +313,13 @@ class MenuScreen():
             for child in self.save_info_frame.winfo_children():
                 child.destroy()
 
-            remove_highlight(
+            ctk_utils.remove_highlight(
                 self.annotation_rows[self.selected_save],
                 self.og_row_color)
-            add_hover(self.annotation_rows[self.selected_save])
+            ctk_utils.add_hover(self.annotation_rows[self.selected_save])
 
-        remove_hover(self.annotation_rows[index])
-        highlight(self.annotation_rows[index], self.og_row_color)
+        ctk_utils.remove_hover(self.annotation_rows[index])
+        ctk_utils.highlight(self.annotation_rows[index], self.og_row_color)
 
         self.selected_save = index
         self.show_save_info(index)
@@ -359,12 +359,12 @@ class MenuScreen():
 
         dir_rel_path = ""
 
-        if os.path.isdir(get_full_path(save["image_directory"])):
+        if os.path.isdir(saves_handler.get_full_path(save["image_directory"])):
             dir_rel_path = save["image_directory"]
         elif self.selected_user and self.selected_user in save['user_directory_dict']:
             rel_path = save['user_directory_dict'][self.selected_user]
 
-            if os.path.isdir(get_full_path(rel_path)):
+            if os.path.isdir(saves_handler.get_full_path(rel_path)):
                 dir_rel_path = rel_path
 
         if dir_rel_path:
@@ -492,7 +492,7 @@ class MenuScreen():
         Args:
             rel_path (str): The relative path to the folder that is to be opened. 
         """
-        full_path = get_full_path(rel_path)
+        full_path = saves_handler.get_full_path(rel_path)
         if os.path.isdir(full_path):
             if sys.platform == "linux" or sys.platform == "linux2":
                 os.system('xdg-open "%s"' % full_path)

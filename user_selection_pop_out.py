@@ -4,7 +4,8 @@ from typing import Any, Callable
 
 import customtkinter as ctk
 
-from utils import add_hover, get_full_path
+import utils.ctk_utils as ctk_utils
+import utils.saves_handler as saves_handler
 
 
 class UserSelectionPopOut():
@@ -39,9 +40,9 @@ class UserSelectionPopOut():
         self.pop_out.rowconfigure(index=1, weight=1)
         self.pop_out.rowconfigure(index=2, weight=1)
 
-        path = Path(get_full_path('users.pickle'))
+        path = Path(saves_handler.get_full_path('users.pickle'))
         if path.is_file():
-            file = open(get_full_path("users.pickle"), 'rb')
+            file = open(saves_handler.get_full_path("users.pickle"), 'rb')
             self.saved_users = pickle.load(file)
         else:
             self.saved_users = []
@@ -117,7 +118,7 @@ class UserSelectionPopOut():
 
         save_name_label.grid(row=0, column=0, padx=10, pady=4, sticky="w")
 
-        add_hover(saved_users_row)
+        ctk_utils.add_hover(saved_users_row)
 
         delete_button = ctk.CTkLabel(
             master=saved_users_row, text="X", text_color="#C00000",
@@ -142,7 +143,7 @@ class UserSelectionPopOut():
         """
         self.saved_users.pop(i)
 
-        f = open(get_full_path("users.pickle"), "wb")
+        f = open(saves_handler.get_full_path("users.pickle"), "wb")
         pickle.dump(self.saved_users, f)
         f.close()
 
@@ -172,7 +173,7 @@ class UserSelectionPopOut():
 
         self.append_user_row(len(self.saved_users)-1, name)
 
-        f = open(get_full_path("users.pickle"), "wb")
+        f = open(saves_handler.get_full_path("users.pickle"), "wb")
         pickle.dump(self.saved_users, f)
         f.close()
 

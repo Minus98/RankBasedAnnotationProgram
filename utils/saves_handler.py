@@ -9,14 +9,13 @@ from typing import List, Optional
 import pandas as pd
 
 import sorting_algorithms as sa
-import utils
 
 
 def save_algorithm_pickle(save):
     """
     Save the current state of the algorithm to a pickle file.
     """
-    f = open(utils.get_full_path(
+    f = open(get_full_path(
         save["path_to_save"] + ".pickle"), "wb")
     pickle.dump(save, f)
     f.close()
@@ -112,3 +111,24 @@ def create_save(
     f = open(path + "/" + file_name + ".pickle", "wb")
     pickle.dump(save_obj, f)
     f.close()
+
+
+def get_full_path(path: str) -> str:
+    """
+    Get the full path of a file or directory.
+
+    Args:
+        path: The relative path.
+
+    Returns:
+        str: The full path.
+    """
+
+    if getattr(sys, 'frozen', False):
+        application_path = os.path.dirname(sys.executable)
+    elif __file__:
+        application_path = os.path.dirname(__file__)
+        application_path = os.path.dirname(application_path)
+
+    path = application_path + "/" + path
+    return path.replace("\\", "/")

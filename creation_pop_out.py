@@ -3,8 +3,8 @@ from typing import Callable
 
 import customtkinter as ctk
 
-import saves_handler
-import utils
+import utils.saves_handler as saves_handler
+import utils.ctk_utils as ctk_utils
 from sorting_algorithms import SortingAlgorithm
 
 
@@ -170,10 +170,10 @@ class CreationPopOut():
             text_color="#777777")
 
         self.advanced_label.bind(
-            "<Enter>", lambda event: utils.highlight_label(
+            "<Enter>", lambda event: ctk_utils.highlight_label(
                 self.advanced_label))
         self.advanced_label.bind(
-            "<Leave>", lambda event: utils.remove_highlight_label(
+            "<Leave>", lambda event: ctk_utils.remove_highlight_label(
                 self.advanced_label))
         self.advanced_label.bind(
             "<Button-1>", lambda event: self.transition_to_advanced())

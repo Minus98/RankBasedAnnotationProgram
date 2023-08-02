@@ -7,7 +7,7 @@ import customtkinter as ctk
 import pandas as pd
 
 import sorting_algorithms as sa
-import utils
+import utils.saves_handler as saves_handler
 from is_finished_pop_out import IsFinishedPopOut
 from ordering import OrderingScreen
 
@@ -228,7 +228,7 @@ class PairwiseOrderingScreen(OrderingScreen):
                            of the keys or None if not enough previous comparison are 
                            found.
         """
-        df_check = pd.read_csv(utils.get_full_path(
+        df_check = pd.read_csv(saves_handler.get_full_path(
             self.save_obj["path_to_save"] + '.csv'))
 
         a_v_b = df_check.loc[(df_check['result'] == str(keys))

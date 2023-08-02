@@ -3,7 +3,7 @@ from typing import List, Optional
 
 import customtkinter as ctk
 
-import ctk_utils
+import utils.ctk_utils as ctk_utils
 
 
 class Pagination(ctk.CTkFrame):

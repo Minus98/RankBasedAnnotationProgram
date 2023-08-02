@@ -3,7 +3,7 @@ from typing import Callable, Optional
 
 import customtkinter as ctk
 
-import saves_handler
+import utils.saves_handler as saves_handler
 import sorting_algorithms as sa
 
 
