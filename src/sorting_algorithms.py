@@ -1,14 +1,14 @@
 import copy
 import random
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import IntEnum
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 from trueskill import Rating, rate_1vs1
 
 
-class DiffLevel(Enum):
+class DiffLevel(IntEnum):
     none = 0
     normal = 1
     major = 2

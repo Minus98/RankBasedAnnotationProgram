@@ -36,7 +36,7 @@ def update_convergence_save(save: dict) -> List[float]:
     return save["rmses"]
 
 
-def get_convergence(save) -> List[float]:
+def get_convergence(save: dict) -> List[float]:
     """
     Retrieves the convergence data from the given 'save' dictionary and provides 
     suitable representation of the RMS errors.
