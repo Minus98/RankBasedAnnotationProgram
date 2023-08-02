@@ -408,10 +408,18 @@ class AdvancedInformationPage():
                     prompts = json.load(file)
                 self.custom_ratings = prompts['rating_buttons']
 
+            self.custom_ratings = [
+                rating + " (" + str(i) + ")" for i,
+                rating in enumerate(self.custom_ratings)]
+
+            color = self.tab_view.tab("Rating Distribution").cget("fg_color")
+            ratings_tab_frame = ctk.CTkFrame(
+                self.tab_view.tab("Rating Distribution"), fg_color=color)
+
             self.ratings_menu = ctk.CTkOptionMenu(
-                self.tab_view.tab("Rating Distribution"),
+                ratings_tab_frame,
                 values=self.custom_ratings,
-                command=lambda event: self.rating_changed())
+                command=lambda event: self.rating_changed(), width=160)
 
             csv_path = utils.get_full_path(
                 self.save_obj["path_to_save"] + ".csv")
@@ -422,7 +430,7 @@ class AdvancedInformationPage():
             hist_canvas_widget = self.create_histogram()
 
             self.rating_frame = Pagination(
-                self.tab_view.tab("Rating Distribution"),
+                ratings_tab_frame,
                 [], self.dir_path, images_per_page=10,
                 image_width=self.root.winfo_screenwidth() // 14)
 
@@ -433,9 +441,10 @@ class AdvancedInformationPage():
 
             hist_canvas_widget.grid(row=0, column=0)
 
-            self.ratings_menu.grid(row=0, column=1, sticky="se")
+            self.ratings_menu.grid(row=0, column=0, sticky="se")
 
-            self.rating_frame.grid(row=1, column=0, columnspan=2)
+            self.rating_frame.grid(row=1, column=0)
+            ratings_tab_frame.grid(row=1, column=0)
         else:
 
             not_found_widget = self.get_images_not_found_widget(
@@ -571,8 +580,8 @@ class AdvancedInformationPage():
         fig, ax = plt.subplots()
         fig.set_size_inches(5, 2)
         fig.set_facecolor("#212121")
-        # fig.canvas.mpl_connect("motion_notify_event", self.hover)
         ax.set_facecolor("#1a1a1a")
+        self.hist_fig = fig
         """
         self.fig = fig
         self.ax = ax
@@ -597,16 +606,47 @@ class AdvancedInformationPage():
         d = np.diff(np.unique(labels)).min()
         left_of_first_bin = labels.min() - float(d)/2
         right_of_last_bin = labels.max() + float(d)/2
-        plt.hist(labels, np.arange(
+        n, bins, patches = plt.hist(labels, np.arange(
             left_of_first_bin, right_of_last_bin + d, d),
             edgecolor='black', linewidth=1.2)
         plt.xticks(range(labels.max() + 1))
-        # ax.hist(labels, bins=[0, 1, 2, 3, 4, 5, 6])  # range(6))
-        # ax.hist(labels, bins=6)
-        # self.line, = ax.plot(rmses)
+        plt.locator_params(axis='y', nbins=4)
+
+        fig.canvas.mpl_connect(
+            "motion_notify_event", lambda event,
+            patches=patches: self.hist_hover(event, patches))
 
         canvas = FigureCanvasTkAgg(
             fig, master=self.tab_view.tab("Rating Distribution"))
         canvas.draw()
 
         return canvas.get_tk_widget()
+
+    def hist_hover(self, event: Any, patches):
+        """
+        Handles the hover effects over the convergence graph.
+
+        Args:
+            event (Any): The hover event. 
+        """
+        if event.xdata:
+            closest_bin = round(event.xdata)
+            if closest_bin >= 0 and closest_bin < len(patches):
+                patches[closest_bin].set_fc('r')
+                self.hist_fig.canvas.draw_idle()
+        """
+        vis = self.annot.get_visible()
+        if event.inaxes == self.ax:
+            cont, ind = self.line.contains(event)
+            if cont:
+                self.update_annot(ind)
+                self.annot.set_visible(True)
+                self.line.set_linewidth(2)
+                self.canvas_widget.config(cursor="tcross")
+                self.fig.canvas.draw_idle()
+            else:
+                if vis:
+                    self.annot.set_visible(False)
+                    self.line.set_linewidth(1)
+                    self.canvas_widget.config(cursor="arrow")
+                    self.fig.canvas.draw_idle()"""
