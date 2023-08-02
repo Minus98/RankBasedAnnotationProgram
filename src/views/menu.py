@@ -9,11 +9,11 @@ import customtkinter as ctk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-import convergence as conv
+import utils.convergence as conv
 import utils.ctk_utils as ctk_utils
 import utils.saves_handler as saves_handler
-from creation_pop_out import CreationPopOut
-from delete_pop_out import DeletePopOut
+from pop_outs.creation_pop_out import CreationPopOut
+from pop_outs.delete_pop_out import DeletePopOut
 
 
 class MenuScreen():

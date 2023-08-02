@@ -5,8 +5,8 @@ from typing import Callable
 
 import customtkinter as ctk
 
-from is_finished_pop_out import IsFinishedPopOut
-from ordering import OrderingScreen
+from pop_outs.is_finished_pop_out import IsFinishedPopOut
+from views.orderings.ordering import OrderingScreen
 
 
 class RatingScreen(OrderingScreen):

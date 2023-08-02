@@ -3,8 +3,8 @@ from typing import Callable, Optional
 
 import customtkinter as ctk
 
-import utils.saves_handler as saves_handler
 import sorting_algorithms as sa
+import utils.saves_handler as saves_handler
 
 
 class AdvancedCreationMenu():

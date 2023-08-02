@@ -3,9 +3,9 @@ from typing import List
 
 import numpy as np
 
-import recomputation as recomp
-import utils.saves_handler as saves_handler
 import sorting_algorithms as sa
+import utils.recomputation as recomp
+import utils.saves_handler as saves_handler
 
 
 def update_convergence_save(save: dict) -> List[float]:

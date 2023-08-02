@@ -69,12 +69,7 @@ def create_save(
 
     file_name = str(int(time.time()))
 
-    if getattr(sys, 'frozen', False):
-        application_path = os.path.dirname(sys.executable)
-    elif __file__:
-        application_path = os.path.dirname(__file__)
-
-    path = application_path + "/saves"
+    path = get_full_path("/saves")
 
     if not os.path.exists(path):
         os.makedirs(path)
@@ -87,7 +82,7 @@ def create_save(
 
     df.to_csv(path_to_save + ".csv", index=False)
 
-    rel_path_to_save = "saves/" + file_name
+    rel_path_to_save = "/saves/" + file_name
     save_obj = {
         "sort_alg": sort_alg,
         "name": name,
@@ -108,7 +103,7 @@ def create_save(
     if ranking_prompt:
         save_obj["custom_ranking_prompt"] = ranking_prompt
 
-    f = open(path + "/" + file_name + ".pickle", "wb")
+    f = open(path_to_save + ".pickle", "wb")
     pickle.dump(save_obj, f)
     f.close()
 
@@ -127,8 +122,11 @@ def get_full_path(path: str) -> str:
     if getattr(sys, 'frozen', False):
         application_path = os.path.dirname(sys.executable)
     elif __file__:
-        application_path = os.path.dirname(__file__)
-        application_path = os.path.dirname(application_path)
+        print(path)
+        application_path = str(Path(os.path.dirname(__file__)).parent.parent)
+
+        print(application_path)
 
     path = application_path + "/" + path
+    print(path)
     return path.replace("\\", "/")

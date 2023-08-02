@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-import convergence as conv
+import utils.convergence as conv
 import utils.saves_handler as saves_handler
-from pagination import Pagination
+from widgets.pagination import Pagination
 
 
 class AdvancedInformationPage():

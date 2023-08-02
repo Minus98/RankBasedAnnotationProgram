@@ -8,8 +8,8 @@ import pandas as pd
 
 import sorting_algorithms as sa
 import utils.saves_handler as saves_handler
-from is_finished_pop_out import IsFinishedPopOut
-from ordering import OrderingScreen
+from pop_outs.is_finished_pop_out import IsFinishedPopOut
+from views.orderings.ordering import OrderingScreen
 
 
 class PairwiseOrderingScreen(OrderingScreen):

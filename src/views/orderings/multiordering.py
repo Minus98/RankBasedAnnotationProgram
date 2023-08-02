@@ -5,7 +5,7 @@ from typing import Callable
 import customtkinter as ctk
 
 import sorting_algorithms as sa
-from ordering import OrderingScreen
+from views.orderings.ordering import OrderingScreen
 
 
 class MultiOrderingScreen(OrderingScreen):

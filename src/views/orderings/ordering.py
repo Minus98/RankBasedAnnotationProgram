@@ -12,13 +12,13 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
-import convergence as conv
-import utils.saves_handler as saves_handler
 import sorting_algorithms as sa
+import utils.convergence as conv
 import utils.ctk_utils as ctk_utils
-from image_directory_pop_out import ImageDirectoryPopOut
-from is_finished_pop_out import IsFinishedPopOut
-from switching_modes_pop_out import SwitchingModesPopOut
+import utils.saves_handler as saves_handler
+from pop_outs.image_directory_pop_out import ImageDirectoryPopOut
+from pop_outs.is_finished_pop_out import IsFinishedPopOut
+from pop_outs.switching_modes_pop_out import SwitchingModesPopOut
 
 
 class OrderingScreen():
@@ -151,7 +151,8 @@ class OrderingScreen():
             text_color="#777777")
 
         self.undo_label.bind(
-            "<Enter>", lambda event: ctk_utils.highlight_label(self.undo_label))
+            "<Enter>", lambda event: ctk_utils.highlight_label(
+                self.undo_label))
         self.undo_label.bind(
             "<Leave>", lambda event: ctk_utils.remove_highlight_label(
                 self.undo_label))
@@ -525,7 +526,8 @@ class OrderingScreen():
         """
         Undo the last entry in the CSV file by marking it as undone.
         """
-        path = saves_handler.get_full_path(self.save_obj["path_to_save"] + '.csv')
+        path = saves_handler.get_full_path(
+            self.save_obj["path_to_save"] + '.csv')
         copy_df = pd.read_csv(path)
         copy_df.iloc[-1, copy_df.columns.get_loc('undone')] = True
         copy_df.to_csv(path, index=False)

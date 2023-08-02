@@ -3,14 +3,14 @@ from typing import Callable, Optional, Tuple
 
 import customtkinter as ctk
 
-from advanced_creation_menu import AdvancedCreationMenu
-from advanced_information_page import AdvancedInformationPage
-from menu import MenuScreen
-from multiordering import MultiOrderingScreen
-from pairwiseordering import PairwiseOrderingScreen
-from rating import RatingScreen
-from src.sorting_algorithms import HybridTrueSkill, RatingAlgorithm
 from pop_outs.user_selection_pop_out import UserSelectionPopOut
+from sorting_algorithms import HybridTrueSkill, RatingAlgorithm
+from views.advanced_creation_menu import AdvancedCreationMenu
+from views.advanced_information_page import AdvancedInformationPage
+from views.menu import MenuScreen
+from views.orderings.multiordering import MultiOrderingScreen
+from views.orderings.pairwiseordering import PairwiseOrderingScreen
+from views.orderings.rating import RatingScreen
 
 
 class AnnotationGui():
