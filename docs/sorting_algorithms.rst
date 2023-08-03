@@ -1,4 +1,4 @@
-sorting\_algorithms module
+sorting\_algorithms
 ==========================
 
 .. automodule:: sorting_algorithms
