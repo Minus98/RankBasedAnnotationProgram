@@ -73,17 +73,18 @@ class OrderingScreen():
             master=self.root, text="0:00", font=('Helvetica bold', 30))
 
         try:
-            csv_df = pd.read_csv(saves_handler.get_full_path(
-                self.save_obj["path_to_save"] + '.csv'))
+            csv_df = pd.read_csv(saves_handler.get_path_to_save(
+                self.save_obj) + '.csv')
         except Exception:
 
             df = pd.DataFrame(
                 columns=['result', 'diff_levels', 'time', 'session', 'user',
                          'undone', 'type'])
 
-            df.to_csv(self.save_obj["path_to_save"] + ".csv", index=False)
-            csv_df = pd.read_csv(saves_handler.get_full_path(
-                self.save_obj["path_to_save"] + '.csv'))
+            df.to_csv(saves_handler.get_path_to_save(
+                self.save_obj) + ".csv", index=False)
+            csv_df = pd.read_csv(saves_handler.get_path_to_save(
+                self.save_obj) + '.csv')
 
         if (type(self.sort_alg) == sa.HybridTrueSkill
                 and self.hybrid_transition_made):
@@ -521,8 +522,7 @@ class OrderingScreen():
                            'undone': [False],
                            'type': [annotation_type]})
 
-        output_path = saves_handler.get_full_path(
-            self.save_obj["path_to_save"] + ".csv")
+        output_path = saves_handler.get_path_to_save(self.save_obj) + ".csv"
         df.to_csv(output_path, mode='a',
                   header=not os.path.exists(output_path), index=False)
 
@@ -530,8 +530,7 @@ class OrderingScreen():
         """
         Undo the last entry in the CSV file by marking it as undone.
         """
-        path = saves_handler.get_full_path(
-            self.save_obj["path_to_save"] + '.csv')
+        path = saves_handler.get_path_to_save(self.save_obj) + '.csv'
         copy_df = pd.read_csv(path)
         copy_df.iloc[-1, copy_df.columns.get_loc('undone')] = True
         copy_df.to_csv(path, index=False)

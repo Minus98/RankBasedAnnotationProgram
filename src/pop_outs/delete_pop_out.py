@@ -69,7 +69,7 @@ class DeletePopOut():
         Refreshes menu and destroys pop out.
         """
 
-        path = saves_handler.get_full_path(self.save_obj["path_to_save"])
+        path = saves_handler.get_path_to_save(self.save_obj)
 
         # Should the csv file be kept?
         os.remove(path + ".csv")
