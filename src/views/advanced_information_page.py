@@ -56,6 +56,8 @@ class AdvancedInformationPage():
 
         matplotlib.rc('font', **font)
 
+        self.highlighted_hist = None
+
         self.general_info_frame = ctk.CTkFrame(self.root)
 
         self.tab_view = ctk.CTkTabview(self.root)
@@ -630,8 +632,14 @@ class AdvancedInformationPage():
         """
         if event.xdata:
             closest_bin = round(event.xdata)
+
+            if self.highlighted_hist is not None and closest_bin != self.highlighted_hist:
+                patches[self.highlighted_hist].set_fc('#8dd3c7')
+
             if closest_bin >= 0 and closest_bin < len(patches):
-                patches[closest_bin].set_fc('r')
+                patches[closest_bin].set_fc('#9deddf')
+
+                self.highlighted_hist = closest_bin
                 self.hist_fig.canvas.draw_idle()
         """
         vis = self.annot.get_visible()
