@@ -88,7 +88,7 @@ class AdvancedInformationPage():
 
         self.dir_path = ""
 
-        if os.path.isdir(saves_handler.get_full_path(
+        if self.images_available(saves_handler.get_full_path(
                 self.save_obj["image_directory"])):
             self.dir_path = saves_handler.get_full_path(
                 self.save_obj["image_directory"])
@@ -424,8 +424,7 @@ class AdvancedInformationPage():
                 values=self.custom_ratings,
                 command=lambda event: self.rating_changed(), width=160)
 
-            csv_path = saves_handler.get_full_path(
-                self.save_obj["path_to_save"] + ".csv")
+            csv_path = saves_handler.get_path_to_save(self.save_obj) + ".csv"
             df = pd.read_csv(csv_path, converters={"result": ast.literal_eval})
             ratings_df = df[(df["type"] == "Rating") & (~df["undone"])]
 
@@ -517,7 +516,8 @@ class AdvancedInformationPage():
 
         submit_button = ctk.CTkButton(
             widget, text="Submit", font=('Helvetica bold', 20),
-            command=lambda directory=directory_var: self.submit_directory(directory),
+            command=lambda directory=directory_var: self.submit_directory(
+                directory),
             state=ctk.DISABLED, width=160, height=40)
 
         directory_entry.bind(
