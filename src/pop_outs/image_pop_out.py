@@ -46,7 +46,6 @@ class ImagePopOut():
         self.image_label.grid(row=0, column=0)
 
     def on_image_scroll(self, event):
-        print(event)
         if event.delta < 0:
             self.idx = max(self.idx-1, 0)
 
