@@ -4,23 +4,34 @@ import random
 import sys
 import time
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import pandas as pd
 
 import sorting_algorithms as sa
 
 
-def save_algorithm_pickle(save):
+def save_algorithm_pickle(save: dict):
     """
     Save the current state of the algorithm to a pickle file.
+
+    Args:
+        save (dict): A dictionary containing information about the save.
     """
     f = open(get_path_to_save(save) + ".pickle", "wb")
     pickle.dump(save, f)
     f.close()
 
 
-def get_path_to_save(save):
+def get_path_to_save(save: dict) -> str:
+    """Get the path to save a file.
+
+    Args:
+        save (dict): A dictionary containing information about the save.
+
+    Returns:
+        str: The path where the file should be saved.
+    """
 
     save_alg = False
     if "path_to_save" in save:
@@ -145,8 +156,20 @@ def get_full_path(path: str) -> str:
     return path.replace("\\", "/")
 
 
-def get_application_path():
+def get_application_path() -> Union[str, None]:
+    """Get the application path.
+
+    Returns:
+        Union[str, None]: The application path as a string, or None if the path 
+        cannot be determined.
+    """
     if getattr(sys, 'frozen', False):
+        # For frozen applications (e.g., PyInstaller),
+        # use the directory of the executable.
         return os.path.dirname(sys.executable)
     elif __file__:
+        # For normal Python scripts, use the parent directory of the script file.
         return str(Path(os.path.dirname(__file__)).parent.parent)
+    else:
+        # If the path cannot be determined, return None.
+        return None
