@@ -26,7 +26,7 @@ class OrderingScreen():
 
     def __init__(
             self, root: ctk.CTk, save_obj: dict, menu_callback: Callable,
-            center: Callable, user: str, reload_ordering_screen: Callable,
+            user: str, reload_ordering_screen: Callable,
             hybrid_transition_made: bool, root_bind_callback: Callable):
         """
         Initialize the OrderingScreen.
@@ -35,7 +35,6 @@ class OrderingScreen():
             root (CTk): The root cutom tkinter object.
             save_obj (dict): The save object containing various parameters.
             menu_callback (function): The callback function for the menu.
-            center (function): The function for centering the window.
             user (str): The user currently annotating.
             reload_ordering_screen (function): Callback function to reload the 
                                                ordering screen.
@@ -49,7 +48,6 @@ class OrderingScreen():
 
         self.root = root
         self.menu_callback = menu_callback
-        self.center = center
         self.user = user
         self.reload_ordering_screen = reload_ordering_screen
         self.root_bind_callback = root_bind_callback
@@ -183,7 +181,7 @@ class OrderingScreen():
 
         else:
             ImageDirectoryPopOut(
-                self.root, self.center, self.save_obj,
+                self.root, self.save_obj,
                 self.submit_path, self.back_to_menu)
 
     def file_2_CTkImage(self, img_src: str) -> List[ctk.CTkImage]:
@@ -395,7 +393,7 @@ class OrderingScreen():
             bool: True if the sorting algorithm is finished, False otherwise.
         """
         if self.sort_alg.is_finished():
-            IsFinishedPopOut(self.root, self.center, self.back_to_menu)
+            IsFinishedPopOut(self.root, self.back_to_menu)
             return True
         return False
 
@@ -473,7 +471,7 @@ class OrderingScreen():
                 self.root.after_cancel(self.timer_after)
                 # Switching modes popout
                 self.reload_ordering_screen(self.save_obj)
-                SwitchingModesPopOut(self.root, self.center)
+                SwitchingModesPopOut(self.root)
 
             else:
                 self.display_new_comparison()

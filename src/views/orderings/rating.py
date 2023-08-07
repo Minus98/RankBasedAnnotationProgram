@@ -14,7 +14,7 @@ class RatingScreen(OrderingScreen):
 
     def __init__(
             self, root: ctk.CTk, save_obj: dict, menu_callback: Callable,
-            center: Callable, user: str, reload_ordering_screen: Callable,
+            user: str, reload_ordering_screen: Callable,
             hybrid_transition_made: bool, root_bind_callback: Callable):
         """
         Initialize the RatingScreen.
@@ -23,7 +23,6 @@ class RatingScreen(OrderingScreen):
             root (CTk): The root cutom tkinter object.
             save_obj (dict): The save object containing various parameters.
             menu_callback (function): The callback function for the menu.
-            center (function): The function for centering the window.
             user (str): The user currently annotating.
             reload_ordering_screen (function): Callback function to reload the 
                                                ordering screen.
@@ -33,7 +32,7 @@ class RatingScreen(OrderingScreen):
                                            root element.
         """
 
-        super().__init__(root, save_obj, menu_callback, center, user,
+        super().__init__(root, save_obj, menu_callback, user,
                          reload_ordering_screen, hybrid_transition_made,
                          root_bind_callback)
 
@@ -200,7 +199,7 @@ class RatingScreen(OrderingScreen):
             key = random.choice(self.sort_alg.data)
             self.images = [[key, self.file_2_CTkImage(key), 0]]
             self.update_images()
-            IsFinishedPopOut(self.root, self.center,
+            IsFinishedPopOut(self.root,
                              self.back_to_menu, 'no annotations')
 
     def on_tab(self):
