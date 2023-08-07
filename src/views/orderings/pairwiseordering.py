@@ -228,8 +228,8 @@ class PairwiseOrderingScreen(OrderingScreen):
                            of the keys or None if not enough previous comparison are 
                            found.
         """
-        df_check = pd.read_csv(saves_handler.get_full_path(
-            self.save_obj["path_to_save"] + '.csv'))
+        df_check = pd.read_csv(
+            saves_handler.get_path_to_save(self.save_obj) + '.csv')
 
         a_v_b = df_check.loc[(df_check['result'] == str(keys))
                              & (~df_check['undone'])]
