@@ -2,7 +2,6 @@ import ast
 import json
 import os
 import sys
-from copy import deepcopy
 from typing import Any, Callable, Optional, Tuple
 
 import customtkinter as ctk
@@ -579,7 +578,15 @@ class AdvancedInformationPage():
             if not self.sort_alg.is_rating:
                 self.generate_ordering_frame()
 
-    def create_histogram(self):
+    def create_histogram(self) -> ctk.CTkCanvas:
+        """
+        Creates a histogram of the rating distribution.
+
+        Returns:
+            Canvas: The generated plot in the form of a canvas. Note that this is
+                    actually a tkinter canvas and not a ctk canvas. But the 
+                    implementation in the libraries try to obscure this fact.
+        """
 
         fig, ax = plt.subplots()
         fig.set_size_inches(5, 2)
@@ -597,7 +604,7 @@ class AdvancedInformationPage():
         d = np.diff(np.unique(labels)).min()
         left_of_first_bin = labels.min() - float(d)/2
         right_of_last_bin = labels.max() + float(d)/2
-        values, bins, patches = plt.hist(labels, np.arange(
+        _, _, patches = plt.hist(labels, np.arange(
             left_of_first_bin, right_of_last_bin + d, d),
             edgecolor='black', linewidth=1.2)
 
@@ -617,22 +624,26 @@ class AdvancedInformationPage():
     def hist_hover(
             self, event: Any, patches: matplotlib.container.BarContainer):
         """
-        Handles the hover effects over the convergence graph.
+        Handles the hover effects of the histogram.
 
         Args:
-            event (Any): The hover event. 
+            event (Any): The hover event.
+            patches (matplotlib.container.BarContainer): The bars in the histogram that
+                                                         are to be manipulated.
         """
         if event.xdata:
             closest_bin = round(event.xdata)
 
-            if self.highlighted_hist is not None and closest_bin != self.highlighted_hist:
+            if self.highlighted_hist is not None and (
+                    closest_bin != self.highlighted_hist):
                 patches[self.highlighted_hist].set_fc('#8dd3c7')
                 if self.bar_label:
                     self.bar_label.remove()
                     self.bar_label = None
                 self.highlighted_hist = None
 
-            if closest_bin >= 0 and closest_bin < len(patches) and closest_bin != self.highlighted_hist:
+            if closest_bin >= 0 and closest_bin < len(patches) and (
+                    closest_bin != self.highlighted_hist):
                 patches[closest_bin].set_fc('#9deddf')
 
                 bar_labels = plt.bar_label(patches)
