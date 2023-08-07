@@ -2,6 +2,7 @@ import ast
 import json
 import os
 import sys
+from copy import deepcopy
 from typing import Any, Callable, Optional, Tuple
 
 import customtkinter as ctk
@@ -57,6 +58,8 @@ class AdvancedInformationPage():
         matplotlib.rc('font', **font)
 
         self.highlighted_hist = None
+        self.bar_label = None
+        # self.bar_labels = None
 
         self.general_info_frame = ctk.CTkFrame(self.root)
 
@@ -583,19 +586,6 @@ class AdvancedInformationPage():
         fig.set_facecolor("#212121")
         ax.set_facecolor("#1a1a1a")
         self.hist_fig = fig
-        """
-        self.fig = fig
-        self.ax = ax
-        self.annot = ax.annotate(
-            "", xy=(0, 0),
-            xytext=(-20, 20),
-            textcoords="offset points", bbox=dict(
-                boxstyle="round", fc="#1f538d"),
-            arrowprops=dict(arrowstyle="simple"))
-        self.annot.set_visible(False)
-        """
-
-        # rmses = conv.get_convergence(self.save_obj)
 
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -607,9 +597,10 @@ class AdvancedInformationPage():
         d = np.diff(np.unique(labels)).min()
         left_of_first_bin = labels.min() - float(d)/2
         right_of_last_bin = labels.max() + float(d)/2
-        n, bins, patches = plt.hist(labels, np.arange(
+        values, bins, patches = plt.hist(labels, np.arange(
             left_of_first_bin, right_of_last_bin + d, d),
             edgecolor='black', linewidth=1.2)
+
         plt.xticks(range(labels.max() + 1))
         plt.locator_params(axis='y', nbins=4)
 
@@ -623,7 +614,8 @@ class AdvancedInformationPage():
 
         return canvas.get_tk_widget()
 
-    def hist_hover(self, event: Any, patches):
+    def hist_hover(
+            self, event: Any, patches: matplotlib.container.BarContainer):
         """
         Handles the hover effects over the convergence graph.
 
@@ -635,25 +627,22 @@ class AdvancedInformationPage():
 
             if self.highlighted_hist is not None and closest_bin != self.highlighted_hist:
                 patches[self.highlighted_hist].set_fc('#8dd3c7')
+                if self.bar_label:
+                    self.bar_label.remove()
+                    self.bar_label = None
+                self.highlighted_hist = None
 
-            if closest_bin >= 0 and closest_bin < len(patches):
+            if closest_bin >= 0 and closest_bin < len(patches) and closest_bin != self.highlighted_hist:
                 patches[closest_bin].set_fc('#9deddf')
 
+                bar_labels = plt.bar_label(patches)
+
+                for index, bar_label in enumerate(bar_labels):
+
+                    if index != closest_bin:
+                        bar_label.remove()
+                    else:
+                        self.bar_label = bar_label
+
                 self.highlighted_hist = closest_bin
-                self.hist_fig.canvas.draw_idle()
-        """
-        vis = self.annot.get_visible()
-        if event.inaxes == self.ax:
-            cont, ind = self.line.contains(event)
-            if cont:
-                self.update_annot(ind)
-                self.annot.set_visible(True)
-                self.line.set_linewidth(2)
-                self.canvas_widget.config(cursor="tcross")
-                self.fig.canvas.draw_idle()
-            else:
-                if vis:
-                    self.annot.set_visible(False)
-                    self.line.set_linewidth(1)
-                    self.canvas_widget.config(cursor="arrow")
-                    self.fig.canvas.draw_idle()"""
+            self.hist_fig.canvas.draw_idle()
