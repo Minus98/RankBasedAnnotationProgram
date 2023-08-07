@@ -21,7 +21,6 @@ def save_algorithm_pickle(save):
 
 
 def get_path_to_save(save):
-    print(save)
 
     save_alg = False
     if "path_to_save" in save:
