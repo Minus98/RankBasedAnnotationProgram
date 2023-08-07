@@ -20,8 +20,7 @@ def recompute_trueskill(save: dict) -> Tuple[sa.TrueSkill, List[float]]:
         Tuple[TrueSkill, List[float]]: A tuple containing the updated TrueSkill 
         object and a list of computed RMS errors.
     """
-    csv = pd.read_csv(saves_handler.get_full_path(
-        save['path_to_save'] + '.csv'))
+    csv = pd.read_csv(saves_handler.get_path_to_save(save) + '.csv')
     csv = csv[csv['type'] == 'Ranking']
     sort_alg = sa.TrueSkill(
         data=save['sort_alg'].data,
@@ -69,8 +68,7 @@ def recompute_ratings(save: dict) -> sa.RatingAlgorithm:
     Returns:
         RatingAlgorithm: The updated rating algorithm object.
     """
-    csv = pd.read_csv(saves_handler.get_full_path(
-        save['path_to_save'] + '.csv'))
+    csv = pd.read_csv(saves_handler.get_path_to_save(save) + '.csv')
     csv = csv[csv['type'] == 'Rating']
     sort_alg = sa.RatingAlgorithm(
         data=save['sort_alg'].data)
@@ -103,8 +101,7 @@ def recompute_hybridtrueskill(save: dict) -> Tuple[sa.HybridTrueSkill,
         Tuple[HybridTrueSkill, List[float]]: A tuple containing the updated 
         HybridTrueSkill object and a list of computed RMS errors.
     """
-    csv = pd.read_csv(saves_handler.get_full_path(
-        save['path_to_save'] + '.csv'))
+    csv = pd.read_csv(saves_handler.get_path_to_save(save) + '.csv')
 
     sort_alg = sa.HybridTrueSkill(
         data=save['sort_alg'].data,

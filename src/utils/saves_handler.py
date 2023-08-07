@@ -15,10 +15,32 @@ def save_algorithm_pickle(save):
     """
     Save the current state of the algorithm to a pickle file.
     """
-    f = open(get_full_path(
-        save["path_to_save"] + ".pickle"), "wb")
+    f = open(get_path_to_save(save) + ".pickle", "wb")
     pickle.dump(save, f)
     f.close()
+
+
+def get_path_to_save(save):
+    print(save)
+
+    save_alg = False
+    if "path_to_save" in save:
+        save_alg = True
+        file_id = os.path.basename(save["path_to_save"])
+        save["file_id"] = file_id
+        save.pop("path_to_save")
+    else:
+        file_id = save["file_id"]
+
+    path_to_save = str(list(Path(get_application_path()).glob(
+        '**/' + file_id + '.pickle'))[0]).split('.')[0].replace("\\", "/")
+
+    if save_alg:
+        f = open(path_to_save + ".pickle", "wb")
+        pickle.dump(save, f)
+        f.close()
+
+    return path_to_save
 
 
 def create_save(
@@ -82,12 +104,11 @@ def create_save(
 
     df.to_csv(path_to_save + ".csv", index=False)
 
-    rel_path_to_save = "/saves/" + file_name
     save_obj = {
         "sort_alg": sort_alg,
         "name": name,
         "image_directory": directory,
-        "path_to_save": rel_path_to_save,
+        "file_id": file_name,
         "user_directory_dict": {},
         "scroll_allowed": scroll_enabled}
 
@@ -119,10 +140,14 @@ def get_full_path(path: str) -> str:
         str: The full path.
     """
 
-    if getattr(sys, 'frozen', False):
-        application_path = os.path.dirname(sys.executable)
-    elif __file__:
-        application_path = str(Path(os.path.dirname(__file__)).parent.parent)
+    application_path = get_application_path()
 
     path = application_path + "/" + path
     return path.replace("\\", "/")
+
+
+def get_application_path():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    elif __file__:
+        return str(Path(os.path.dirname(__file__)).parent.parent)
