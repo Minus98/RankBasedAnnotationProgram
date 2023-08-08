@@ -749,4 +749,9 @@ class HybridTrueSkill (SortingAlgorithm):
         Returns:
             The maximum number of comparisons allowed.
         """
-        return self.sort_alg.get_comparison_max()
+
+        total = self.sort_alg.get_comparison_max()
+        if not self.is_rating:
+            total += len(self.data)
+
+        return total
