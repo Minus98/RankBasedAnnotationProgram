@@ -167,18 +167,18 @@ class OrderingScreen():
         directory_dict = self.save_obj['user_directory_dict']
         full_img_dir_path = saves_handler.get_full_path(
             self.save_obj['image_directory'])
+
         if self.user in directory_dict and all(
             [os.path.isfile(directory_dict[self.user] + "/" + k)
              for k in self.sort_alg.data]):
-
             self.image_directory = directory_dict[self.user]
             self.image_directory_located = True
 
         elif all([os.path.isfile(full_img_dir_path + "/" + k)
                   for k in self.sort_alg.data]):
 
-            directory_dict[self.user] = self.save_obj['image_directory']
-            self.image_directory = self.save_obj['image_directory']
+            directory_dict[self.user] = full_img_dir_path
+            self.image_directory = full_img_dir_path
             self.image_directory_located = True
 
         else:
@@ -200,10 +200,8 @@ class OrderingScreen():
             FileNotFoundError: If the image file is not found.
         """
 
-        img_src = os.path.relpath(self.image_directory + "/" + img_src)
+        img_src = self.image_directory + "/" + img_src
         _, extension = os.path.splitext(img_src)
-
-        img_src = saves_handler.get_full_path(img_src)
 
         if extension == '.nii':
             ctk_imgs = []
@@ -242,11 +240,8 @@ class OrderingScreen():
             A list of CTkImage objects representing the loaded image.
         """
 
-        img_src = os.path.relpath(self.image_directory + "/" + img_src)
-
+        img_src = self.image_directory + "/" + img_src
         _, extension = os.path.splitext(img_src)
-
-        img_src = saves_handler.get_full_path(img_src)
 
         if extension == '.nii':
             ctk_imgs = []
