@@ -601,14 +601,14 @@ class AdvancedInformationPage():
 
         labels = np.array([r[1] for r in self.ratings])
 
-        d = np.diff(np.unique(labels)).min()
-        left_of_first_bin = labels.min() - float(d)/2
-        right_of_last_bin = labels.max() + float(d)/2
+        left_of_first_bin = -1/2
+        right_of_last_bin = (len(self.custom_ratings) * 2 - 1) / 2
+
         _, _, patches = plt.hist(labels, np.arange(
-            left_of_first_bin, right_of_last_bin + d, d),
+            left_of_first_bin, right_of_last_bin + 1, 1),
             edgecolor='black', linewidth=1.2)
 
-        plt.xticks(range(labels.max() + 1))
+        plt.xticks(range(len(self.custom_ratings)))
         plt.locator_params(axis='y', nbins=4)
 
         fig.canvas.mpl_connect(
