@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Tuple
 
 import customtkinter as ctk
 import nibabel as nib
@@ -20,8 +20,6 @@ def file_2_CTkImage(img_src: str, height=None, width=None) -> List[ctk.CTkImage]
     Raises:
         FileNotFoundError: If the image file is not found.
     """
-
-    # img_src = os.path.relpath(self.image_directory + "/" + img_src)
 
     _, extension = os.path.splitext(img_src)
 
@@ -46,11 +44,38 @@ def file_2_CTkImage(img_src: str, height=None, width=None) -> List[ctk.CTkImage]
                     size=(new_shape)))
         return ctk_imgs
     else:
+        img = Image.open(img_src)
         if height:
             size = (height, height)
         elif width:
             size = (width, width)
-        return [ctk.CTkImage(Image.open(img_src), size=size)]
+        else:
+            size = (img.width, img.height)
+        return [ctk.CTkImage(img, size=size)]
+
+
+def center(root: ctk.CTk, w: int, h: int) -> Tuple[int, int]:
+    """
+    Calculates the x and y coordinates to center the CTk root window.
+
+    Args:
+        root (CTk): The root cutom tkinter object.
+        w (int): The width of the window.
+        h (int): The height of the window.
+
+    Returns:
+        The x and y coordinates to center the window.
+    """
+
+    # get screen width and height
+    ws = root.winfo_screenwidth()  # width of the screen
+    hs = root.winfo_screenheight()  # height of the screen
+
+    # calculate x and y coordinates for the Tk root window
+    x = (ws/2) - (w/2)
+    y = (hs/2) - (h/2) - 40
+
+    return x, y
 
 
 def remove_hover(widget: ctk.CTkBaseClass):

@@ -381,10 +381,9 @@ class AdvancedInformationPage():
 
         if self.images_available(self.dir_path):
             ordering_frame = Pagination(
-                self.tab_view.tab("Current Ordering"),
+                self.root, self.tab_view.tab("Current Ordering"),
                 self.sort_alg.get_result(),
-                self.dir_path,
-                image_width=self.root.winfo_screenwidth() // 14)
+                self.dir_path, image_width=self.root.winfo_screenwidth() // 14)
             ordering_frame.grid(row=0, column=0)
         else:
             could_not_find_images_label = self.get_images_not_found_widget(
@@ -432,8 +431,8 @@ class AdvancedInformationPage():
             hist_canvas_widget = self.create_histogram()
 
             self.rating_frame = Pagination(
-                ratings_tab_frame,
-                [], self.dir_path, images_per_page=10,
+                self.root, self.tab_view.tab("Rating Distribution"),
+                [], self.dir_path,
                 image_width=self.root.winfo_screenwidth() // 14)
 
             self.rating_changed()
