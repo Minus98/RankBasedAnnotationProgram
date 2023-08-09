@@ -11,27 +11,25 @@ import utils.saves_handler as saves_handler
 class UserSelectionPopOut():
     """Class representing a pop-out window for user selection"""
 
-    def __init__(self, root: ctk.CTk, center: Callable,
+    def __init__(self, root: ctk.CTk,
                  select_user_callback: Callable):
         """
         Initialize the UserSelectionPopOut.
 
         Args:
             root (CTk): The root window.
-            center (function): A function to center the pop-out window.
             select_user_callback (function): The callback function to select 
                                              a user.
         """
 
         self.root = root
-        self.center = center
         self.select_user_callback = select_user_callback
 
         self.pop_out = ctk.CTkToplevel()
 
         w = 500
         h = 700
-        x, y = self.center(w, h)
+        x, y = ctk_utils.center(self.root, w, h)
 
         self.pop_out.geometry('%dx%d+%d+%d' % (w, h, x, y))
         self.pop_out.columnconfigure(index=0, weight=1)

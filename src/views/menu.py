@@ -23,7 +23,7 @@ class MenuScreen():
 
     def __init__(
             self, root: ctk.CTk, display_menu_callback: Callable,
-            ordering_callback: Callable, center: Callable,
+            ordering_callback: Callable,
             open_user_selection: Callable,
             advanced_settings_callback: Callable,
             information_page_callback: Callable):
@@ -36,7 +36,6 @@ class MenuScreen():
                                               menu.
             ordering_callback (function): The callback function for loading a 
                                           saved annotation.
-            center (function): The function to center the window.
             open_user_selection (function): The function to open user selection.
             advanced_settings_callback (function): Calback function to bring up the
             advanced settings menu.
@@ -52,7 +51,6 @@ class MenuScreen():
         self.ordering_callback = ordering_callback
         self.advanced_settings_callback = advanced_settings_callback
         self.information_page_callback = information_page_callback
-        self.center = center
         self.open_user_selection = open_user_selection
 
         with open('prompts.json', 'r') as file:
@@ -287,7 +285,7 @@ class MenuScreen():
         Callback function for the new annotation button.
         """
 
-        CreationPopOut(self.display_menu_callback, self.center,
+        CreationPopOut(self.root, self.display_menu_callback,
                        self.advanced_settings_callback)
 
     def target_save(self, index):
@@ -556,7 +554,7 @@ class MenuScreen():
                          saves list.
         """
 
-        DeletePopOut(self.root, self.center,
+        DeletePopOut(self.root,
                      self.display_menu_callback, self.saves[index])
 
     def update_wraplength(self, label: ctk.CTkLabel):

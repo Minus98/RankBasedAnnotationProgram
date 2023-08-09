@@ -17,7 +17,7 @@ class PairwiseOrderingScreen(OrderingScreen):
 
     def __init__(
             self, root: ctk.CTk, save_obj: dict, menu_callback: Callable,
-            center: Callable, user: str, reload_ordering_screen: Callable,
+            user: str, reload_ordering_screen: Callable,
             root_bind_callback: Callable):
         """
         Initialize the PairwiseOrderingScreen.
@@ -26,7 +26,6 @@ class PairwiseOrderingScreen(OrderingScreen):
             root (CTk): The root cutom tkinter object.
             save_obj (dict): The save object containing various parameters.
             menu_callback (function): The callback function for the menu.
-            center (function): The function for centering the window.
             user (str): The user currently annotating.
             reload_ordering_screen (function): Callback function to reload the 
                                                ordering screen.
@@ -34,8 +33,8 @@ class PairwiseOrderingScreen(OrderingScreen):
                                            root element.
         """
 
-        super().__init__(root, save_obj, menu_callback, center,
-                         user, reload_ordering_screen, True, root_bind_callback)
+        super().__init__(root, save_obj, menu_callback, user,
+                         reload_ordering_screen, True, root_bind_callback)
 
         self.buttons_frame = ctk.CTkFrame(master=self.root)
         self.root_bind_callback = root_bind_callback
@@ -209,7 +208,7 @@ class PairwiseOrderingScreen(OrderingScreen):
             keys = random.sample(self.sort_alg.data, 2)
             self.images = [[img, self.file_2_CTkImage(img), 0] for img in keys]
             self.update_images()
-            IsFinishedPopOut(self.root, self.center,
+            IsFinishedPopOut(self.root,
                              self.back_to_menu, 'no annotations')
 
     def check_df_for_comp(self, keys: List[str]) -> Optional[int]:

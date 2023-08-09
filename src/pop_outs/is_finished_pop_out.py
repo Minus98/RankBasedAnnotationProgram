@@ -2,6 +2,8 @@ from typing import Callable
 
 import customtkinter as ctk
 
+from utils import ctk_utils
+
 
 class IsFinishedPopOut():
     """
@@ -10,28 +12,26 @@ class IsFinishedPopOut():
     """
 
     def __init__(
-            self, root: ctk.CTk, center: Callable, back_to_menu: Callable,
+            self, root: ctk.CTk, back_to_menu: Callable,
             state: str = 'finished'):
         """
         Initializes the IsFinishedPopOut object.
 
         Args:
             root (CTk): The root cutom tkinter object.
-            center (function): A function to center the pop-out window.
             back_to_menu (function): A function to go back to the main menu.
             state (str): The state of the annotation, either 'finished' or 
                          'not finished'.
         """
 
         self.root = root
-        self.center = center
         self.back_to_menu = back_to_menu
 
         pop_out = ctk.CTkToplevel()
 
         w = 700
         h = 300
-        x, y = self.center(w, h)
+        x, y = ctk_utils.center(self.root, w, h)
 
         pop_out.geometry('%dx%d+%d+%d' % (w, h, x, y))
         pop_out.columnconfigure(index=0, weight=1)

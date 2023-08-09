@@ -4,6 +4,7 @@ from typing import List, Optional
 import customtkinter as ctk
 
 import utils.ctk_utils as ctk_utils
+from pop_outs.image_pop_out import ImagePopOut
 
 
 class Pagination(ctk.CTkFrame):
@@ -12,13 +13,14 @@ class Pagination(ctk.CTkFrame):
     """
 
     def __init__(
-            self, master: ctk.CTkBaseClass, data: List[str],
+            self, root: ctk.CTk, master: ctk.CTkBaseClass, data: List[str],
             src_dir: str, images_per_row: int = 5, images_per_page: int = 15,
             image_width=130, image_label: Optional[int] = None):
         """
         Initialize the Pagination.
 
         Args:
+            root (CTk): The root cutom tkinter object.
             master (ctk.CtkBaseClass): The parent ctk widget.
             data (List[str]): A list containint the filenames of the images that are to 
                               be shown.
@@ -35,6 +37,7 @@ class Pagination(ctk.CTkFrame):
 
         ctk.CTkFrame.__init__(self, master)
 
+        self.root = root
         self.master = master
         self.data = data
         self.src_dir = src_dir
@@ -97,6 +100,11 @@ class Pagination(ctk.CTkFrame):
             preview_image_frame.grid(row=index//self.images_per_row,
                                      column=index % self.images_per_row, padx=3, pady=3)
 
+            preview_image.bind(
+                "<Button-1>", command=lambda event,
+                full_img_path=full_img_path: self.on_image_press(
+                    event, full_img_path))
+
             if self.image_label is not None:
                 label = self.image_label
             else:
@@ -109,6 +117,9 @@ class Pagination(ctk.CTkFrame):
                     'fg_color'))
             img_label.place(relx=0, rely=1,
                             anchor="sw")
+
+    def on_image_press(self, event, full_img_path):
+        ImagePopOut(self.root, full_img_path)
 
     def create_pagination_controls(self):
         """

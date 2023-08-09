@@ -3,8 +3,8 @@ from typing import Callable
 
 import customtkinter as ctk
 
-import utils.saves_handler as saves_handler
 import utils.ctk_utils as ctk_utils
+import utils.saves_handler as saves_handler
 from sorting_algorithms import SortingAlgorithm
 
 
@@ -13,28 +13,28 @@ class CreationPopOut():
     Class representing a pop-up window for creating an annotation session.
     """
 
-    def __init__(self, creation_callback: Callable, center: Callable,
+    def __init__(self, root: ctk.CTk, creation_callback: Callable,
                  advanced_settings_callback: Callable):
         """
         Initializes the CreationPopOut instance.
 
         Args:
+            root (CTk): The root cutom tkinter object.
             creation_callback (function): Callback function to be executed after 
             creating the annotation.
-            center (function): Function to center the pop-up window.
             advanced_settings_callback (function): Calback function to bring up the
             advanced settings menu.
         """
 
         self.creation_callback = creation_callback
         self.advanced_settings_callback = advanced_settings_callback
-        self.center = center
+        self.root = root
 
         pop_out = ctk.CTkToplevel()
 
         w = 700
         h = 400
-        x, y = self.center(w, h)
+        x, y = ctk_utils.center(self.root, w, h)
 
         pop_out.geometry('%dx%d+%d+%d' % (w, h, x, y))
 
