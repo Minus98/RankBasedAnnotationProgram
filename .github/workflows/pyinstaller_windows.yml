@@ -32,14 +32,6 @@ jobs:
                   name: windows-executeable
                   path: dist/main
 
-            - name: Minor version for each merge
-              id: taggerDryRun
-              uses: anothrNick/github-tag-action@1.67.0
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  WITH_V: true
-                  DRY_RUN: true
-
             - name: Create release
               id: create_release
               uses: actions/create-release@v1
@@ -47,10 +39,10 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  tag_name: ${{ github.ref_name }} ${{ steps.taggerDryRun.outputs.new_tag }}
-                  release_name: Release ${{ steps.taggerDryRun.outputs.new_tag }}
+                  tag_name: ${{ github.ref_name }} 1.0
+                  release_name: Release ${{ github.ref_name }} 1.0
                   body: |
-                      Test Release ${{ steps.taggerDryRun.outputs.new_tag }}
+                      Test Release 1.0
                   draft: false
                   prerelease: false
 
