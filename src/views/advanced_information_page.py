@@ -431,9 +431,9 @@ class AdvancedInformationPage():
             hist_canvas_widget = self.create_histogram()
 
             self.rating_frame = Pagination(
-                self.root, self.tab_view.tab("Rating Distribution"),
-                [], self.dir_path,
-                image_width=self.root.winfo_screenwidth() // 14)
+                self.root, ratings_tab_frame, [],
+                self.dir_path, image_width=self.root.winfo_screenwidth() // 14,
+                images_per_page=10)
 
             self.rating_changed()
 
@@ -453,7 +453,6 @@ class AdvancedInformationPage():
             not_found_widget.grid(row=0, column=0)
 
         self.tab_view.tab("Rating Distribution").columnconfigure(0, weight=1)
-        self.tab_view.tab("Rating Distribution").rowconfigure(0, weight=1)
 
     def rating_changed(self):
         """
