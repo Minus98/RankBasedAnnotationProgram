@@ -69,7 +69,7 @@ class Pagination(ctk.CTkFrame):
         self.images_frame.grid(row=0, column=0, pady=5)
         self.pagination_controls.grid(row=1, column=0, pady=5)
 
-        self.load_page(1)
+        self.page_changed()
 
     def load_page(self, page_number: int):
         """
@@ -129,12 +129,12 @@ class Pagination(ctk.CTkFrame):
         self.pagination_controls = ctk.CTkFrame(
             master=self)
 
-        previous_page_button = ctk.CTkButton(
+        self.previous_page_button = ctk.CTkButton(
             master=self.pagination_controls, text="<", width=35, height=35,
             font=('Helvetica bold', 20),
             command=self.decrement_page)
 
-        next_page_button = ctk.CTkButton(
+        self.next_page_button = ctk.CTkButton(
             master=self.pagination_controls, text=">", width=35, height=35,
             font=('Helvetica bold', 20),
             command=self.increment_page)
@@ -153,10 +153,10 @@ class Pagination(ctk.CTkFrame):
             master=self.pagination_controls, text="of " + str(self.last_page),
             font=('Helvetica bold', 16))
 
-        previous_page_button.grid(row=0, column=0, padx=5, pady=3)
+        self.previous_page_button.grid(row=0, column=0, padx=5, pady=3)
         current_page_entry.grid(row=0, column=1, padx=(5, 2), pady=3)
         self.max_page_label.grid(row=0, column=2, padx=(2, 5), pady=3)
-        next_page_button.grid(row=0, column=3, padx=5, pady=3)
+        self.next_page_button.grid(row=0, column=3, padx=5, pady=3)
 
     def validate_number(self, value: str):
         """
@@ -203,6 +203,16 @@ class Pagination(ctk.CTkFrame):
 
         self.load_page(page)
 
+        if page == 1:
+            self.previous_page_button.configure(state=ctk.DISABLED)
+        else:
+            self.previous_page_button.configure(state=ctk.NORMAL)
+
+        if page == self.last_page:
+            self.next_page_button.configure(state=ctk.DISABLED)
+        else:
+            self.next_page_button.configure(state=ctk.NORMAL)
+
     def change_data(self, data: List[str], image_label: Optional[int] = None):
         """
         Changes the images that the widget displays.
@@ -219,4 +229,4 @@ class Pagination(ctk.CTkFrame):
         self.image_label = image_label
 
         self.current_page.set(1)
-        self.load_page(1)
+        self.page_changed()

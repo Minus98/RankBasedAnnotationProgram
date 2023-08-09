@@ -77,9 +77,10 @@ def create_save(
         comp_max (Optional[int]): The total amount of allowed comparisons.
     """
 
-    directory = os.path.relpath(image_directory)
+    directory = os.path.relpath(image_directory, get_application_path())
+
     img_paths = list(str(os.path.basename(p))
-                     for p in Path(directory).glob("**/*")
+                     for p in Path(image_directory).glob("**/*")
                      if p.suffix
                      in {'.jpg', '.png', '.nii'} and 'sorted'
                      not in str(p).lower())
