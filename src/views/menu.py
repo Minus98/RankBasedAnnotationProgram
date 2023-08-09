@@ -450,9 +450,9 @@ class MenuScreen():
                     row=6, column=0, pady=(5, 10),
                     columnspan=2)
 
-                # Not a fan of this workaround, but the canvas has not necessarily been drawn
-                # when placed on the display, could not find any event to await so instead we
-                # use a placeholder for the first 100ms...
+                # Not a fan of this workaround, but the canvas has not necessarily been
+                # drawn when placed on the display, could not find any event to await so
+                # instead we use a placeholder for the first 100ms...
                 self.root.after(100, lambda: self.replace_placeholder(
                     place_holder_frame, canvas.get_tk_widget()))
             else:
