@@ -118,6 +118,17 @@ class Pagination(ctk.CTkFrame):
             img_label.place(relx=0, rely=1,
                             anchor="sw")
 
+        if len(self.data) == 0:
+            no_images_label = ctk.CTkLabel(
+                self.images_frame, text="No images have received this label",
+                font=('Helvetica bold', 20),
+                width=(self.image_width + 16) * self.images_per_row, height=320)
+
+            no_images_label.grid(
+                row=0, column=0, columnspan=self.images_per_row,
+                rowspan=math.ceil(
+                    self.images_per_page / self.images_per_row))
+
     def on_image_press(self, event, full_img_path):
         ImagePopOut(self.root, full_img_path)
 
