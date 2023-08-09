@@ -33,6 +33,7 @@ jobs:
                   path: dist/main
 
             - name: Create release
+              id: create_release
               uses: actions/create-release@v1
               if: ${{github.ref == 'refs/heads/main' }}
               env:
