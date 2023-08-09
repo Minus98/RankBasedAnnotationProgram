@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 
 import customtkinter as ctk
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -23,7 +24,7 @@ class MenuScreen():
 
     def __init__(
             self, root: ctk.CTk, display_menu_callback: Callable,
-            ordering_callback: Callable, center: Callable,
+            ordering_callback: Callable,
             open_user_selection: Callable,
             advanced_settings_callback: Callable,
             information_page_callback: Callable):
@@ -36,7 +37,6 @@ class MenuScreen():
                                               menu.
             ordering_callback (function): The callback function for loading a 
                                           saved annotation.
-            center (function): The function to center the window.
             open_user_selection (function): The function to open user selection.
             advanced_settings_callback (function): Calback function to bring up the
             advanced settings menu.
@@ -45,6 +45,9 @@ class MenuScreen():
         self.root = root
         self.root.protocol("WM_DELETE_WINDOW", root.quit)
         plt.style.use("dark_background")
+        font = {'weight': 'bold',
+                'size': 10}
+        matplotlib.rc('font', **font)
 
         self.selected_user = None
 
@@ -52,7 +55,6 @@ class MenuScreen():
         self.ordering_callback = ordering_callback
         self.advanced_settings_callback = advanced_settings_callback
         self.information_page_callback = information_page_callback
-        self.center = center
         self.open_user_selection = open_user_selection
 
         with open('prompts.json', 'r') as file:
@@ -287,7 +289,7 @@ class MenuScreen():
         Callback function for the new annotation button.
         """
 
-        CreationPopOut(self.display_menu_callback, self.center,
+        CreationPopOut(self.root, self.display_menu_callback,
                        self.advanced_settings_callback)
 
     def target_save(self, index):
@@ -340,6 +342,8 @@ class MenuScreen():
             font=('Helvetica bold', 24))
 
         sort_alg = save["sort_alg"]
+
+        alg_name = type(sort_alg).__name__
 
         save_algorithm_label = ctk.CTkLabel(
             self.save_info_frame, text="Algorithm:",
@@ -404,23 +408,64 @@ class MenuScreen():
             self.save_info_frame, text=str(comp_count) + "/" + str(max_count),
             font=('Helvetica bold', 20))
 
-        fig, ax = plt.subplots()
-        self.open_plot = fig
-        fig.set_size_inches(4, 2)
-        fig.set_facecolor("#1a1a1a")
-        ax.set_facecolor("#1a1a1a")
+        if alg_name == "TrueSkill" or alg_name == "HybridTrueSkill":
 
-        ax.axis("off")
-        ax.plot(conv.get_convergence(save))
-        fig.subplots_adjust(left=0, right=1, bottom=0,
-                            top=1, wspace=0, hspace=0)
-        canvas = FigureCanvasTkAgg(
-            fig, master=self.save_info_frame)
-        canvas.draw()
+            values = conv.get_convergence(save)
 
-        save_convergence_label = ctk.CTkLabel(
-            self.save_info_frame, text="Convergence",
-            font=('Helvetica bold', 20))
+            save_convergence_label = ctk.CTkLabel(
+                self.save_info_frame, text="Convergence",
+                font=('Helvetica bold', 20))
+
+            save_convergence_label.grid(
+                row=5, column=0, pady=(10, 5),
+                columnspan=2)
+
+            if len(values) > 1:
+
+                fig, ax = plt.subplots()
+                self.open_plot = fig
+                fig.set_size_inches(4.5, 3)
+                fig.set_facecolor("#212121")
+                ax.set_facecolor("#1a1a1a")
+
+                ax.plot(values)
+
+                ax.spines['top'].set_visible(False)
+                ax.spines['right'].set_visible(False)
+
+                ax.set_xlabel("Comparisons")
+                ax.set_ylabel("RMSE")
+                plt.subplots_adjust(bottom=0.2, left=0.15)
+                canvas = FigureCanvasTkAgg(
+                    fig, master=self.save_info_frame)
+                canvas.draw()
+
+                width, height = canvas.get_width_height()
+
+                place_holder_frame = ctk.CTkFrame(
+                    self.save_info_frame, width=width, height=height,
+                    corner_radius=0, fg_color="#1a1a1a")
+
+                place_holder_frame.grid(
+                    row=6, column=0, pady=(5, 10),
+                    columnspan=2)
+
+                # Not a fan of this workaround, but the canvas has not necessarily been
+                # drawn when placed on the display, could not find any event to await so
+                # instead we use a placeholder for the first 100ms...
+                self.root.after(100, lambda: self.replace_placeholder(
+                    place_holder_frame, canvas.get_tk_widget()))
+            else:
+
+                text = "More comparisons are required\n\
+before convergence can be displayed"
+                needs_more_comparisons_label = ctk.CTkLabel(
+                    self.save_info_frame,
+                    text=text,
+                    font=('Helvetica bold', 20))
+                needs_more_comparisons_label.grid(
+                    row=6, column=0, pady=(5, 10),
+                    columnspan=2)
 
         more_information_button = ctk.CTkButton(
             master=self.save_info_frame, text="More information", height=45,
@@ -443,6 +488,23 @@ class MenuScreen():
         self.save_info_frame.grid_columnconfigure(
             1, weight=1, uniform="save_info")
 
+        self.save_info_frame.grid_rowconfigure(
+            1, weight=1, uniform="save_info")
+        self.save_info_frame.grid_rowconfigure(
+            2, weight=1, uniform="save_info")
+        self.save_info_frame.grid_rowconfigure(
+            3, weight=1, uniform="save_info")
+        self.save_info_frame.grid_rowconfigure(
+            4, weight=1, uniform="save_info")
+        self.save_info_frame.grid_rowconfigure(
+            5, weight=1, uniform="save_info")
+        self.save_info_frame.grid_rowconfigure(
+            6, weight=6, uniform="save_info")
+        self.save_info_frame.grid_rowconfigure(
+            7, weight=2, uniform="save_info")
+        self.save_info_frame.grid_rowconfigure(
+            8, weight=2, uniform="save_info")
+
         save_name_label.grid(row=0, column=0, columnspan=2, pady=20)
         save_algorithm_label.grid(row=1, column=0, pady=10, padx=5, sticky="e")
         save_algorithm_value.grid(row=1, column=1, pady=10, padx=5, sticky="w")
@@ -458,25 +520,6 @@ class MenuScreen():
             row=4, column=0, pady=10, padx=5, sticky="e")
         save_comp_count_value.grid(
             row=4, column=1, pady=10, padx=5, sticky="w")
-        save_convergence_label.grid(
-            row=5, column=0, pady=(10, 5),
-            columnspan=2)
-
-        width, height = canvas.get_width_height()
-
-        place_holder_frame = ctk.CTkFrame(
-            self.save_info_frame, width=width, height=height, corner_radius=0,
-            fg_color="#1a1a1a")
-
-        place_holder_frame.grid(
-            row=6, column=0, pady=(5, 10),
-            columnspan=2)
-
-        # Not a fan of this workaround, but the canvas has not necessarily been drawn
-        # when placed on the display, could not find any event to await so instead we
-        # use a placeholder for the first 100ms...
-        self.root.after(100, lambda: self.replace_placeholder(
-            place_holder_frame, canvas.get_tk_widget()))
 
         more_information_button.grid(
             row=7, column=0, columnspan=2, pady=10, padx=5)
@@ -556,7 +599,7 @@ class MenuScreen():
                          saves list.
         """
 
-        DeletePopOut(self.root, self.center,
+        DeletePopOut(self.root,
                      self.display_menu_callback, self.saves[index])
 
     def update_wraplength(self, label: ctk.CTkLabel):

@@ -7,6 +7,7 @@ from typing import Any, Callable, Optional, Tuple
 import customtkinter as ctk
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -55,6 +56,10 @@ class AdvancedInformationPage():
 
         matplotlib.rc('font', **font)
 
+        self.highlighted_hist = None
+        self.bar_label = None
+        # self.bar_labels = None
+
         self.general_info_frame = ctk.CTkFrame(self.root)
 
         self.tab_view = ctk.CTkTabview(self.root)
@@ -83,7 +88,7 @@ class AdvancedInformationPage():
 
         self.dir_path = ""
 
-        if os.path.isdir(saves_handler.get_full_path(
+        if self.images_available(saves_handler.get_full_path(
                 self.save_obj["image_directory"])):
             self.dir_path = saves_handler.get_full_path(
                 self.save_obj["image_directory"])
@@ -376,10 +381,9 @@ class AdvancedInformationPage():
 
         if self.images_available(self.dir_path):
             ordering_frame = Pagination(
-                self.tab_view.tab("Current Ordering"),
+                self.root, self.tab_view.tab("Current Ordering"),
                 self.sort_alg.get_result(),
-                self.dir_path,
-                image_width=self.root.winfo_screenwidth() // 14)
+                self.dir_path, image_width=self.root.winfo_screenwidth() // 14)
             ordering_frame.grid(row=0, column=0)
         else:
             could_not_find_images_label = self.get_images_not_found_widget(
@@ -406,30 +410,42 @@ class AdvancedInformationPage():
                     prompts = json.load(file)
                 self.custom_ratings = prompts['rating_buttons']
 
-            self.ratings_menu = ctk.CTkOptionMenu(
-                self.tab_view.tab("Rating Distribution"),
-                values=self.custom_ratings,
-                command=lambda event: self.rating_changed())
+            self.custom_ratings = [
+                rating + " (" + str(i) + ")" for i,
+                rating in enumerate(self.custom_ratings)]
 
-            csv_path = saves_handler.get_full_path(
-                self.save_obj["path_to_save"] + ".csv")
+            color = self.tab_view.tab("Rating Distribution").cget("fg_color")
+            ratings_tab_frame = ctk.CTkFrame(
+                self.tab_view.tab("Rating Distribution"), fg_color=color)
+
+            self.ratings_menu = ctk.CTkOptionMenu(
+                ratings_tab_frame,
+                values=self.custom_ratings,
+                command=lambda event: self.rating_changed(), width=160)
+
+            csv_path = saves_handler.get_path_to_save(self.save_obj) + ".csv"
             df = pd.read_csv(csv_path, converters={"result": ast.literal_eval})
             ratings_df = df[(df["type"] == "Rating") & (~df["undone"])]
 
             self.ratings = ratings_df["result"].to_list()
+            hist_canvas_widget = self.create_histogram()
 
             self.rating_frame = Pagination(
-                self.tab_view.tab("Rating Distribution"),
-                [], self.dir_path,
-                image_width=self.root.winfo_screenwidth() // 14)
+                self.root, ratings_tab_frame, [],
+                self.dir_path, image_width=self.root.winfo_screenwidth() // 14,
+                images_per_page=10)
 
             self.rating_changed()
 
+            self.tab_view.tab("Rating Distribution").rowconfigure(0, weight=4)
             self.tab_view.tab("Rating Distribution").rowconfigure(1, weight=5)
 
-            self.ratings_menu.grid(row=0, column=0, sticky="e")
+            hist_canvas_widget.grid(row=0, column=0)
+
+            self.ratings_menu.grid(row=0, column=0, sticky="se")
 
             self.rating_frame.grid(row=1, column=0)
+            ratings_tab_frame.grid(row=1, column=0)
         else:
 
             not_found_widget = self.get_images_not_found_widget(
@@ -437,7 +453,6 @@ class AdvancedInformationPage():
             not_found_widget.grid(row=0, column=0)
 
         self.tab_view.tab("Rating Distribution").columnconfigure(0, weight=1)
-        self.tab_view.tab("Rating Distribution").rowconfigure(0, weight=1)
 
     def rating_changed(self):
         """
@@ -499,7 +514,8 @@ class AdvancedInformationPage():
 
         submit_button = ctk.CTkButton(
             widget, text="Submit", font=('Helvetica bold', 20),
-            command=lambda directory=directory_var: self.submit_directory(directory),
+            command=lambda directory=directory_var: self.submit_directory(
+                directory),
             state=ctk.DISABLED, width=160, height=40)
 
         directory_entry.bind(
@@ -559,3 +575,83 @@ class AdvancedInformationPage():
         elif alg == "HybridTrueSkill":
             if not self.sort_alg.is_rating:
                 self.generate_ordering_frame()
+
+    def create_histogram(self) -> ctk.CTkCanvas:
+        """
+        Creates a histogram of the rating distribution.
+
+        Returns:
+            Canvas: The generated plot in the form of a canvas. Note that this is
+                    actually a tkinter canvas and not a ctk canvas. But the 
+                    implementation in the libraries try to obscure this fact.
+        """
+
+        fig, ax = plt.subplots()
+        fig.set_size_inches(5, 2)
+        fig.set_facecolor("#212121")
+        ax.set_facecolor("#1a1a1a")
+        self.hist_fig = fig
+
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.set_ylabel("Amount")
+        plt.subplots_adjust(bottom=0.15)
+
+        labels = np.array([r[1] for r in self.ratings])
+
+        left_of_first_bin = -1/2
+        right_of_last_bin = (len(self.custom_ratings) * 2 - 1) / 2
+
+        _, _, patches = plt.hist(labels, np.arange(
+            left_of_first_bin, right_of_last_bin + 1, 1),
+            edgecolor='black', linewidth=1.2)
+
+        plt.xticks(range(len(self.custom_ratings)))
+        plt.locator_params(axis='y', nbins=4)
+
+        fig.canvas.mpl_connect(
+            "motion_notify_event", lambda event,
+            patches=patches: self.hist_hover(event, patches))
+
+        canvas = FigureCanvasTkAgg(
+            fig, master=self.tab_view.tab("Rating Distribution"))
+        canvas.draw()
+
+        return canvas.get_tk_widget()
+
+    def hist_hover(
+            self, event: Any, patches: matplotlib.container.BarContainer):
+        """
+        Handles the hover effects of the histogram.
+
+        Args:
+            event (Any): The hover event.
+            patches (matplotlib.container.BarContainer): The bars in the histogram that
+                                                         are to be manipulated.
+        """
+        if event.xdata:
+            closest_bin = round(event.xdata)
+
+            if self.highlighted_hist is not None and (
+                    closest_bin != self.highlighted_hist):
+                patches[self.highlighted_hist].set_fc('#8dd3c7')
+                if self.bar_label:
+                    self.bar_label.remove()
+                    self.bar_label = None
+                self.highlighted_hist = None
+
+            if closest_bin >= 0 and closest_bin < len(patches) and (
+                    closest_bin != self.highlighted_hist):
+                patches[closest_bin].set_fc('#9deddf')
+
+                bar_labels = plt.bar_label(patches)
+
+                for index, bar_label in enumerate(bar_labels):
+
+                    if index != closest_bin:
+                        bar_label.remove()
+                    else:
+                        self.bar_label = bar_label
+
+                self.highlighted_hist = closest_bin
+            self.hist_fig.canvas.draw_idle()

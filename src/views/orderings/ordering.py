@@ -26,7 +26,7 @@ class OrderingScreen():
 
     def __init__(
             self, root: ctk.CTk, save_obj: dict, menu_callback: Callable,
-            center: Callable, user: str, reload_ordering_screen: Callable,
+            user: str, reload_ordering_screen: Callable,
             hybrid_transition_made: bool, root_bind_callback: Callable):
         """
         Initialize the OrderingScreen.
@@ -35,7 +35,6 @@ class OrderingScreen():
             root (CTk): The root cutom tkinter object.
             save_obj (dict): The save object containing various parameters.
             menu_callback (function): The callback function for the menu.
-            center (function): The function for centering the window.
             user (str): The user currently annotating.
             reload_ordering_screen (function): Callback function to reload the 
                                                ordering screen.
@@ -49,7 +48,6 @@ class OrderingScreen():
 
         self.root = root
         self.menu_callback = menu_callback
-        self.center = center
         self.user = user
         self.reload_ordering_screen = reload_ordering_screen
         self.root_bind_callback = root_bind_callback
@@ -167,23 +165,23 @@ class OrderingScreen():
         directory_dict = self.save_obj['user_directory_dict']
         full_img_dir_path = saves_handler.get_full_path(
             self.save_obj['image_directory'])
+
         if self.user in directory_dict and all(
             [os.path.isfile(directory_dict[self.user] + "/" + k)
              for k in self.sort_alg.data]):
-
             self.image_directory = directory_dict[self.user]
             self.image_directory_located = True
 
         elif all([os.path.isfile(full_img_dir_path + "/" + k)
                   for k in self.sort_alg.data]):
 
-            directory_dict[self.user] = self.save_obj['image_directory']
-            self.image_directory = self.save_obj['image_directory']
+            directory_dict[self.user] = full_img_dir_path
+            self.image_directory = full_img_dir_path
             self.image_directory_located = True
 
         else:
             ImageDirectoryPopOut(
-                self.root, self.center, self.save_obj,
+                self.root, self.save_obj,
                 self.submit_path, self.back_to_menu)
 
     def file_2_CTkImage(self, img_src: str) -> List[ctk.CTkImage]:
@@ -200,10 +198,8 @@ class OrderingScreen():
             FileNotFoundError: If the image file is not found.
         """
 
-        img_src = os.path.relpath(self.image_directory + "/" + img_src)
+        img_src = self.image_directory + "/" + img_src
         _, extension = os.path.splitext(img_src)
-
-        img_src = saves_handler.get_full_path(img_src)
 
         if extension == '.nii':
             ctk_imgs = []
@@ -242,11 +238,8 @@ class OrderingScreen():
             A list of CTkImage objects representing the loaded image.
         """
 
-        img_src = os.path.relpath(self.image_directory + "/" + img_src)
-
+        img_src = self.image_directory + "/" + img_src
         _, extension = os.path.splitext(img_src)
-
-        img_src = saves_handler.get_full_path(img_src)
 
         if extension == '.nii':
             ctk_imgs = []
@@ -395,7 +388,7 @@ class OrderingScreen():
             bool: True if the sorting algorithm is finished, False otherwise.
         """
         if self.sort_alg.is_finished():
-            IsFinishedPopOut(self.root, self.center, self.back_to_menu)
+            IsFinishedPopOut(self.root, self.back_to_menu)
             return True
         return False
 
@@ -473,7 +466,7 @@ class OrderingScreen():
                 self.root.after_cancel(self.timer_after)
                 # Switching modes popout
                 self.reload_ordering_screen(self.save_obj)
-                SwitchingModesPopOut(self.root, self.center)
+                SwitchingModesPopOut(self.root)
 
             else:
                 self.display_new_comparison()

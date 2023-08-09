@@ -11,10 +11,10 @@ from views.orderings.ordering import OrderingScreen
 class MultiOrderingScreen(OrderingScreen):
     """A screen for multi-ordering."""
 
-    def __init__(
-            self, root: ctk.CTkFrame, save_obj: dict, menu_callback: Callable,
-            center: Callable, user: str, reload_ordering_screen: Callable,
-            root_bind_callback: Callable):
+    def __init__(self, root: ctk.CTkFrame, save_obj: dict,
+                 menu_callback: Callable, user: str,
+                 reload_ordering_screen: Callable,
+                 root_bind_callback: Callable):
         """
         Initialize the MultiOrderingScreen.
 
@@ -22,7 +22,6 @@ class MultiOrderingScreen(OrderingScreen):
             root (CTkFrame): The root frame for the screen.
             save_obj (dict): The save object.
             menu_callback (function): The callback function for the menu.
-            center (function): The function for centering the window.
             user (str): The user name.
             reload_ordering_screen (function): The function to reload the 
                                                ordering screen.
@@ -30,8 +29,8 @@ class MultiOrderingScreen(OrderingScreen):
                                            root element.
         """
 
-        super().__init__(root, save_obj, menu_callback, center,
-                         user, reload_ordering_screen, True, root_bind_callback)
+        super().__init__(root, save_obj, menu_callback, user,
+                         reload_ordering_screen, True, root_bind_callback)
 
         self.root_bind_callback = root_bind_callback
 

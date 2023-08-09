@@ -5,6 +5,8 @@ from typing import Callable
 
 import customtkinter as ctk
 
+from utils import ctk_utils
+
 
 class ImageDirectoryPopOut():
     """
@@ -13,14 +15,13 @@ class ImageDirectoryPopOut():
     """
 
     def __init__(
-            self, root: ctk.CTk, center: Callable, save_obj: dict,
+            self, root: ctk.CTk, save_obj: dict,
             submit_path: Callable, back_to_menu: Callable):
         """
         Initializes the ImageDirectoryPopOut object.
 
         Args:
             root (CTk): The root cutom tkinter object.
-            center (function): A function to center the pop-out window.
             save_obj (dict): The save object containing the sort algorithm and 
             other parameters.
             submit_path (function): A function to submit the selected image 
@@ -28,7 +29,6 @@ class ImageDirectoryPopOut():
             back_to_menu (function): A function to go back to the main menu.
         """
         self.root = root
-        self.center = center
         self.save_obj = save_obj
         self.submit_path = submit_path
         self.back_to_menu = back_to_menu
@@ -37,7 +37,7 @@ class ImageDirectoryPopOut():
         self.pop_out = pop_out
         w = 700
         h = 300
-        x, y = self.center(w, h)
+        x, y = ctk_utils.center(self.root, w, h)
 
         pop_out.geometry('%dx%d+%d+%d' % (w, h, x, y))
         pop_out.columnconfigure(index=0, weight=1)

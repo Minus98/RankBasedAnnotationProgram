@@ -1,29 +1,28 @@
 import json
-from typing import Callable
 
 import customtkinter as ctk
+
+from utils import ctk_utils
 
 
 class SwitchingModesPopOut():
     """Class representing a pop-out window for switching modes"""
 
-    def __init__(self, root: ctk.CTk, center: Callable):
+    def __init__(self, root: ctk.CTk):
         """
         Initialize the SwitchingModesPopOut.
 
         Args:
             root (CTk): The root window.
-            center (function): A function to center the pop-out window.
         """
 
         self.root = root
-        self.center = center
 
         pop_out = ctk.CTkToplevel()
 
         w = 700
         h = 300
-        x, y = self.center(w, h)
+        x, y = ctk_utils.center(self.root, w, h)
 
         pop_out.geometry('%dx%d+%d+%d' % (w, h, x, y))
         pop_out.columnconfigure(index=0, weight=1)

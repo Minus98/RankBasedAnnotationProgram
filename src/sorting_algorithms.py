@@ -707,7 +707,7 @@ class HybridTrueSkill (SortingAlgorithm):
         """
         results = {
             k: self.rating_to_mu(v) for k,
-            v in self.sort_alg.get_user_result("hybrid").items() if v > 0}
+            v in self.sort_alg.get_user_result("hybrid").items() if v > 1}
 
         self.sort_alg = TrueSkill(
             results.keys(),
@@ -726,7 +726,7 @@ class HybridTrueSkill (SortingAlgorithm):
             The corresponding mu value.
         """
         # With mu = 25 and 1/2 standard deviation spacing
-        return 25 + ((rating - 1) * 2 + 1) / 4 * 8.333
+        return 25 + ((rating - 3) * 2 + 1) / 4 * 8.333
 
     def get_comparison_count(self) -> int:
         """
@@ -749,4 +749,9 @@ class HybridTrueSkill (SortingAlgorithm):
         Returns:
             The maximum number of comparisons allowed.
         """
-        return self.sort_alg.get_comparison_max()
+
+        total = self.sort_alg.get_comparison_max()
+        if not self.is_rating:
+            total += len(self.data)
+
+        return total

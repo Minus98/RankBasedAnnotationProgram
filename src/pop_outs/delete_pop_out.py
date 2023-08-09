@@ -4,6 +4,7 @@ from typing import Callable
 import customtkinter as ctk
 
 import utils.saves_handler as saves_handler
+from utils import ctk_utils
 
 
 class DeletePopOut():
@@ -12,20 +13,18 @@ class DeletePopOut():
     """
 
     def __init__(
-            self, root: ctk.CTk, center: Callable, deletion_callback: Callable,
+            self, root: ctk.CTk, deletion_callback: Callable,
             save_obj: dict):
         """
         Initializes the DeletePopOut object.
 
         Args:
             root (CTk): The root cutom tkinter object.
-            center (function): A function to center the pop-out window.
             deletion_callback (function): A function to refresh the main menu.
             save_obj (dict): The save object that is up for deletion.
         """
 
         self.root = root
-        self.center = center
         self.deletion_callback = deletion_callback
         self.save_obj = save_obj
 
@@ -33,7 +32,7 @@ class DeletePopOut():
 
         w = 700
         h = 300
-        x, y = self.center(w, h)
+        x, y = ctk_utils.center(self.root, w, h)
 
         pop_out.geometry('%dx%d+%d+%d' % (w, h, x, y))
         pop_out.columnconfigure(index=0, weight=1)
