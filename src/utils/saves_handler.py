@@ -42,8 +42,7 @@ def get_path_to_save(save: dict) -> str:
     else:
         file_id = save["file_id"]
 
-    path_to_save = str(list(Path(get_application_path()).glob(
-        '**/' + file_id + '.pickle'))[0]).split('.')[0].replace("\\", "/")
+    path_to_save = get_full_path("saves/" + file_id)
 
     if save_alg:
         f = open(path_to_save + ".pickle", "wb")

@@ -423,7 +423,6 @@ class OrderingScreen():
         self.submission_timeout = True
 
         self.is_loading = True
-
         self.prev_sort_alg = copy.deepcopy(self.sort_alg)
 
         user = 'DF' if df_annotatation else self.user
@@ -453,7 +452,6 @@ class OrderingScreen():
                 '/' + str(self.sort_alg.get_comparison_max()))
 
         self.update_comparison_bar()
-
         saves_handler.save_algorithm_pickle(self.save_obj)
 
         self.session_elapsed_time_prev = time.time() - self.session_start_time
