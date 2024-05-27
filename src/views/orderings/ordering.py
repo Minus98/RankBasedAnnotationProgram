@@ -3,7 +3,7 @@ import os
 import shutil
 import time
 from tkinter import Event
-from typing import Callable, List, Union
+from typing import Callable, List, Optional, Union
 from uuid import uuid4
 
 import customtkinter as ctk
@@ -58,6 +58,11 @@ class OrderingScreen():
         self.sort_alg = save_obj["sort_alg"]
         self.prev_sort_alg = None
         self.comparison_size = self.sort_alg.comparison_size
+
+        if "min_ip" in save_obj:
+            self.min_ip = save_obj["min_ip"]
+        else:
+            self.min_ip = False
 
         self.images_frame = ctk.CTkFrame(master=self.root)
 
@@ -184,12 +189,15 @@ class OrderingScreen():
                 self.root, self.save_obj,
                 self.submit_path, self.back_to_menu)
 
-    def file_2_CTkImage(self, img_src: str) -> List[ctk.CTkImage]:
+    def file_2_CTkImage(self, img_src: str,
+                        min_ip: Optional[bool] = False) -> List[ctk.CTkImage]:
         """
         Convert an image file to a list of CTkImage objects.
 
         Args:
             img_src (str): The path to the image file.
+            min_ip (Optional[bool]): If True the image is instead loaded from the
+                                     ..._MinIP directory
 
         Returns:
             List[CTkImage]: The list of CTkImage objects.
@@ -198,7 +206,11 @@ class OrderingScreen():
             FileNotFoundError: If the image file is not found.
         """
 
-        img_src = self.image_directory + "/" + img_src
+        if self.min_ip:
+            img_src = self.image_directory + "_MinIP/" + img_src
+        else:
+            img_src = self.image_directory + "/" + img_src
+
         _, extension = os.path.splitext(img_src)
 
         if extension == '.nii':
@@ -215,7 +227,7 @@ class OrderingScreen():
                 ctk_imgs.append(
                     ctk.CTkImage(
                         Image.fromarray(np.rot90(img)).resize(
-                            new_shape, resample=2),
+                            new_shape, resample=Image.BILINEAR),
                         size=(new_shape)))
                 self.progress_bar_progress += 1
                 self.progress_bar.set(
@@ -250,7 +262,7 @@ class OrderingScreen():
             new_shape = (int(img.shape[0] * resize_factor),
                          int(img.shape[1] * resize_factor))
             ctk_imgs.append(ctk.CTkImage(Image.fromarray(np.rot90(img)).resize(
-                new_shape, resample=2), size=(new_shape)))
+                new_shape, resample=Image.BILINEAR), size=(new_shape)))
 
             return ctk_imgs
         else:

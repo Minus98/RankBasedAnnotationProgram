@@ -47,6 +47,7 @@ class CreationPopOut():
         pop_out.rowconfigure(index=3, weight=1)
         pop_out.rowconfigure(index=4, weight=1)
         pop_out.rowconfigure(index=5, weight=1)
+        pop_out.rowconfigure(index=6, weight=1)
 
         ctk.CTkLabel(master=pop_out, text="Name:", font=('Helvetica bold', 20)).grid(
             row=0, column=0, padx=10, pady=(10, 2), sticky="e")
@@ -139,9 +140,21 @@ class CreationPopOut():
         self.scroll_enabled_checkbox.grid(
             row=4, column=1, padx=10, pady=2, sticky="w")
 
+        ctk.CTkLabel(
+            master=pop_out, text="Display MinIP:",
+            font=('Helvetica bold', 20)).grid(
+            row=5, column=0, padx=10, pady=2, sticky="e")
+        self.min_ip = ctk.BooleanVar()
+        self.min_ip_checkbox = ctk.CTkCheckBox(
+            master=pop_out, variable=self.min_ip, text="",
+            checkbox_width=30, checkbox_height=30, onvalue=True,
+            offvalue=False)
+        self.min_ip_checkbox.grid(
+            row=5, column=1, padx=10, pady=2, sticky="w")
+
         button_frame = ctk.CTkFrame(
             master=pop_out, fg_color=pop_out.cget("fg_color"))
-        button_frame.grid(row=5, column=0, columnspan=2,
+        button_frame.grid(row=6, column=0, columnspan=2,
                           sticky="ew", pady=(0, 10))
 
         create_button = ctk.CTkButton(
@@ -150,9 +163,9 @@ class CreationPopOut():
             command=lambda name=self.name,
             algorithm_selection=self.algorithm_selection, slider=self.slider,
             image_directory=self.image_directory, pop_out=pop_out,
-            scroll_enabled=self.scroll_enabled: self.create_save(
+            scroll_enabled=self.scroll_enabled, min_ip=self.min_ip: self.create_save(
                 name, algorithm_selection, slider, image_directory, pop_out,
-                scroll_enabled))
+                scroll_enabled, min_ip))
         delete_button = ctk.CTkButton(
             master=button_frame, text="Cancel", width=200, height=40,
             font=('Helvetica bold', 20),
@@ -210,7 +223,7 @@ class CreationPopOut():
     def create_save(
             self, name: ctk.StringVar, algorithm: SortingAlgorithm,
             comparison_size: ctk.CTkSlider, image_directory: ctk.StringVar,
-            pop_out: ctk.CTkToplevel, scroll_enabled: ctk.BooleanVar):
+            pop_out: ctk.CTkToplevel, scroll_enabled: ctk.BooleanVar, min_ip: ctk.BooleanVar):
         """
         Creates and saves the annotation item.
 
@@ -225,6 +238,8 @@ class CreationPopOut():
             pop_out (CTkToplevel): The pop-out window.
             scroll_enabled (BooleanVar): A checkbox with a boolean indicating 
             whether scrolling is enabled.
+            min_ip (BooleanVar): A checkbox with a boolean indicating whether
+            a MinIP images should be displayed next to the original.
         """
 
         directory_value = image_directory.get()
@@ -232,10 +247,11 @@ class CreationPopOut():
         alg_value = algorithm.get()
         comparison_size_value = int(comparison_size.get())
         scroll_enabled_value = scroll_enabled.get()
-
+        min_ip_value = min_ip.get()
+        print(min_ip_value)
         saves_handler.create_save(
             name_value, alg_value, comparison_size_value, directory_value,
-            scroll_enabled_value)
+            scroll_enabled_value, min_ip=min_ip_value)
 
         pop_out.destroy()
 

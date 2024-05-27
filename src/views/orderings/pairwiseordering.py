@@ -123,6 +123,7 @@ class PairwiseOrderingScreen(OrderingScreen):
         """
 
         self.displayed_images = []
+        self.displayed_min_ip = []
         self.image_frames = []
 
         img_info = {"A": 'sw', "B": 'se'}
@@ -134,6 +135,7 @@ class PairwiseOrderingScreen(OrderingScreen):
             self.image_frames.append(image_frame)
 
             image_frame.grid(row=1, column=i, padx=20, pady=20)
+            # image_frame.columnconfigure(index=0)
 
             displayed_image = ctk.CTkLabel(
                 master=image_frame, text="")
@@ -147,7 +149,29 @@ class PairwiseOrderingScreen(OrderingScreen):
 
             self.displayed_images.append(displayed_image)
 
-            displayed_image.grid(row=0, column=0, columnspan=2,
+            img_c = 0
+
+            if self.min_ip:
+                displayed_min_ip_image = ctk.CTkLabel(
+                    master=image_frame, text="", image="")
+
+                self.displayed_min_ip.append(displayed_min_ip_image)
+
+                if i == 0:
+                    img_c = 1
+
+                displayed_min_ip_image.grid(row=0, column=i, columnspan=1,
+                                            sticky="ew", padx=10, pady=10)
+
+                min_ip_label = ctk.CTkLabel(
+                    master=displayed_min_ip_image, text=img_name + " - MinIP",
+                    font=('Helvetica bold', 20), padx=5,
+                    width=30, height=30, bg_color=image_frame.cget('fg_color'))
+
+                min_ip_label.place(relx=abs(i - 0.01), rely=0.99,
+                                   anchor=img_info[img_name])
+
+            displayed_image.grid(row=0, column=img_c, columnspan=1,
                                  sticky="ew", padx=10, pady=10)
 
             img_label.place(relx=abs(i - 0.01), rely=0.99,
@@ -192,6 +216,15 @@ class PairwiseOrderingScreen(OrderingScreen):
             self.images = [[img, self.load_initial_image(
                 img), 0] for img in keys]  # load initial images
             self.update_images()
+
+            if self.min_ip:
+                min_ip_images = [self.file_2_CTkImage(
+                    img, min_ip=True) for img in keys]
+
+                for i, img in enumerate(min_ip_images):
+                    self.displayed_min_ip[i].configure(
+                        image=img[0])
+
             self.root.update()
             if self.scroll_allowed:
                 self.progress_bar.grid(

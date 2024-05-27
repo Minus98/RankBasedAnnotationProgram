@@ -40,7 +40,7 @@ def file_2_CTkImage(img_src: str, height=None, width=None) -> List[ctk.CTkImage]
             ctk_imgs.append(
                 ctk.CTkImage(
                     Image.fromarray(np.rot90(img)).resize(
-                        new_shape, resample=2),
+                        new_shape, resample=Image.BILINEAR),
                     size=(new_shape)))
         return ctk_imgs
     else:

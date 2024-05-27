@@ -57,7 +57,8 @@ def create_save(
         scroll_enabled: bool, rating_buttons: Optional[List[str]] = None,
         rating_prompt: Optional[str] = None,
         custom_rankings: Optional[List[str]] = None,
-        ranking_prompt: Optional[str] = None, comp_max: Optional[int] = None):
+        ranking_prompt: Optional[str] = None, comp_max: Optional[int] = None,
+        min_ip: Optional[bool] = False):
     """
     Creates and saves the annotation item.
 
@@ -74,6 +75,8 @@ def create_save(
                                                when ranking.
         ranking_prompt (Optional[str]): A new prompt which users are given when ranking.
         comp_max (Optional[int]): The total amount of allowed comparisons.
+        min_ip (Optional[bool]): Whether or not a MinIP image should be displayed next
+                                 to the stacks.
     """
 
     directory = os.path.relpath(image_directory, get_application_path())
@@ -120,7 +123,8 @@ def create_save(
         "image_directory": directory,
         "file_id": file_name,
         "user_directory_dict": {},
-        "scroll_allowed": scroll_enabled}
+        "scroll_allowed": scroll_enabled,
+        "min_ip": min_ip}
 
     if rating_buttons:
         save_obj["custom_ratings"] = rating_buttons
