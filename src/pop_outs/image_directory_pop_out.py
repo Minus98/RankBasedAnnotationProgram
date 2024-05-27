@@ -45,7 +45,7 @@ class ImageDirectoryPopOut():
         pop_out.rowconfigure(index=0, weight=1)
         pop_out.rowconfigure(index=1, weight=1)
 
-        with open('prompts.json', 'r') as file:
+        with open('_internal/prompts.json', 'r') as file:
             prompts = json.load(file)
 
         label = ctk.CTkLabel(

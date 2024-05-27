@@ -25,7 +25,7 @@ jobs:
             #Path should be fetched dynamically if possible...
             - name: Run PyInstaller
               run: |
-                  pyinstaller --noconfirm --onedir --windowed --add-data "c:\hostedtoolcache\windows\python\3.10.11\x64\lib\site-packages\customtkinter;customtkinter\" --add-data "src/prompts.json;.." src/main.py;
+                  pyinstaller --noconfirm --onedir --windowed --add-data "c:\hostedtoolcache\windows\python\3.10.11\x64\lib\site-packages\customtkinter;customtkinter\" --add-data "src/prompts.json;." src/main.py;
 
             - uses: actions/upload-artifact@v3
               with:

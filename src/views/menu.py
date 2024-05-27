@@ -57,7 +57,7 @@ class MenuScreen():
         self.information_page_callback = information_page_callback
         self.open_user_selection = open_user_selection
 
-        with open('prompts.json', 'r') as file:
+        with open('_internal/prompts.json', 'r') as file:
             prompts = json.load(file)
 
         path = saves_handler.get_full_path("saves")

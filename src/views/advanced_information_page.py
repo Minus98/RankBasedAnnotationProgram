@@ -406,7 +406,7 @@ class AdvancedInformationPage():
             if "custom_ratings" in self.save_obj:
                 self.custom_ratings = self.save_obj["custom_ratings"]
             else:
-                with open('prompts.json', 'r') as file:
+                with open('_internal/prompts.json', 'r') as file:
                     prompts = json.load(file)
                 self.custom_ratings = prompts['rating_buttons']
 
