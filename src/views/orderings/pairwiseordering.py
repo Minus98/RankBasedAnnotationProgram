@@ -39,7 +39,7 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.buttons_frame = ctk.CTkFrame(master=self.root)
         self.root_bind_callback = root_bind_callback
 
-        with open('prompts.json', 'r') as file:
+        with open('_internal/prompts.json', 'r') as file:
             prompts = json.load(file)
 
         ranking_buttons = prompts['ranking_buttons']
