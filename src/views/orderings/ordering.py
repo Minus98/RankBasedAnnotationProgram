@@ -206,7 +206,7 @@ class OrderingScreen():
             FileNotFoundError: If the image file is not found.
         """
 
-        if self.min_ip:
+        if min_ip:
             img_src = self.image_directory + "_MinIP/" + img_src
         else:
             img_src = self.image_directory + "/" + img_src
