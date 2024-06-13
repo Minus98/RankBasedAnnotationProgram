@@ -257,7 +257,9 @@ class OrderingScreen():
             ctk_imgs = []
             nib_imgs = nib.load(img_src).get_fdata()
 
-            img = nib_imgs[:, :, 0]
+            mid_index = nib_imgs.shape[2] // 2
+
+            img = nib_imgs[:, :, mid_index]
             resize_factor = (self.root.winfo_screenheight()/2) / img.shape[1]
             new_shape = (int(img.shape[0] * resize_factor),
                          int(img.shape[1] * resize_factor))
