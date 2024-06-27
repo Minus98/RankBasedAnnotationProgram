@@ -237,7 +237,7 @@ class PairwiseOrderingScreen(OrderingScreen):
                 self.images = new_imgs
 
                 self.update_images()
-                self.progress_bar.grid_forget()
+                self.progress_bar.grid_remove()
                 self.progress_bar_progress = 0
 
             if self.prev_sort_alg is not None:

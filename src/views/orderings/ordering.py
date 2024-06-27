@@ -437,16 +437,22 @@ class OrderingScreen():
         self.submission_timeout = True
 
         self.is_loading = True
+
+        self.progress_bar.set(0)
+        self.progress_bar.grid()
+        self.root.update()
         self.prev_sort_alg = copy.deepcopy(self.sort_alg)
+        self.progress_bar.set(0.5)
+        self.root.update()
 
         user = 'DF' if df_annotatation else self.user
 
-        if type(self.sort_alg) == sa.TrueSkill:
+        # rmses_inference heavy when amount of samples is large
+        if type(self.sort_alg) == sa.TrueSkill and self.sort_alg.n < 2000:
             prev_ratings = copy.deepcopy(self.sort_alg.ratings)
             self.save_to_csv_file(keys, lvl, df_annotatation)
             self.sort_alg.inference(user, keys, lvl)
             conv.rmses_inference(self.save_obj, prev_ratings, self.sort_alg)
-
         else:
             self.sort_alg.inference(user, keys, lvl)
             self.save_to_csv_file(keys, lvl, df_annotatation)
@@ -467,6 +473,9 @@ class OrderingScreen():
 
         self.update_comparison_bar()
         saves_handler.save_algorithm_pickle(self.save_obj)
+
+        self.progress_bar.grid_remove()
+        self.progress_bar.set(0)
 
         self.session_elapsed_time_prev = time.time() - self.session_start_time
 
