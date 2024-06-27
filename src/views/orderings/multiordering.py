@@ -43,6 +43,10 @@ class MultiOrderingScreen(OrderingScreen):
 
         self.motion_allowed = True
 
+        self.progress_bar.grid(
+            row=2, column=0, columnspan=2, sticky="N", pady=5)
+        self.progress_bar.grid_remove()
+
     def display(self):
         """
         Display the multi-ordering screen.

@@ -73,6 +73,9 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.root_bind_callback("<Return>", lambda event: self.on_enter())
 
         self.root_bind_callback("<Tab>", lambda event: self.on_tab())
+        self.progress_bar.grid(
+            row=3, column=0, columnspan=2, sticky="N", pady=5)
+        self.progress_bar.grid_remove()
 
     def display(self):
 
