@@ -3,6 +3,7 @@ import random
 from abc import ABC, abstractmethod
 from enum import IntEnum
 from typing import Any, Dict, List, Optional, Union
+from tqdm import tqdm
 
 import numpy as np
 from trueskill import Rating, rate_1vs1
@@ -244,7 +245,7 @@ class TrueSkill (SortingAlgorithm):
             comparison_size: int = 2, comparison_max: Optional[int] = None,
             initial_mus: Optional[Dict[Union[int, float, str],
                                        float]] = None,
-            random_comparisons: bool = False,):
+            random_comparisons: bool = False, same_comp_amount=False, initial_std=None):
         """
         Initialize the TrueSkill object.
 
@@ -261,6 +262,7 @@ class TrueSkill (SortingAlgorithm):
         self.n = len(data)
         self.data = list(data)
         self.random_comparisons = random_comparisons
+        self.same_comp_amount = same_comp_amount
 
         if comparison_max is None:
             self.comparison_max = self.n * 6
@@ -268,15 +270,33 @@ class TrueSkill (SortingAlgorithm):
             self.comparison_max = comparison_max
 
         if initial_mus:
-            self.ratings = {k: Rating(initial_mus[k]) for k in data}
+            if initial_std is not None:
+                self.ratings = {
+                    k: Rating(initial_mus[k], initial_std) for k in data}
+            else:
+                self.ratings = {
+                    k: Rating(initial_mus[k]) for k in data}
+
+            self.overlap_matrix = np.zeros((self.n, self.n))
+            print("constructing overlap matrix")
+            for i in tqdm(range(self.n)):
+                for j in range(i + 1, self.n):
+                    overlap = self.intervals_overlap(self.data[i],
+                                                     self.data[j])
+                    self.overlap_matrix[i, j] = overlap
+                    self.overlap_matrix[j, i] = overlap
         else:
             self.ratings = {k: Rating() for k in data}
 
-        self.overlap_matrix = np.full(
-            (self.n, self.n),
-            self.intervals_overlap(self.data[0],
-                                   self.data[1]))
-        np.fill_diagonal(self.overlap_matrix, 0)
+            self.overlap_matrix = np.full(
+                (self.n, self.n),
+                self.intervals_overlap(self.data[0],
+                                       self.data[1]))
+
+        np.fill_diagonal(self.overlap_matrix, -np.inf)
+
+        if self.same_comp_amount:
+            self.comp_tracker = np.zeros((self.n))
 
         self.comparison_size = comparison_size
         self.comp_count = 0
@@ -296,11 +316,13 @@ class TrueSkill (SortingAlgorithm):
         Returns:
             The overlap value between the intervals.
         """
-        r1_low = self.ratings[key1].mu - 2 * self.ratings[key1].sigma
-        r1_high = self.ratings[key1].mu + 2 * self.ratings[key1].sigma
+        std = 3
 
-        r2_low = self.ratings[key2].mu - 2 * self.ratings[key2].sigma
-        r2_high = self.ratings[key2].mu + 2 * self.ratings[key2].sigma
+        r1_low = self.ratings[key1].mu - std * self.ratings[key1].sigma
+        r1_high = self.ratings[key1].mu + std * self.ratings[key1].sigma
+
+        r2_low = self.ratings[key2].mu - std * self.ratings[key2].sigma
+        r2_high = self.ratings[key2].mu + std * self.ratings[key2].sigma
 
         common_gap = min(r1_high, r2_high) - max(r1_low, r2_low)
         overall_gap = (max(r1_high, r2_high) - min(r1_low, r2_low))
@@ -346,28 +368,40 @@ class TrueSkill (SortingAlgorithm):
             masked_overlap_matrix = np.multiply(
                 self.overlap_matrix, self.user_comparisons[user_id])
 
-            for i in range(self.n):
-                if self.comparison_size == 2:
+            if self.same_comp_amount and self.comparison_size == 2:
+                arg_sorted_comps = np.argsort(self.comp_tracker)
+                i = arg_sorted_comps[0]
 
-                    max_index = np.argmax(masked_overlap_matrix[i])
+                max_index = np.argmax(
+                    masked_overlap_matrix[i])
 
-                    if masked_overlap_matrix[i][max_index] > max_sum:
+                if i == max_index:
+                    max_index = np.argpartition(masked_overlap_matrix[i], 2)[1]
 
-                        max_sum = masked_overlap_matrix[i][max_index]
-                        comparisons = [i, max_index]
+                comparisons = [i, max_index]
+            else:
+                for i in range(self.n):
+                    if self.comparison_size == 2:
 
-                else:
-                    indices = np.argpartition(
-                        self.overlap_matrix[i], -self.comparison_size+1)[
-                            -self.comparison_size+1:]
-                    indices = [
-                        ind for ind in indices
-                        if self.overlap_matrix[i][ind] > 0]
+                        max_index = np.argmax(masked_overlap_matrix[i])
 
-                    sum_i = sum(self.overlap_matrix[i][indices])
-                    if max_sum < sum_i:
-                        max_sum = sum_i
-                        comparisons = [i] + list(indices)
+                        if masked_overlap_matrix[i][max_index] > max_sum:
+
+                            max_sum = masked_overlap_matrix[i][max_index]
+                            comparisons = [i, max_index]
+
+                    else:
+                        indices = np.argpartition(
+                            self.overlap_matrix[i], -self.comparison_size+1)[
+                                -self.comparison_size+1:]
+                        indices = [
+                            ind for ind in indices
+                            if self.overlap_matrix[i][ind] > 0]
+
+                        sum_i = sum(self.overlap_matrix[i][indices])
+                        if max_sum < sum_i:
+                            max_sum = sum_i
+                            comparisons = [i] + list(indices)
 
         keys_output = [list(self.ratings.keys())[c] for c in comparisons]
 
@@ -403,6 +437,9 @@ class TrueSkill (SortingAlgorithm):
 
         random.Random(6).shuffle(to_update)
 
+        if user_id not in self.user_comparisons:
+            self.user_comparisons[user_id] = np.ones(self.overlap_matrix.shape)
+
         for ([i, j], is_draw) in to_update:
             if is_draw:
                 self.ratings[keys[j]], self.ratings[keys[i]] = rate_1vs1(
@@ -411,19 +448,20 @@ class TrueSkill (SortingAlgorithm):
                 self.ratings[keys[j]], self.ratings[keys[i]] = rate_1vs1(
                     self.ratings[keys[j]], self.ratings[keys[i]])
 
+            key_i = self.data.index(keys[i])
+            key_j = self.data.index(keys[j])
+
+            if self.same_comp_amount:
+                self.comp_tracker[key_i] += 1
+                self.comp_tracker[key_j] += 1
+
+            self.user_comparisons[user_id][key_i, key_j] = 0
+            self.user_comparisons[user_id][key_j, key_i] = 0
+
         for k in keys:
             self.update_overlap_matrix(k)
 
         self.comp_count += 1
-
-        if user_id not in self.user_comparisons:
-            self.user_comparisons[user_id] = np.ones(self.overlap_matrix.shape)
-
-        key_i = self.data.index(keys[i])
-        key_j = self.data.index(keys[j])
-
-        self.user_comparisons[user_id][key_i, key_j] = 0
-        self.user_comparisons[user_id][key_j, key_i] = 0
 
     def get_result(self) -> List[Union[int, float, str]]:
         """
@@ -432,7 +470,7 @@ class TrueSkill (SortingAlgorithm):
         Returns:
             A list of items sorted based on the TrueSkill algorithm.
         """
-        return [k for k, _ in sorted(self.ratings.items(), key=lambda x:x[1])]
+        return [k for k, _ in sorted(self.ratings.items(), key=lambda x: x[1])]
 
     def is_finished(self) -> bool:
         """
