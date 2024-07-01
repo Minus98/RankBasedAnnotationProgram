@@ -73,6 +73,9 @@ class PairwiseOrderingScreen(OrderingScreen):
         self.root_bind_callback("<Return>", lambda event: self.on_enter())
 
         self.root_bind_callback("<Tab>", lambda event: self.on_tab())
+        self.progress_bar.grid(
+            row=3, column=0, columnspan=2, sticky="N", pady=5)
+        self.progress_bar.grid_remove()
 
     def display(self):
 
@@ -237,7 +240,7 @@ class PairwiseOrderingScreen(OrderingScreen):
                 self.images = new_imgs
 
                 self.update_images()
-                self.progress_bar.grid_forget()
+                self.progress_bar.grid_remove()
                 self.progress_bar_progress = 0
 
             if self.prev_sort_alg is not None:

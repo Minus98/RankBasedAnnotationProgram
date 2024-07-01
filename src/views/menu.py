@@ -410,55 +410,69 @@ class MenuScreen():
 
         if alg_name == "TrueSkill" or alg_name == "HybridTrueSkill":
 
-            values = conv.get_convergence(save)
+            # Rmses takes too long...
+            if len(sort_alg.data) < 1000:
+                values = conv.get_convergence(save)
 
-            save_convergence_label = ctk.CTkLabel(
-                self.save_info_frame, text="Convergence",
-                font=('Helvetica bold', 20))
+                save_convergence_label = ctk.CTkLabel(
+                    self.save_info_frame, text="Convergence",
+                    font=('Helvetica bold', 20))
 
-            save_convergence_label.grid(
-                row=5, column=0, pady=(10, 5),
-                columnspan=2)
-
-            if len(values) > 1:
-
-                fig, ax = plt.subplots()
-                self.open_plot = fig
-                fig.set_size_inches(4.5, 3)
-                fig.set_facecolor("#212121")
-                ax.set_facecolor("#1a1a1a")
-
-                ax.plot(values)
-
-                ax.spines['top'].set_visible(False)
-                ax.spines['right'].set_visible(False)
-
-                ax.set_xlabel("Comparisons")
-                ax.set_ylabel("RMSE")
-                plt.subplots_adjust(bottom=0.2, left=0.15)
-                canvas = FigureCanvasTkAgg(
-                    fig, master=self.save_info_frame)
-                canvas.draw()
-
-                width, height = canvas.get_width_height()
-
-                place_holder_frame = ctk.CTkFrame(
-                    self.save_info_frame, width=width, height=height,
-                    corner_radius=0, fg_color="#1a1a1a")
-
-                place_holder_frame.grid(
-                    row=6, column=0, pady=(5, 10),
+                save_convergence_label.grid(
+                    row=5, column=0, pady=(10, 5),
                     columnspan=2)
 
-                # Not a fan of this workaround, but the canvas has not necessarily been
-                # drawn when placed on the display, could not find any event to await so
-                # instead we use a placeholder for the first 100ms...
-                self.root.after(100, lambda: self.replace_placeholder(
-                    place_holder_frame, canvas.get_tk_widget()))
+                if len(values) > 1:
+
+                    fig, ax = plt.subplots()
+                    self.open_plot = fig
+                    fig.set_size_inches(4.5, 3)
+                    fig.set_facecolor("#212121")
+                    ax.set_facecolor("#1a1a1a")
+
+                    ax.plot(values)
+
+                    ax.spines['top'].set_visible(False)
+                    ax.spines['right'].set_visible(False)
+
+                    ax.set_xlabel("Comparisons")
+                    ax.set_ylabel("RMSE")
+                    plt.subplots_adjust(bottom=0.2, left=0.15)
+                    canvas = FigureCanvasTkAgg(
+                        fig, master=self.save_info_frame)
+                    canvas.draw()
+
+                    width, height = canvas.get_width_height()
+
+                    place_holder_frame = ctk.CTkFrame(
+                        self.save_info_frame, width=width, height=height,
+                        corner_radius=0, fg_color="#1a1a1a")
+
+                    place_holder_frame.grid(
+                        row=6, column=0, pady=(5, 10),
+                        columnspan=2)
+
+                    # Not a fan of this workaround, but the canvas has not necessarily been
+                    # drawn when placed on the display, could not find any event to await so
+                    # instead we use a placeholder for the first 100ms...
+                    self.root.after(100, lambda: self.replace_placeholder(
+                        place_holder_frame, canvas.get_tk_widget()))
+                else:
+
+                    text = "More comparisons are required\n\
+before convergence can be displayed"
+                    needs_more_comparisons_label = ctk.CTkLabel(
+                        self.save_info_frame,
+                        text=text,
+                        font=('Helvetica bold', 20))
+                    needs_more_comparisons_label.grid(
+                        row=6, column=0, pady=(5, 10),
+                        columnspan=2)
             else:
 
-                text = "More comparisons are required\n\
-before convergence can be displayed"
+                text = "Dataset too large\n\
+Ignoring convergence graph\n\
+to avoid slow-down"
                 needs_more_comparisons_label = ctk.CTkLabel(
                     self.save_info_frame,
                     text=text,
